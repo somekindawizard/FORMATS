@@ -20,3 +20,6 @@ Packages/
 
 # Misc
 *.log
+
+# Brainstorming visual companion
+.superpowers/
