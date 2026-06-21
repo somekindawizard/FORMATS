@@ -1,0 +1,41 @@
+name: Fern
+options:
+  bundleIdPrefix: garden.fern
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    GENERATE_INFOPLIST_FILE: YES
+    INFOPLIST_KEY_UILaunchScreen_Generation: YES
+    INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+    INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+targets:
+  Fern:
+    type: application
+    platform: iOS
+    sources: [Fern]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: garden.fern.Fern
+        TARGETED_DEVICE_FAMILY: "1,2"
+  FernTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [FernTests]
+    dependencies:
+      - target: Fern
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: garden.fern.FernTests
+schemes:
+  Fern:
+    build:
+      targets:
+        Fern: all
+        FernTests: [test]
+    test:
+      targets: [FernTests]
