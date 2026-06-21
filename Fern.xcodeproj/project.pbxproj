@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		0D0DE355B9F5C242382E500E /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E955C6672E8D66A488569630 /* SmokeTests.swift */; };
 		4B409622B1DBAB1DB8FA90C9 /* FernApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C576F242B37F60F2186C68E4 /* FernApp.swift */; };
+		51010732818FD074595FF242 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49BCF6E4EFF1274EEAC43A8B /* Typography.swift */; };
+		746E38C71A4F2CEF9BEBB03D /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4414F13CC04DFCD17197E71 /* Palette.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -22,9 +24,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		49BCF6E4EFF1274EEAC43A8B /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		6874D40188440206C80B5EE5 /* Fern.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fern.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B572112FB741A611B6732471 /* FernTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = FernTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C576F242B37F60F2186C68E4 /* FernApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FernApp.swift; sourceTree = "<group>"; };
+		E4414F13CC04DFCD17197E71 /* Palette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Palette.swift; sourceTree = "<group>"; };
 		E955C6672E8D66A488569630 /* SmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -33,6 +37,7 @@
 			isa = PBXGroup;
 			children = (
 				C576F242B37F60F2186C68E4 /* FernApp.swift */,
+				D52DB763515C2DBBEA2436F4 /* Theme */,
 			);
 			path = Fern;
 			sourceTree = "<group>";
@@ -52,6 +57,15 @@
 				B572112FB741A611B6732471 /* FernTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		D52DB763515C2DBBEA2436F4 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				E4414F13CC04DFCD17197E71 /* Palette.swift */,
+				49BCF6E4EFF1274EEAC43A8B /* Typography.swift */,
+			);
+			path = Theme;
 			sourceTree = "<group>";
 		};
 		FCC22838342F85043D78ACE0 = {
@@ -146,6 +160,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B409622B1DBAB1DB8FA90C9 /* FernApp.swift in Sources */,
+				746E38C71A4F2CEF9BEBB03D /* Palette.swift in Sources */,
+				51010732818FD074595FF242 /* Typography.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
