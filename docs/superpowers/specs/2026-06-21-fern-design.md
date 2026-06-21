@@ -181,7 +181,7 @@ Fern/
   Store/                 – ModelContainer, LibraryStore, search, prompts, on-this-day, stats
   Services/              – Location/Weather, MarkdownExporter, BiometricLock, JournalingSuggestionsBridge
   Editor/                – MarkdownTextView (TextKit 2), live-styling, accessory bar
-  Fern/                  – FernMark (Barnsley), FernFrond (skeletal), FiddleheadUnfurl, sway
+  Botanical/             – FernMark (Barnsley), FernFrond (skeletal), FiddleheadUnfurl, sway
   Views/                 – Today, Library, EntryRow, EntryEditor, Search, Collections, Stats, Settings
   Assets.xcassets/       – app icon + accent
 ```
