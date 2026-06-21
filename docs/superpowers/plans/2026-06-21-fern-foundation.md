@@ -1,0 +1,1007 @@
+# Fern Foundation Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Stand up a runnable Fern iOS/iPadOS app — paper‑and‑ink theme, SwiftData model, and adaptive navigation that reads real entries — as the foundation every later milestone builds on.
+
+**Architecture:** A single SwiftUI app target. A `Theme/` layer (palette, type, components) retuned from the sibling **Press** app. A SwiftData model layer (`Entry`, `Tag`, `Attachment` + enums) with a shared `ModelContainer` and an in‑memory factory for tests/previews. An adaptive `RootView` that shows a `TabView` in compact width (iPhone) and a `NavigationSplitView` in regular width (iPad). Pure logic (word count, date grouping) is unit‑tested; views are verified by running.
+
+**Tech Stack:** Swift 5.10+, SwiftUI, SwiftData, XCTest. Xcode 26.5. Deployment target iOS 18.0 (runs great on 26.5).
+
+**Scope note:** This is Plan 1 of 7 (see `docs/superpowers/specs/2026-06-21-fern-design.md` §11). The editor, journaling features, metadata, botanical art, Journaling Suggestions, and CloudKit/export come in later plans. Where this plan stubs something a later plan fills, it says so explicitly.
+
+---
+
+## File structure created by this plan
+
+```
+Fern.xcodeproj
+Fern/
+  FernApp.swift            – @main entry; installs the ModelContainer; shows RootView
+  Persistence.swift        – shared ModelContainer + in-memory factory
+  Theme/
+    Palette.swift          – Fern color tokens (final Mist + sienna palette)
+    Typography.swift       – serif type scale + sectionLabel()
+    PaperBackground.swift  – cool-paper wash + seeded static grain
+    Components.swift        – Rule, card(), button styles, SectionHeader, pressable()
+  Models/
+    Enums.swift            – Collection, Mood
+    Entry.swift            – @Model Entry (+ wordCount)
+    Tag.swift              – @Model Tag
+    Attachment.swift       – @Model Attachment
+  Support/
+    DateGrouping.swift     – group entries into day sections
+    SampleData.swift       – seed entries for previews/first run
+  Views/
+    RootView.swift         – adaptive TabView / NavigationSplitView
+    TodayView.swift        – greeting + prompt placeholder (static for now)
+    LibraryView.swift      – day-grouped list of entries
+    EntryRow.swift         – one entry's row (date label, title, snippet)
+    SearchView.swift       – stub (filled in Plan 3)
+FernTests/
+  ModelTests.swift         – Entry round-trip + wordCount
+  DateGroupingTests.swift  – grouping logic
+```
+
+---
+
+### Task 1: Bootstrap the Xcode project
+
+**Files:**
+- Create: `Fern.xcodeproj` (via Xcode), `Fern/FernApp.swift`, `FernTests/` target
+
+- [ ] **Step 1: Create the project**
+
+In Xcode 26.5: **File ▸ New ▸ Project ▸ iOS ▸ App**. Set:
+- Product Name: `Fern`
+- Organization Identifier: `garden.fern` (bundle id becomes `garden.fern.Fern`)
+- Interface: **SwiftUI**, Language: **Swift**, Storage: **None** (we add SwiftData by hand), **Include Tests: ON**.
+- Save into the repo root `/Volumes/Akasha Terminal/Pressed/` (so `Fern.xcodeproj` sits beside `Press.xcodeproj`).
+
+Then in the target's **General ▸ Minimum Deployments**, set **iOS 18.0**. In **Signing & Capabilities**, select your team (same as Press). Lock the app to light mode in the next step.
+
+- [ ] **Step 2: Replace the generated `FernApp.swift`**
+
+Replace `Fern/FernApp.swift` with a minimal shell (RootView + container come in later tasks; keep it compiling now):
+
+```swift
+import SwiftUI
+
+@main
+struct FernApp: App {
+    var body: some Scene {
+        WindowGroup {
+            Text("Fern")
+                .preferredColorScheme(.light)   // Fern is light-mode only, by design
+        }
+    }
+}
+```
+
+- [ ] **Step 3: Create the folder groups**
+
+In the Xcode navigator, create empty groups under `Fern/`: `Theme`, `Models`, `Support`, `Views`. (They map to on‑disk folders; later tasks add files into them.)
+
+- [ ] **Step 4: Build to verify the skeleton runs**
+
+Run (Xcode MCP `BuildProject`, or): `xcodebuild -project Fern.xcodeproj -scheme Fern -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build`
+Expected: **BUILD SUCCEEDED**. Running shows a blank screen with "Fern".
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add Fern.xcodeproj Fern FernTests
+git commit -m "Fern: bootstrap iOS app target (light mode, iOS 18 deploy)"
+```
+
+---
+
+### Task 2: Palette and typography
+
+**Files:**
+- Create: `Fern/Theme/Palette.swift`, `Fern/Theme/Typography.swift`
+
+- [ ] **Step 1: Write the palette**
+
+Create `Fern/Theme/Palette.swift` with the final spec colors:
+
+```swift
+import SwiftUI
+
+/// Fern's visual language: cool soft paper, warm near-black ink,
+/// hairline rules, and a single restrained sienna accent.
+/// Retuned from the sibling Press app to a cleaner, cooler paper.
+enum Paper {
+
+    // MARK: Surfaces
+    /// Primary canvas — "Mist", a soft de-greened paper white.
+    static let bg      = Color(red: 0.965, green: 0.961, blue: 0.945)  // #F6F5F1
+    /// Raised surfaces (cards, sheets) — clean white.
+    static let raised  = Color(red: 1.000, green: 1.000, blue: 1.000)  // #FFFFFF
+    /// A slightly toned inset for wells and pressed states.
+    static let sunken  = Color(red: 0.925, green: 0.918, blue: 0.886)  // #ECEAE2
+
+    // MARK: Ink
+    /// Primary text and strokes — a warm near-black, never pure #000.
+    static let ink      = Color(red: 0.110, green: 0.102, blue: 0.090) // #1C1A17
+    /// Secondary text.
+    static let inkSoft  = Color(red: 0.357, green: 0.341, blue: 0.314) // #5B5750
+    /// Tertiary / hints / dimmed Markdown syntax marks.
+    static let inkFaint = Color(red: 0.541, green: 0.525, blue: 0.486) // #8A867C
+    /// Hairline rules and quiet borders.
+    static let line     = Color(red: 0.922, green: 0.914, blue: 0.882) // #EBE9E1
+
+    // MARK: Accent
+    /// Used sparingly — selection, the active tab, a pinned star, the fern mark.
+    static let accent   = Color(red: 0.604, green: 0.290, blue: 0.176) // #9A4A2D
+}
+```
+
+- [ ] **Step 2: Write the type scale**
+
+Create `Fern/Theme/Typography.swift` (ported from Press; same editorial serif scale):
+
+```swift
+import SwiftUI
+
+extension Font {
+    /// Editorial serif scale, drawn from the system New York face.
+    static func serif(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font {
+        .system(size: size, weight: weight, design: .serif)
+    }
+
+    static let mastheadXL   = Font.system(size: 52, weight: .regular, design: .serif)
+    static let masthead     = Font.system(size: 34, weight: .regular, design: .serif)
+    static let titleSerif   = Font.system(size: 26, weight: .medium,  design: .serif)
+    static let headlineSerif = Font.system(size: 19, weight: .medium, design: .serif)
+    static let bodySerif    = Font.system(size: 17, weight: .regular, design: .serif)
+    static let calloutSerif = Font.system(size: 15, weight: .regular, design: .serif)
+    /// Tracked small-caps section labels.
+    static let label        = Font.system(size: 12, weight: .semibold, design: .serif)
+    /// Monospaced for figures — word counts, dimensions.
+    static func figure(_ size: CGFloat = 14, _ weight: Font.Weight = .regular) -> Font {
+        .system(size: size, weight: weight, design: .monospaced)
+    }
+}
+
+extension Text {
+    /// A tracked, uppercase section label in soft ink.
+    func sectionLabel() -> some View {
+        self.font(.label)
+            .textCase(.uppercase)
+            .tracking(1.6)
+            .foregroundStyle(Paper.inkSoft)
+    }
+}
+```
+
+- [ ] **Step 3: Build to verify it compiles**
+
+Run: `xcodebuild -project Fern.xcodeproj -scheme Fern -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build`
+Expected: **BUILD SUCCEEDED**.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add Fern/Theme/Palette.swift Fern/Theme/Typography.swift
+git commit -m "Fern: palette (Mist + sienna) and serif type scale"
+```
+
+---
+
+### Task 3: Paper background and components
+
+**Files:**
+- Create: `Fern/Theme/PaperBackground.swift`, `Fern/Theme/Components.swift`
+
+- [ ] **Step 1: Write the paper background**
+
+Create `Fern/Theme/PaperBackground.swift` (retuned from Press for the cooler paper):
+
+```swift
+import SwiftUI
+
+/// The full-bleed paper canvas: a soft cool-white wash with the faintest
+/// vignette and a low, static grain so the surface feels printed.
+struct PaperBackground: View {
+    var body: some View {
+        ZStack {
+            Paper.bg
+            LinearGradient(
+                colors: [
+                    Color.white.opacity(0.20),
+                    Color.clear,
+                    Paper.sunken.opacity(0.30)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            RadialGradient(
+                colors: [Color.clear, Paper.ink.opacity(0.04)],
+                center: .center,
+                startRadius: 280,
+                endRadius: 620
+            )
+            PaperGrain().opacity(0.04)
+        }
+        .ignoresSafeArea()
+    }
+}
+
+/// A cheap, static speckle drawn once into a Canvas — just enough tooth
+/// to read as paper rather than flat color. Seeded so it never shimmers.
+private struct PaperGrain: View {
+    var body: some View {
+        Canvas { context, size in
+            var rng = SeededGenerator(seed: 4_211)
+            let count = Int(size.width * size.height / 1000)
+            for _ in 0..<count {
+                let x = Double.random(in: 0...size.width, using: &rng)
+                let y = Double.random(in: 0...size.height, using: &rng)
+                let s = Double.random(in: 0.5...1.3, using: &rng)
+                let rect = CGRect(x: x, y: y, width: s, height: s)
+                context.fill(Path(ellipseIn: rect), with: .color(Paper.ink))
+            }
+        }
+        .blendMode(.multiply)
+        .allowsHitTesting(false)
+    }
+}
+
+/// Deterministic generator so the grain doesn't shimmer on every redraw.
+struct SeededGenerator: RandomNumberGenerator {
+    private var state: UInt64
+    init(seed: UInt64) { state = seed &+ 0x9E3779B97F4A7C15 }
+    mutating func next() -> UInt64 {
+        state &+= 0x9E3779B97F4A7C15
+        var z = state
+        z = (z ^ (z >> 30)) &* 0xBF58476D1CE4E5B9
+        z = (z ^ (z >> 27)) &* 0x94D049BB133111EB
+        return z ^ (z >> 31)
+    }
+}
+```
+
+- [ ] **Step 2: Write the components**
+
+Create `Fern/Theme/Components.swift` (ported from Press; corner radii unchanged):
+
+```swift
+import SwiftUI
+
+/// A single ink hairline — the workhorse divider.
+struct Rule: View {
+    var inset: CGFloat = 0
+    var body: some View {
+        Rectangle()
+            .fill(Paper.line)
+            .frame(height: 1)
+            .padding(.horizontal, inset)
+    }
+}
+
+private struct CardModifier: ViewModifier {
+    var padding: CGFloat
+    func body(content: Content) -> some View {
+        content
+            .padding(padding)
+            .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Paper.raised))
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Paper.line, lineWidth: 1))
+            .shadow(color: Paper.ink.opacity(0.05), radius: 14, x: 0, y: 8)
+    }
+}
+
+extension View {
+    func card(padding: CGFloat = 18) -> some View { modifier(CardModifier(padding: padding)) }
+}
+
+/// The solid ink call-to-action, set in cream serif.
+struct InkButtonStyle: ButtonStyle {
+    var enabled: Bool = true
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.headlineSerif)
+            .tracking(0.3)
+            .foregroundStyle(Paper.bg)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 17)
+            .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(enabled ? Paper.ink : Paper.inkFaint))
+            .opacity(configuration.isPressed ? 0.82 : 1)
+            .scaleEffect(configuration.isPressed ? 0.985 : 1)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+    }
+}
+
+/// An outlined, quieter action.
+struct OutlineButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.headlineSerif)
+            .foregroundStyle(Paper.ink)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Paper.raised.opacity(configuration.isPressed ? 1 : 0)))
+            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Paper.ink, lineWidth: 1.2))
+            .opacity(configuration.isPressed ? 0.7 : 1)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+    }
+}
+
+/// A small text button for inline, low-emphasis actions.
+struct QuietButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.calloutSerif)
+            .foregroundStyle(configuration.isPressed ? Paper.inkFaint : Paper.inkSoft)
+    }
+}
+
+struct SectionHeader: View {
+    let title: String
+    var trailing: String? = nil
+    var body: some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(title).sectionLabel()
+            Spacer()
+            if let trailing {
+                Text(trailing).font(.figure(12)).foregroundStyle(Paper.inkFaint)
+            }
+        }
+    }
+}
+
+/// Adds a gentle press response to any tappable surface.
+struct PressableScale: ViewModifier {
+    @GestureState private var pressed = false
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(pressed ? 0.97 : 1)
+            .animation(.easeOut(duration: 0.16), value: pressed)
+            .simultaneousGesture(DragGesture(minimumDistance: 0).updating($pressed) { _, state, _ in state = true })
+    }
+}
+
+extension View {
+    func pressable() -> some View { modifier(PressableScale()) }
+}
+```
+
+- [ ] **Step 3: Build to verify it compiles**
+
+Run: `xcodebuild -project Fern.xcodeproj -scheme Fern -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build`
+Expected: **BUILD SUCCEEDED**.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add Fern/Theme/PaperBackground.swift Fern/Theme/Components.swift
+git commit -m "Fern: paper background (cool grain) and core components"
+```
+
+---
+
+### Task 4: Data model + persistence (with unit tests)
+
+**Files:**
+- Create: `Fern/Models/Enums.swift`, `Fern/Models/Tag.swift`, `Fern/Models/Attachment.swift`, `Fern/Models/Entry.swift`, `Fern/Persistence.swift`
+- Test: `FernTests/ModelTests.swift`
+
+- [ ] **Step 1: Write the failing test**
+
+Create `FernTests/ModelTests.swift`:
+
+```swift
+import XCTest
+import SwiftData
+@testable import Fern
+
+@MainActor
+final class ModelTests: XCTestCase {
+
+    func makeContext() throws -> ModelContext {
+        let container = try ModelContainer(
+            for: Entry.self, Tag.self, Attachment.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        return container.mainContext
+    }
+
+    func test_entry_roundTrips() throws {
+        let ctx = try makeContext()
+        let entry = Entry(title: "Lady Bird", body: "Still water this morning.", collection: .journal)
+        ctx.insert(entry)
+        try ctx.save()
+
+        let fetched = try ctx.fetch(FetchDescriptor<Entry>())
+        XCTAssertEqual(fetched.count, 1)
+        XCTAssertEqual(fetched.first?.title, "Lady Bird")
+        XCTAssertEqual(fetched.first?.collection, .journal)
+    }
+
+    func test_wordCount_countsWhitespaceSeparatedTokens() {
+        let entry = Entry(title: "x", body: "  one two   three\nfour ", collection: .piece)
+        XCTAssertEqual(entry.wordCount, 4)
+    }
+
+    func test_wordCount_emptyBodyIsZero() {
+        let entry = Entry(title: "x", body: "   \n ", collection: .piece)
+        XCTAssertEqual(entry.wordCount, 0)
+    }
+}
+```
+
+- [ ] **Step 2: Run the test to verify it fails**
+
+Run: `xcodebuild test -project Fern.xcodeproj -scheme Fern -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:FernTests/ModelTests`
+Expected: **FAILS to compile** — `Entry`, `Tag`, `Attachment` not defined.
+
+- [ ] **Step 3: Write the enums**
+
+Create `Fern/Models/Enums.swift`:
+
+```swift
+import SwiftUI
+
+/// An entry's intent. Both live in one library.
+enum Collection: String, Codable, CaseIterable, Identifiable {
+    case journal, piece
+    var id: String { rawValue }
+    var title: String { self == .journal ? "Journal" : "Pieces" }
+}
+
+/// Optional mood captured on an entry. Maps later to State of Mind (Plan 4/6).
+enum Mood: String, Codable, CaseIterable, Identifiable {
+    case calm, glad, tender, clear, restless, low
+    var id: String { rawValue }
+    var label: String { rawValue.capitalized }
+    /// SF Symbol used in the mood chip.
+    var symbol: String {
+        switch self {
+        case .calm:     return "leaf"
+        case .glad:     return "sun.max"
+        case .tender:   return "heart"
+        case .clear:    return "circle"
+        case .restless: return "wind"
+        case .low:      return "cloud"
+        }
+    }
+}
+```
+
+- [ ] **Step 4: Write Tag and Attachment**
+
+Create `Fern/Models/Tag.swift`:
+
+```swift
+import SwiftData
+
+@Model
+final class Tag {
+    @Attribute(.unique) var name: String
+    var entries: [Entry]
+
+    init(name: String) {
+        self.name = name
+        self.entries = []
+    }
+}
+```
+
+Create `Fern/Models/Attachment.swift`:
+
+```swift
+import SwiftData
+import Foundation
+
+@Model
+final class Attachment {
+    var imageData: Data?
+    var caption: String?
+    var order: Int
+
+    init(imageData: Data? = nil, caption: String? = nil, order: Int = 0) {
+        self.imageData = imageData
+        self.caption = caption
+        self.order = order
+    }
+}
+```
+
+- [ ] **Step 5: Write Entry**
+
+Create `Fern/Models/Entry.swift`:
+
+```swift
+import SwiftData
+import Foundation
+
+@Model
+final class Entry {
+    var id: UUID
+    var title: String
+    var body: String                 // Markdown
+    var collection: Collection
+    var createdAt: Date
+    var updatedAt: Date
+    var mood: Mood?
+    var placeName: String?
+    var latitude: Double?
+    var longitude: Double?
+    var isPinned: Bool
+
+    @Relationship(deleteRule: .nullify, inverse: \Tag.entries)
+    var tags: [Tag]
+
+    @Relationship(deleteRule: .cascade)
+    var attachments: [Attachment]
+
+    init(
+        id: UUID = UUID(),
+        title: String,
+        body: String,
+        collection: Collection,
+        createdAt: Date = .now,
+        mood: Mood? = nil,
+        isPinned: Bool = false
+    ) {
+        self.id = id
+        self.title = title
+        self.body = body
+        self.collection = collection
+        self.createdAt = createdAt
+        self.updatedAt = createdAt
+        self.mood = mood
+        self.isPinned = isPinned
+        self.tags = []
+        self.attachments = []
+    }
+
+    /// Whitespace-separated token count of the body.
+    var wordCount: Int {
+        body.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count
+    }
+}
+```
+
+- [ ] **Step 6: Write the persistence helper**
+
+Create `Fern/Persistence.swift`:
+
+```swift
+import SwiftData
+
+enum Persistence {
+    /// The app's shared on-device container. CloudKit is layered on in Plan 7.
+    static let shared: ModelContainer = {
+        do {
+            return try ModelContainer(for: Entry.self, Tag.self, Attachment.self)
+        } catch {
+            fatalError("Failed to create ModelContainer: \(error)")
+        }
+    }()
+
+    /// An in-memory container for previews and tests.
+    @MainActor
+    static func inMemory() -> ModelContainer {
+        try! ModelContainer(
+            for: Entry.self, Tag.self, Attachment.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+    }
+}
+```
+
+- [ ] **Step 7: Run the tests to verify they pass**
+
+Run: `xcodebuild test -project Fern.xcodeproj -scheme Fern -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:FernTests/ModelTests`
+Expected: **TEST SUCCEEDED** — 3 tests pass.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add Fern/Models Fern/Persistence.swift FernTests/ModelTests.swift
+git commit -m "Fern: SwiftData model (Entry/Tag/Attachment) + persistence, tested"
+```
+
+---
+
+### Task 5: Date grouping helper (with unit tests)
+
+**Files:**
+- Create: `Fern/Support/DateGrouping.swift`
+- Test: `FernTests/DateGroupingTests.swift`
+
+- [ ] **Step 1: Write the failing test**
+
+Create `FernTests/DateGroupingTests.swift`:
+
+```swift
+import XCTest
+@testable import Fern
+
+final class DateGroupingTests: XCTestCase {
+
+    private func date(_ y: Int, _ m: Int, _ d: Int, _ h: Int = 9) -> Date {
+        Calendar.current.date(from: DateComponents(year: y, month: m, day: d, hour: h))!
+    }
+
+    func test_groupsByDay_sortedNewestFirst() {
+        let a = Entry(title: "a", body: "x", collection: .journal, createdAt: date(2026, 6, 21, 7))
+        let b = Entry(title: "b", body: "x", collection: .journal, createdAt: date(2026, 6, 21, 19))
+        let c = Entry(title: "c", body: "x", collection: .piece,   createdAt: date(2026, 6, 18))
+
+        let sections = DayGrouping.sections(from: [a, b, c])
+
+        XCTAssertEqual(sections.count, 2)
+        // Newest day first
+        XCTAssertEqual(sections[0].entries.count, 2)
+        // Within a day, newest entry first
+        XCTAssertEqual(sections[0].entries.first?.title, "b")
+        XCTAssertEqual(sections[1].entries.first?.title, "c")
+    }
+}
+```
+
+- [ ] **Step 2: Run the test to verify it fails**
+
+Run: `xcodebuild test -project Fern.xcodeproj -scheme Fern -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:FernTests/DateGroupingTests`
+Expected: **FAILS to compile** — `DayGrouping` not defined.
+
+- [ ] **Step 3: Write the implementation**
+
+Create `Fern/Support/DateGrouping.swift`:
+
+```swift
+import Foundation
+
+struct DaySection: Identifiable {
+    let day: Date            // start of day
+    let entries: [Entry]
+    var id: Date { day }
+}
+
+enum DayGrouping {
+    /// Group entries by calendar day, days newest-first, entries newest-first within a day.
+    static func sections(from entries: [Entry], calendar: Calendar = .current) -> [DaySection] {
+        let groups = Dictionary(grouping: entries) { calendar.startOfDay(for: $0.createdAt) }
+        return groups
+            .map { day, items in
+                DaySection(day: day, entries: items.sorted { $0.createdAt > $1.createdAt })
+            }
+            .sorted { $0.day > $1.day }
+    }
+}
+```
+
+- [ ] **Step 4: Run the test to verify it passes**
+
+Run: `xcodebuild test -project Fern.xcodeproj -scheme Fern -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:FernTests/DateGroupingTests`
+Expected: **TEST SUCCEEDED**.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add Fern/Support/DateGrouping.swift FernTests/DateGroupingTests.swift
+git commit -m "Fern: day-grouping helper for the library, tested"
+```
+
+---
+
+### Task 6: Sample data, rows, and the Library view
+
+**Files:**
+- Create: `Fern/Support/SampleData.swift`, `Fern/Views/EntryRow.swift`, `Fern/Views/LibraryView.swift`
+
+- [ ] **Step 1: Write the sample seed**
+
+Create `Fern/Support/SampleData.swift`:
+
+```swift
+import SwiftData
+import Foundation
+
+enum SampleData {
+    /// Insert a few entries so previews and a fresh install aren't empty.
+    @MainActor
+    static func seed(into context: ModelContext) {
+        let cal = Calendar.current
+        func daysAgo(_ n: Int, hour: Int = 8) -> Date {
+            cal.date(byAdding: .day, value: -n, to: cal.startOfDay(for: .now))!
+                .addingTimeInterval(TimeInterval(hour * 3600))
+        }
+
+        let e1 = Entry(title: "The light over Lady Bird",
+                       body: "I walked the trail before the heat came up and the water was perfectly still.",
+                       collection: .journal, createdAt: daysAgo(0, hour: 7), mood: .calm)
+        let e2 = Entry(title: "Cicada draft",
+                       body: "all summer they rehearse / one note, then the whole orchestra at once",
+                       collection: .piece, createdAt: daysAgo(2), isPinned: true)
+        let e3 = Entry(title: "On finishing things",
+                       body: "The hardest part was never the starting.",
+                       collection: .piece, createdAt: daysAgo(5))
+        [e1, e2, e3].forEach { context.insert($0) }
+        try? context.save()
+    }
+
+    @MainActor
+    static func previewContainer() -> ModelContainer {
+        let container = Persistence.inMemory()
+        seed(into: container.mainContext)
+        return container
+    }
+}
+```
+
+- [ ] **Step 2: Write the entry row**
+
+Create `Fern/Views/EntryRow.swift`:
+
+```swift
+import SwiftUI
+
+struct EntryRow: View {
+    let entry: Entry
+
+    private var dateLabel: String {
+        entry.createdAt.formatted(.dateTime.weekday(.abbreviated)).uppercased()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Text(dateLabel).sectionLabel()
+                if entry.collection == .piece {
+                    Text("· \(entry.collection.title.lowercased())").font(.label).foregroundStyle(Paper.inkFaint)
+                }
+                if entry.isPinned {
+                    Image(systemName: "star.fill").font(.system(size: 9)).foregroundStyle(Paper.accent)
+                }
+                if let mood = entry.mood {
+                    Text("· \(mood.label.lowercased())").font(.label).foregroundStyle(Paper.accent)
+                }
+            }
+            Text(entry.title).font(.headlineSerif).foregroundStyle(Paper.ink)
+            if !entry.body.isEmpty {
+                Text(entry.body).font(.calloutSerif).foregroundStyle(Paper.inkSoft)
+                    .lineLimit(2)
+            }
+        }
+        .padding(.vertical, 6)
+    }
+}
+```
+
+- [ ] **Step 3: Write the Library view**
+
+Create `Fern/Views/LibraryView.swift`:
+
+```swift
+import SwiftUI
+import SwiftData
+
+struct LibraryView: View {
+    @Query(sort: \Entry.createdAt, order: .reverse) private var entries: [Entry]
+
+    private var sections: [DaySection] { DayGrouping.sections(from: entries) }
+
+    var body: some View {
+        ZStack {
+            PaperBackground()
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    ForEach(sections) { section in
+                        Text(section.day.formatted(.dateTime.weekday(.wide).month(.wide).day()))
+                            .sectionLabel()
+                            .padding(.top, 22).padding(.bottom, 6)
+                        ForEach(section.entries) { entry in
+                            EntryRow(entry: entry)
+                            Rule()
+                        }
+                    }
+                }
+                .padding(.horizontal, 22)
+                .padding(.bottom, 40)
+            }
+        }
+        .navigationTitle("Library")
+    }
+}
+
+#Preview {
+    NavigationStack { LibraryView() }
+        .modelContainer(SampleData.previewContainer())
+}
+```
+
+- [ ] **Step 4: Build + preview to verify it renders**
+
+Run: `xcodebuild -project Fern.xcodeproj -scheme Fern -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build`
+Expected: **BUILD SUCCEEDED**. Open `LibraryView.swift` in Xcode and run the Preview: a paper screen with day headers, three seeded entries, hairline rules, the pinned star and mood label in sienna.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add Fern/Support/SampleData.swift Fern/Views/EntryRow.swift Fern/Views/LibraryView.swift
+git commit -m "Fern: Library view reading SwiftData, with seeded sample data"
+```
+
+---
+
+### Task 7: Today stub, Search stub, and adaptive RootView
+
+**Files:**
+- Create: `Fern/Views/TodayView.swift`, `Fern/Views/SearchView.swift`, `Fern/Views/RootView.swift`
+- Modify: `Fern/FernApp.swift`
+
+- [ ] **Step 1: Write the Today view (static greeting + prompt placeholder)**
+
+Create `Fern/Views/TodayView.swift`. The rotating prompt logic and On‑This‑Day arrive in Plan 3; for now show a fixed prompt so the screen reads correctly:
+
+```swift
+import SwiftUI
+
+struct TodayView: View {
+    private var greeting: String {
+        let h = Calendar.current.component(.hour, from: .now)
+        switch h {
+        case 5..<12:  return "Good morning,"
+        case 12..<17: return "Good afternoon,"
+        case 17..<22: return "Good evening,"
+        default:      return "Hello,"
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            PaperBackground()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    Text(Date.now.formatted(.dateTime.weekday(.wide).month(.wide).day()))
+                        .sectionLabel()
+                        .padding(.top, 8)
+                    Text("\(greeting)\nAustin.")
+                        .font(.masthead)
+                        .foregroundStyle(Paper.ink)
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("A prompt for today").sectionLabel()
+                        Text("What has quietly stayed with you?")
+                            .font(.titleSerif)
+                            .foregroundStyle(Paper.ink)
+                        Button("Begin writing") { /* wired in Plan 2 */ }
+                            .buttonStyle(InkButtonStyle())
+                            .padding(.top, 4)
+                    }
+                    .card()
+                }
+                .padding(.horizontal, 22)
+                .padding(.bottom, 40)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .navigationTitle("Today")
+    }
+}
+
+#Preview { NavigationStack { TodayView() } }
+```
+
+- [ ] **Step 2: Write the Search stub**
+
+Create `Fern/Views/SearchView.swift` (full search lands in Plan 3):
+
+```swift
+import SwiftUI
+
+struct SearchView: View {
+    var body: some View {
+        ZStack {
+            PaperBackground()
+            VStack(spacing: 8) {
+                Image(systemName: "magnifyingglass").font(.title2).foregroundStyle(Paper.inkFaint)
+                Text("Search arrives soon").font(.bodySerif).foregroundStyle(Paper.inkSoft)
+            }
+        }
+        .navigationTitle("Search")
+    }
+}
+```
+
+- [ ] **Step 3: Write the adaptive RootView**
+
+Create `Fern/Views/RootView.swift`. Compact width (iPhone) → tabs; regular width (iPad) → split view:
+
+```swift
+import SwiftUI
+
+enum Destination: String, CaseIterable, Identifiable {
+    case today, library, search
+    var id: String { rawValue }
+    var title: String { rawValue.capitalized }
+    var symbol: String {
+        switch self {
+        case .today:   return "sun.max"
+        case .library: return "books.vertical"
+        case .search:  return "magnifyingglass"
+        }
+    }
+    @ViewBuilder var view: some View {
+        switch self {
+        case .today:   TodayView()
+        case .library: LibraryView()
+        case .search:  SearchView()
+        }
+    }
+}
+
+struct RootView: View {
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    @State private var selection: Destination = .today
+
+    var body: some View {
+        if sizeClass == .regular {
+            NavigationSplitView {
+                List(Destination.allCases, selection: $selection) { dest in
+                    Label(dest.title, systemImage: dest.symbol).tag(dest)
+                }
+                .navigationTitle("Fern")
+            } detail: {
+                NavigationStack { selection.view }
+            }
+            .tint(Paper.accent)
+        } else {
+            TabView(selection: $selection) {
+                ForEach(Destination.allCases) { dest in
+                    NavigationStack { dest.view }
+                        .tabItem { Label(dest.title, systemImage: dest.symbol) }
+                        .tag(dest)
+                }
+            }
+            .tint(Paper.accent)
+        }
+    }
+}
+```
+
+- [ ] **Step 4: Wire the app entry to the container + RootView**
+
+Replace `Fern/FernApp.swift`:
+
+```swift
+import SwiftUI
+import SwiftData
+
+@main
+struct FernApp: App {
+    var body: some Scene {
+        WindowGroup {
+            RootView()
+                .preferredColorScheme(.light)   // Fern is light-mode only, by design
+        }
+        .modelContainer(Persistence.shared)
+    }
+}
+```
+
+- [ ] **Step 5: Build and run on both idioms**
+
+Run (iPhone): `xcodebuild -project Fern.xcodeproj -scheme Fern -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build`
+Run (iPad): `xcodebuild -project Fern.xcodeproj -scheme Fern -destination 'platform=iOS Simulator,name=iPad Air 13-inch (M2)' build`
+Expected: both **BUILD SUCCEEDED**. Launch each: iPhone shows a three‑tab bar (Today / Library / Search) in sienna; iPad shows a sidebar + detail. Library is empty on a fresh simulator (no sample seed in the live container yet) — that's expected; previews show the seeded data.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add Fern/Views/TodayView.swift Fern/Views/SearchView.swift Fern/Views/RootView.swift Fern/FernApp.swift
+git commit -m "Fern: adaptive RootView (tabs/iPhone, split/iPad) + Today and Search screens"
+```
+
+---
+
+## Self-review
+
+**Spec coverage (Plan 1 portion):** Palette §8 → Task 2 ✓. Type §8 → Task 2 ✓. Components/paper §8 → Task 3 ✓. Data model §7 → Task 4 ✓ (CloudKit deferred to Plan 7, as the spec allows). IA / adaptive nav §3 → Task 7 ✓. Today layout B §4 → Task 7 (static; prompt rotation/On‑This‑Day deferred to Plan 3) ✓. Library §3 → Task 6 ✓. Light‑mode‑only §2 → Tasks 1 & 7 ✓. Editor/search/metadata/art/suggestions/export are explicitly out of this plan (later milestones).
+
+**Placeholder scan:** No TBD/TODO left as work items. Two `/* wired in Plan X */` markers are intentional no‑op button actions on stub screens, each naming the milestone that fills them — not hidden work in this plan.
+
+**Type consistency:** `Entry(title:body:collection:createdAt:mood:isPinned:)` is used identically in tests, sample data, and previews. `DayGrouping.sections(from:)` / `DaySection.entries` consistent across Task 5 and Task 6. `Collection.title`, `Mood.label`/`.symbol`, `Paper.*`, and the `Font` tokens (`.headlineSerif`, `.titleSerif`, `.masthead`, `.label`) are defined in Tasks 2/3 before first use in Tasks 6/7. `Destination.view` returns the three screens defined in Tasks 6/7.
