@@ -32,11 +32,10 @@ func rand() -> Double {
     return Double(z ^ (z >> 31)) / Double(UInt64.max)
 }
 
-// Run Barnsley
+// Run Barnsley — points in math coords (base at origin, grows +y "up").
 let count = 120_000
 var x = 0.0, y = 0.0
 var pts = [(Double, Double)](); pts.reserveCapacity(count)
-var mnx = Double.infinity, mxx = -Double.infinity, mxy = -Double.infinity
 for _ in 0..<count {
     let r = rand()
     let (nx, ny): (Double, Double)
@@ -47,27 +46,41 @@ for _ in 0..<count {
     default:      nx = -0.15 * x + 0.28 * y;  ny =  0.26 * x + 0.24 * y + 0.44
     }
     x = nx; y = ny; pts.append((x, y))
-    if x < mnx { mnx = x }
-    if x > mxx { mxx = x }
-    if y > mxy { mxy = y }
 }
 
-// Map fern coords into a centered, padded square on the icon.
-let padding = Double(size) * 0.10
-let drawW = Double(size) - padding * 2
-let drawH = Double(size) - padding * 2
-let xSpan = max(0.001, mxx - mnx)
-let ySpan = max(0.001, mxy)
-let scale = min(drawW / xSpan, drawH / ySpan) * 0.94
-let centerX = Double(size) / 2 - ((mxx + mnx) / 2) * scale
-let bottomY = Double(size) - padding
+// Rotate the whole frond for a diagonal composition (base lower-left, tip upper-right).
+let angle = -Double.pi / 6   // -30°
+let ca = cos(angle), sa = sin(angle)
+var rpts = [(Double, Double)](); rpts.reserveCapacity(pts.count)
+var mnx = Double.infinity, mxx = -Double.infinity
+var mny = Double.infinity, mxy = -Double.infinity
+for (px, py) in pts {
+    let rx = px * ca - py * sa
+    let ry = px * sa + py * ca
+    rpts.append((rx, ry))
+    if rx < mnx { mnx = rx }
+    if rx > mxx { mxx = rx }
+    if ry < mny { mny = ry }
+    if ry > mxy { mxy = ry }
+}
+
+// Fit the rotated bounding box into a centered, padded square.
+// CGContext is y-up, so larger ry maps higher on the image → fern points up.
+let pad = Double(size) * 0.12
+let drawW = Double(size) - pad * 2
+let drawH = Double(size) - pad * 2
+let spanX = max(0.001, mxx - mnx)
+let spanY = max(0.001, mxy - mny)
+let scale = min(drawW / spanX, drawH / spanY)
+let offX = (Double(size) - spanX * scale) / 2
+let offY = (Double(size) - spanY * scale) / 2
 
 ctx.setFillColor(accent.copy(alpha: 0.62) ?? accent)
 let dot = 2.6
-for (px, py) in pts {
-    let dx = centerX + px * scale - dot / 2
-    let dy = bottomY - py * scale - dot / 2
-    ctx.fillEllipse(in: CGRect(x: dx, y: dy, width: dot, height: dot))
+for (rx, ry) in rpts {
+    let sx = offX + (rx - mnx) * scale - dot / 2
+    let sy = offY + (ry - mny) * scale - dot / 2
+    ctx.fillEllipse(in: CGRect(x: sx, y: sy, width: dot, height: dot))
 }
 
 guard let image = ctx.makeImage() else { fatalError("image") }
