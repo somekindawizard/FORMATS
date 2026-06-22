@@ -52,6 +52,7 @@
 		D3988507F66A8D5E8CF88039 /* MarkdownStyler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7826A6B5EB47145BAAF378E /* MarkdownStyler.swift */; };
 		D5B3AC7B5AB7666C2BAEC1DE /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08E10046E72A3938832A9FAD /* Persistence.swift */; };
 		E46E487B2EB249A714915481 /* Prompts+Reflective.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498E7586F70ECCFA602F6B03 /* Prompts+Reflective.swift */; };
+		E5B87471D24573544FF784FD /* PromptNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED830E78A8ED4F64E15ECC2C /* PromptNotifier.swift */; };
 		EFB45A7993691F8811C3B8D5 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DC35D8BD947984A93C106B /* TodayView.swift */; };
 		F349ECAB7A224AE4DBB6C3C5 /* Entry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7151C81AE2B364DEA4C780 /* Entry.swift */; };
 		F644D9FD13C1AF7313F2738B /* LocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC7E99A123649E4FFAC4ECD /* LocationProvider.swift */; };
@@ -122,6 +123,7 @@
 		E955C6672E8D66A488569630 /* SmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
 		EA4BBB39E7CE32F7D86E79DC /* BiometricLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricLock.swift; sourceTree = "<group>"; };
 		EC5A0D4651E2BDC4D80A6AC9 /* MarkdownTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownTheme.swift; sourceTree = "<group>"; };
+		ED830E78A8ED4F64E15ECC2C /* PromptNotifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptNotifier.swift; sourceTree = "<group>"; };
 		EE08F5EFD57674CB778E0A8B /* PromptLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptLibrary.swift; sourceTree = "<group>"; };
 		F742AB1A0EB1B95CC7A91A9D /* SuggestionsButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionsButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -188,6 +190,7 @@
 				CBC7E99A123649E4FFAC4ECD /* LocationProvider.swift */,
 				12337FE2289C85966902B783 /* MarkdownExporter.swift */,
 				8179EB32444953EE697C2342 /* PhotoStore.swift */,
+				ED830E78A8ED4F64E15ECC2C /* PromptNotifier.swift */,
 				70573A969736F0D4419D6DA6 /* WeatherProvider.swift */,
 			);
 			path = Services;
@@ -428,6 +431,7 @@
 				65A3BFB4A131C784AA20BB46 /* Prompt.swift in Sources */,
 				3291FF5A77AE8F8B2D893CCE /* PromptCard.swift in Sources */,
 				121EC7706CC6B8DD6B0B1CDE /* PromptLibrary.swift in Sources */,
+				E5B87471D24573544FF784FD /* PromptNotifier.swift in Sources */,
 				91D3B0870053AE6264E7441B /* PromptStore.swift in Sources */,
 				A1608D2E62B4B1917A46A610 /* Prompts+Extras.swift in Sources */,
 				4438065D4292698772195EA0 /* Prompts+Genshin.swift in Sources */,

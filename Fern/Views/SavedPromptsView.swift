@@ -69,6 +69,7 @@ struct SavedPromptsView: View {
         let collection: Collection = prompt.kind == .journal ? .journal : .piece
         let entry = Entry(title: "", body: "", collection: collection)
         entry.prompt = prompt.text
+        entry.tagNames = [prompt.theme.rawValue]
         context.insert(entry)
         draft = entry
     }

@@ -64,7 +64,7 @@ final class JournalingTests: XCTestCase {
     }
 
     func test_promptLibrary_isLarge() {
-        XCTAssertGreaterThan(PromptLibrary.all.count, 700)
+        XCTAssertGreaterThan(PromptLibrary.all.count, 600)
     }
 
     func test_dailyPrompt_matchesKindAndTheme() {

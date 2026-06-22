@@ -122,6 +122,7 @@ struct TodayView: View {
         let collection: Collection = kind == .journal ? .journal : .piece
         let entry = Entry(title: "", body: "", collection: collection)
         entry.prompt = prompt?.text
+        if let theme = prompt?.theme { entry.tagNames = [theme.rawValue] }
         context.insert(entry)
         draft = entry
     }

@@ -1,151 +1,10 @@
 import Foundation
 
-private func j(_ s: String) -> Prompt { Prompt(text: s, kind: .journal, theme: .genshin) }
 private func c(_ s: String) -> Prompt { Prompt(text: s, kind: .creative, theme: .genshin) }
 
+// Genshin prompts are creative-only — story sparks set in Teyvat and its archetypes.
 extension PromptLibrary {
     static let genshin: [Prompt] = [
-        // ── Journal (a character or place as a lens for reflection) ──
-
-        // Mondstadt
-        j("Venti would tell you to follow the wind. Where would it take you today?"),
-        j("Jean carries Mondstadt on her shoulders. What are you carrying that you could set down?"),
-        j("Diluc gave up a title to do the right thing quietly. What have you done that no one applauded?"),
-        j("Kaeya keeps his real face hidden. What do you keep behind an easy smile?"),
-        j("Klee finds joy in small explosions. What's a harmless mischief that delights you?"),
-        j("Albedo studies the world to understand his own existence. What are you trying to understand about yours?"),
-        j("Eula answers cruelty with grace. When did you take the high road, and what did it cost?"),
-        j("Amber never gives up on anyone. Who deserves your patience right now?"),
-        j("Lisa chooses ease over ambition on purpose. Where could you let yourself rest?"),
-        j("Bennett's luck never breaks his spirit. What keeps your spirit unbroken?"),
-        j("Noelle dreams of becoming a knight by serving first. What dream are you building one small task at a time?"),
-        j("Razor trusts a small pack fiercely. Who is your pack?"),
-        j("Mona reads fate but lives in poverty by choice. What principle do you keep even when it's inconvenient?"),
-        j("Rosaria does good without wanting to be thanked. Where do you give quietly?"),
-        j("Sucrose experiments toward a gentler world. What are you curious enough to try?"),
-        j("Barbara heals by simply showing up. Whose presence heals you?"),
-        j("Fischl lives inside a story she built. What story do you tell about yourself, and is it kind?"),
-        j("Diona wants to ruin a thing she secretly loves. What do you resist that you actually need?"),
-        j("Mika maps the unknown for others. What are you charting for the people who come after you?"),
-
-        // Liyue
-        j("Zhongli has all the time in the world and still values each contract. What promise are you keeping?"),
-        j("Hu Tao laughs at death to honor life. What would living fully look like this week?"),
-        j("Xiao bears old burdens alone. What weight could you finally let someone share?"),
-        j("Ganyu works tirelessly between two natures. Which two parts of you are hardest to reconcile?"),
-        j("Ningguang built everything from nothing, twice. What would you rebuild if you had to start over?"),
-        j("Keqing doubts the gods and trusts her own work. Where do you trust your own hands?"),
-        j("Xingqiu hides a soft heart behind chivalry. What tenderness do you disguise?"),
-        j("Chongyun tries to cool an overheated heart. Where do you need to steady yourself?"),
-        j("Xiangling pours love into a single dish. What ordinary thing do you make with care?"),
-        j("Beidou fears nothing on the open sea. What fear would you sail straight through?"),
-        j("Yelan keeps her cards close. What are you not ready to reveal, and that's okay?"),
-        j("Shenhe was raised cold and is slowly thawing. Where are you softening?"),
-        j("Qiqi forgets, and writes everything down to hold on. What are you afraid of forgetting?"),
-        j("Xinyan plays loud in a place that wants quiet. Where do you refuse to be smaller than you are?"),
-        j("Yanfei knows every rule and bends them with care. Which rule of yours could use mercy?"),
-        j("Yaoyao tends to others before herself. What would it look like to be on your own list?"),
-        j("Baizhu bargains with his own illness to keep helping. What do you push through, and should you?"),
-        j("Xianyun would rather create than rest. What would you build if failure were impossible?"),
-        j("Yun Jin keeps an old art alive. What tradition lives on through you?"),
-        j("Madame Ping has watched centuries pass with a steady heart. What would your oldest, wisest self tell you now?"),
-        j("Madame Ping tends a small shop and an ancient secret. What ordinary life are you quietly extraordinary inside of?"),
-
-        // Inazuma
-        j("The Raiden Shogun pursued an eternity that cost her everything. What 'forever' are you chasing that may not be worth it?"),
-        j("Kazuha carries his friend's will on the wind. Whose memory do you carry forward?"),
-        j("Ayaka upholds grace under enormous pressure. Where do you stay gentle when it's hard?"),
-        j("Ayato moves unseen to protect what he loves. What do you protect quietly?"),
-        j("Yoimiya makes festivals so others can be happy. When did you make joy for someone else?"),
-        j("Kokomi leads while exhausted and never lets it show. What are you tired of hiding?"),
-        j("Kuki Shinobu holds a chaotic group together. What are you the glue of?"),
-        j("Itto loses with style and never lets it dim him. How do you handle losing?"),
-        j("Sara serves a cause and questions it honestly. What loyalty are you re-examining?"),
-        j("Yae Miko plays the long game with a smile. What are you patient about?"),
-        j("Gorou rallies others by believing first. Where could your belief steady someone?"),
-        j("Thoma makes any place feel like home. What makes a place home for you?"),
-        j("Heizou solves others' mysteries. What mystery about yourself are you avoiding?"),
-        j("Chiori builds beauty on her own exacting terms. Where do you refuse to compromise your craft?"),
-        j("Mizuki drifts between dream and waking. What does your daydreaming keep trying to tell you?"),
-
-        // Sumeru
-        j("Nahida was kept in a jar and chose love anyway. What kept you tender despite being kept small?"),
-        j("Alhaitham keeps his life simple to keep his mind free. What could you simplify?"),
-        j("Cyno hides warmth behind duty and bad jokes. What's your version of a bad joke that means 'I care'?"),
-        j("Tighnari guards a forest he loves. What are you the keeper of?"),
-        j("Collei turned pain into the gentleness she needed. What wound made you kinder?"),
-        j("Kaveh pours himself into beauty even when it ruins him. What do you give too much to, and why?"),
-        j("Dehya protects others first, always. Who needs your protection, and who protects you?"),
-        j("Nilou dances a tradition into the future. How do you keep something beautiful alive?"),
-        j("Layla sleepwalks toward what she's too anxious to do awake. What do you avoid until you can't?"),
-        j("Faruzan hid for a century and re-enters the world prickly and proud. How do you handle being out of step with your time?"),
-        j("The Wanderer rewrote who he would be. What part of your story are you choosing to rewrite?"),
-        j("Candace guards a village gate with old faith. What do you stand watch over?"),
-        j("Dori profits and protects at once. Where do you balance self-interest and care?"),
-        j("Sethos walks an old path with new questions. What inherited belief are you testing?"),
-
-        // Fontaine
-        j("Furina performed certainty for centuries while terrified inside. Where are you performing strength?"),
-        j("Neuvillette learned that justice needs mercy. Where could you be more merciful — to yourself?"),
-        j("Navia smiles through grief and keeps her people standing. How do you hold others while hurting?"),
-        j("Lyney performs flawless illusions to hide real stakes. What do you make look easy?"),
-        j("Lynette says little and notices everything. What have you noticed lately that you haven't said?"),
-        j("Freminet retreats to the deep to be alone with his thoughts. Where is your quiet, deep place?"),
-        j("Charlotte chases the truth and prints it. What truth are you ready to put into words?"),
-        j("Clorinde duels so others don't have to. What do you take on so others won't be hurt?"),
-        j("Wriothesley runs a prison with unexpected fairness. Where do you bring fairness to a hard place?"),
-        j("Sigewinne heals tiny and tireless. What care do you give that goes unseen?"),
-        j("Chevreuse aims true and answers for every shot. What do you take full responsibility for?"),
-        j("Emilie distills memory into perfume. What scent would capture this season of your life?"),
-
-        // Natlan
-        j("Mavuika leads from the front and burns bright for her people. What would you lead if you let yourself?"),
-        j("Mualani rides the waves with pure delight. When did you last do something purely for the joy of it?"),
-        j("Kinich keeps his word for a price, and the word matters more. What's your code?"),
-        j("Kachina doubts herself but shows up scared and tries anyway. What are you doing despite the fear?"),
-        j("Citlali carries old knowledge and a sharp tongue. What wisdom have you earned the hard way?"),
-        j("Xilonen makes for her community first. What do you build that's bigger than yourself?"),
-        j("Chasca bridges two worlds and belongs fully to neither. Where do you live between two belongings?"),
-        j("Iansan trains relentlessly toward a single goal. What are you disciplined about?"),
-        j("Ororon listens to what others can't hear. What faint signal in your life deserves attention?"),
-        j("Varesa chases a thrill bigger than fear. What excites you more than it scares you?"),
-
-        // Fatui / Snezhnaya / Khaenri'ah
-        j("Arlecchino rules a house of orphans with terrifying love. How do you love people who are hard to love?"),
-        j("Capitano holds to honor in a dishonorable cause. Where do you keep your integrity in a flawed situation?"),
-        j("Childe lives for the next fight. What hunger in you needs a worthier target?"),
-        j("Columbina drifts serene above it all. What would unsettling serenity teach you?"),
-        j("Signora gave everything to grief and let it harden her. What grief are you tending so it softens instead?"),
-        j("Dainsleif endures, alone, for a homeland that's gone. What do you keep faith with that the world forgot?"),
-        j("Sandrone builds tools to replace what she's lost. What are you trying to engineer around a loss?"),
-
-        // Elemental / thematic journal
-        j("If you held a Pyro Vision, what would you have the courage to finally do?"),
-        j("If you held a Hydro Vision, what feeling would you let flow instead of holding back?"),
-        j("If you held an Anemo Vision, what would you finally let go of?"),
-        j("If you held a Geo Vision, what foundation would you lay for your future?"),
-        j("If you held an Electro Vision, what conviction would you act on?"),
-        j("If you held a Dendro Vision, what would you nurture into growth?"),
-        j("If you held a Cryo Vision, where do you need a steadier, cooler head?"),
-        j("If your life were an open world, where would you wander first, with no quest at all?"),
-        j("What is your Vision — the desire strong enough to define you?"),
-        j("If a Statue of the Seven granted one wish for your week, what would you ask?"),
-        j("What region — windy Mondstadt, golden Liyue, electric Inazuma, green Sumeru, watery Fontaine, fiery Natlan, frozen Snezhnaya — matches your inner weather today?"),
-        j("If you could share a meal with one Traveler's companion, who, and what would you ask them?"),
-        j("What 'commission' would you give yourself today — one small, doable quest?"),
-        j("Which of your friends is your Paimon — loud, loyal, always hungry, always there?"),
-        j("If you had a Wish, would you spend it on a person, a power, or a place? Why?"),
-        j("What part of your past is a domain you keep returning to clear?"),
-        j("If your heart were a teapot you could decorate freely, what would you place inside it?"),
-        j("What constellation would your life form, and what would it be named?"),
-        j("Where in your life are you 'ascending' — leveling up slowly and unglamorously?"),
-        j("If the Abyss is the part of you that you fear, what's one honest thing it wants?"),
-        j("Which element do you wish you had more of in your life right now, and why?"),
-        j("What old contract — a promise, a role, an expectation — are you ready to renegotiate?"),
-        j("If you could leave one teapot replica of a place you love, which place, and for whom?"),
-
-        // ── Creative (story sparks set in Teyvat / its archetypes) ──
-
         // Mondstadt
         c("The wind in Mondstadt carries a melody no one has played in a thousand years. Someone finally recognizes it. Write the moment."),
         c("Write a night at the Angel's Share when Diluc and Kaeya are the only two left, and neither will say goodnight first."),
@@ -157,6 +16,8 @@ extension PromptLibrary {
         c("Write a scene where Fischl's 'Oz' answers a question Fischl herself can't."),
         c("Eula plans an elaborate 'vengeance' that turns out to be an act of kindness. Reveal it slowly."),
         c("A knight of Favonius is assigned to guard a single dandelion seed across the whole region. Write the journey."),
+        c("Venti trades a song for a secret in a quiet tavern. Write the secret and the price."),
+        c("Mona reads a fortune she refuses to say aloud. Write the night she finally tells someone."),
 
         // Liyue
         c("Zhongli attends his own mock funeral and overhears what people really think of him. Write it."),
@@ -166,9 +27,11 @@ extension PromptLibrary {
         c("Ganyu falls asleep mid-shift and wakes to find the work done by someone who left no name. Continue."),
         c("Write the story of a contract signed in a teahouse that binds two enemies to save each other once."),
         c("Madame Ping closes her shop, brews tea, and tells a child the true story of how the mountains were made. Write the story she tells."),
+        c("Madame Ping plants a tree that won't bloom for three hundred years and writes a note for whoever sees it flower. Write the note."),
         c("Ningguang plays a game of stones with a rival where every move is a real decision about the city. Write the final move."),
         c("Write a Lantern Rite where one lantern, when lit, shows the wisher their own future. Whose is it?"),
         c("Xiangling invents a dish that makes the eater remember their happiest meal. Write a stranger's reaction."),
+        c("Childe and Zhongli share one quiet meal with everything unsaid between them. Write the dinner."),
 
         // Inazuma
         c("Write the moment the Raiden Shogun, deep in her Plane of Euthymia, is visited by the one memory she tried to delete."),
@@ -179,6 +42,7 @@ extension PromptLibrary {
         c("Two rival swordsmen are trapped by a typhoon and must share a single lantern's worth of oil and truth. Continue."),
         c("Write the legend of the lightning that struck the same shrine for a hundred years, and what it was guarding."),
         c("Thoma is asked to make one impossible person feel at home. Write his first, failed attempt and his second, better one."),
+        c("Yoimiya promises a dying festival one last unforgettable night. Write how she keeps the promise."),
 
         // Sumeru
         c("Nahida shows a grieving stranger a dream of the person they lost. Write what the dream gets wrong, and right."),
@@ -189,6 +53,7 @@ extension PromptLibrary {
         c("Cyno tells a joke so bad it accidentally breaks a curse. Write the scene around it."),
         c("A desert village shares one well and one secret. A traveler is offered both. Continue."),
         c("Write the night Collei finally sleeps without nightmares, and the small thing that made it possible."),
+        c("Alhaitham agrees to help solve a problem only if no one thanks him for it. Write why."),
 
         // Fontaine
         c("Write the trial of a clockwork servant accused of feeling, with Neuvillette presiding."),
@@ -199,6 +64,7 @@ extension PromptLibrary {
         c("Navia hosts a gathering where everyone must bring the thing they're most afraid to lose. Write what one guest brings."),
         c("Write the story of a detective in Fontaine solving the case of a memory that doesn't belong to anyone."),
         c("Sigewinne treats a patient whose only ailment is a broken promise. Write the cure."),
+        c("Wriothesley grants one prisoner a single afternoon of sunlight. Write the afternoon."),
 
         // Natlan
         c("Write the first ride of a young dragon and its rider, neither of whom is sure of the other."),
@@ -208,6 +74,7 @@ extension PromptLibrary {
         c("Write the legend of the night the volcano spoke, and the one person who answered."),
         c("Kachina is given a task far too big for her. Write the moment she decides to try anyway."),
         c("Two tribes settle an ancient grudge with a single game. Write the final round."),
+        c("Citlali passes down one last piece of forbidden knowledge before the season turns. Write the lesson."),
 
         // Fatui / Snezhnaya / Khaenri'ah
         c("Write a morning in the House of the Hearth, where Arlecchino's 'children' make her breakfast and she lets them think she doesn't notice."),
@@ -217,6 +84,7 @@ extension PromptLibrary {
         c("Dainsleif walks through the ruins of Khaenri'ah and tells the empty streets the news of the world. Write his report."),
         c("A Fatui agent is ordered to steal something that turns out to be a child's drawing. Write the theft and the change of heart."),
         c("Write the story of the Knave teaching an orphan that love and survival are not opposites."),
+        c("Columbina hums a tune that makes everyone who hears it tell the truth. Write what spills out."),
 
         // Cross-Teyvat / archetype sparks
         c("A Traveler arrives in a region not on any map, where the people have never heard of the Seven. Write the first hour."),

@@ -29,27 +29,30 @@ struct RootView: View {
     @State private var tabSelection: Destination = .today
 
     var body: some View {
-        if sizeClass == .regular {
-            NavigationSplitView {
-                List(selection: $sidebarSelection) {
+        Group {
+            if sizeClass == .regular {
+                NavigationSplitView {
+                    List(selection: $sidebarSelection) {
+                        ForEach(Destination.allCases) { dest in
+                            Label(dest.title, systemImage: dest.symbol).tag(dest)
+                        }
+                    }
+                    .navigationTitle("Fern")
+                } detail: {
+                    NavigationStack { (sidebarSelection ?? .today).view }
+                }
+                .tint(Paper.accent)
+            } else {
+                TabView(selection: $tabSelection) {
                     ForEach(Destination.allCases) { dest in
-                        Label(dest.title, systemImage: dest.symbol).tag(dest)
+                        NavigationStack { dest.view }
+                            .tabItem { Label(dest.title, systemImage: dest.symbol) }
+                            .tag(dest)
                     }
                 }
-                .navigationTitle("Fern")
-            } detail: {
-                NavigationStack { (sidebarSelection ?? .today).view }
+                .tint(Paper.accent)
             }
-            .tint(Paper.accent)
-        } else {
-            TabView(selection: $tabSelection) {
-                ForEach(Destination.allCases) { dest in
-                    NavigationStack { dest.view }
-                        .tabItem { Label(dest.title, systemImage: dest.symbol) }
-                        .tag(dest)
-                }
-            }
-            .tint(Paper.accent)
         }
+        .task { await PromptNotifier.refresh() }
     }
 }
