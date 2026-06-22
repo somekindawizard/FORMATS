@@ -66,9 +66,34 @@ struct EntryEditorView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .hidesFernTabBar()
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
+                NavigationLink {
+                    ReadingView(entry: entry)
+                } label: {
+                    Image(systemName: "book").foregroundStyle(Paper.accent)
+                }
                 Menu {
+                    Button {
+                        entry.isPinned.toggle()
+                    } label: {
+                        Label(entry.isPinned ? "Unpin" : "Pin",
+                              systemImage: entry.isPinned ? "star.slash" : "star")
+                    }
+                    Button {
+                        entry.isLocked.toggle()
+                        if entry.isLocked { noteUnlocked = true }
+                    } label: {
+                        Label(entry.isLocked ? "Unlock note" : "Lock note",
+                              systemImage: entry.isLocked ? "lock.open" : "lock")
+                    }
+                    Button {
+                        entry.isFinished.toggle()
+                    } label: {
+                        Label(entry.isFinished ? "Mark as draft" : "Mark as finished",
+                              systemImage: entry.isFinished ? "circle" : "checkmark.seal")
+                    }
                     Menu("Notebook") {
                         Button("None") { entry.notebook = nil }
                         ForEach(notebooks, id: \.self) { nb in
@@ -80,38 +105,15 @@ struct EntryEditorView: View {
                         Divider()
                         Button("New notebook…") { showingNewNotebook = true }
                     }
-                    Button {
-                        entry.isFinished.toggle()
-                    } label: {
-                        Label(entry.isFinished ? "Mark as draft" : "Mark as finished",
-                              systemImage: entry.isFinished ? "circle" : "checkmark.seal")
-                    }
+                    Divider()
                     Button { shareCard() } label: {
                         Label("Share as card", systemImage: "photo")
                     }
+                    ShareLink(item: MarkdownExporter.markdown(for: entry)) {
+                        Label("Share as Markdown", systemImage: "square.and.arrow.up")
+                    }
                 } label: {
                     Image(systemName: "ellipsis.circle").foregroundStyle(Paper.accent)
-                }
-                NavigationLink {
-                    ReadingView(entry: entry)
-                } label: {
-                    Image(systemName: "book").foregroundStyle(Paper.accent)
-                }
-                ShareLink(item: MarkdownExporter.markdown(for: entry)) {
-                    Image(systemName: "square.and.arrow.up").foregroundStyle(Paper.accent)
-                }
-                Button {
-                    entry.isLocked.toggle()
-                    if entry.isLocked { noteUnlocked = true } // stay open this session
-                } label: {
-                    Image(systemName: entry.isLocked ? "lock.fill" : "lock")
-                        .foregroundStyle(Paper.accent)
-                }
-                Button {
-                    entry.isPinned.toggle()
-                } label: {
-                    Image(systemName: entry.isPinned ? "star.fill" : "star")
-                        .foregroundStyle(Paper.accent)
                 }
             }
         }

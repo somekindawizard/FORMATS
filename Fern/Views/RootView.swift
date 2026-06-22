@@ -14,6 +14,14 @@ enum Destination: String, CaseIterable, Identifiable {
         case .settings: return "gearshape"
         }
     }
+    var symbolActive: String {
+        switch self {
+        case .today:    return "sun.max.fill"
+        case .library:  return "books.vertical.fill"
+        case .search:   return "magnifyingglass"
+        case .settings: return "gearshape.fill"
+        }
+    }
     @ViewBuilder var view: some View {
         switch self {
         case .today:    TodayView()
@@ -33,6 +41,7 @@ struct RootView: View {
     // Persisted so a theme change (which rebuilds the tree) keeps you on the tab.
     @AppStorage("fern.tab") private var tabSelection: Destination = .today
     @State private var spotlightEntry: Entry?
+    @State private var hideTabBar = false
 
     var body: some View {
         Group {
@@ -49,14 +58,17 @@ struct RootView: View {
                 }
                 .tint(Paper.accent)
             } else {
-                TabView(selection: $tabSelection) {
-                    ForEach(Destination.allCases) { dest in
-                        NavigationStack { dest.view }
-                            .tabItem { Label(dest.title, systemImage: dest.symbol) }
-                            .tag(dest)
+                NavigationStack { tabSelection.view }
+                    .tint(Paper.accent)
+                    .onPreferenceChange(HidesTabBarKey.self) { hidden in
+                        withAnimation(.easeInOut(duration: 0.22)) { hideTabBar = hidden }
                     }
-                }
-                .tint(Paper.accent)
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
+                        if !hideTabBar {
+                            FernTabBar(selection: $tabSelection)
+                                .transition(.move(edge: .bottom).combined(with: .opacity))
+                        }
+                    }
             }
         }
         .task {

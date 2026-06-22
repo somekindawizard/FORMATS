@@ -67,6 +67,7 @@
 		D5B3AC7B5AB7666C2BAEC1DE /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08E10046E72A3938832A9FAD /* Persistence.swift */; };
 		D85467988DD2C1B7C6F01832 /* SpotlightIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232C4DDB499CBDC6E0B73E75 /* SpotlightIndexer.swift */; };
 		E46E487B2EB249A714915481 /* Prompts+Reflective.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498E7586F70ECCFA602F6B03 /* Prompts+Reflective.swift */; };
+		E473E6FD8FFFD9B1D6D51332 /* FernTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = D383A32ED71D29BD1C19B13C /* FernTabBar.swift */; };
 		E5B87471D24573544FF784FD /* PromptNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED830E78A8ED4F64E15ECC2C /* PromptNotifier.swift */; };
 		EFB45A7993691F8811C3B8D5 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DC35D8BD947984A93C106B /* TodayView.swift */; };
 		F00296BCD3F84428E90C9F8D /* Prompts+Reflective.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498E7586F70ECCFA602F6B03 /* Prompts+Reflective.swift */; };
@@ -160,6 +161,7 @@
 		C9AD8AFAC01175AC14737031 /* Prompts+Nature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Nature.swift"; sourceTree = "<group>"; };
 		CBC7E99A123649E4FFAC4ECD /* LocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationProvider.swift; sourceTree = "<group>"; };
 		D35FC6DC207A6791C7446EE4 /* OnThisDay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnThisDay.swift; sourceTree = "<group>"; };
+		D383A32ED71D29BD1C19B13C /* FernTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FernTabBar.swift; sourceTree = "<group>"; };
 		D3A20EA5F23C21B6ACF018CE /* Prompts+Extras.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Extras.swift"; sourceTree = "<group>"; };
 		D5E1846726DBE1B8EB6ADCED /* BarnsleyFernView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFernView.swift; sourceTree = "<group>"; };
 		D7A67E4C33A31B4DDC79FE4E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -307,6 +309,7 @@
 				6E26486E72AA73E121EBA526 /* ActivityView.swift */,
 				B628B8479289E7CC246E5C5B /* EntryEditorView.swift */,
 				33B710B62EE4D952BA7B3585 /* EntryRow.swift */,
+				D383A32ED71D29BD1C19B13C /* FernTabBar.swift */,
 				55662AF595DC7900135BE0CA /* LibraryView.swift */,
 				69C9FD6E8B7EA7C53554913F /* LockGate.swift */,
 				280EC49A5562C111FA2CD94C /* PaperCard.swift */,
@@ -523,6 +526,7 @@
 				80AC7B1ED6DFFBCDA716827D /* EntryRow.swift in Sources */,
 				37DBA60E213431CDD95E2D8F /* Enums.swift in Sources */,
 				4B409622B1DBAB1DB8FA90C9 /* FernApp.swift in Sources */,
+				E473E6FD8FFFD9B1D6D51332 /* FernTabBar.swift in Sources */,
 				3D0FB454E38EAC3E80B50E90 /* FiddleheadShape.swift in Sources */,
 				7247B5144A9C2346788FEE39 /* LibraryExporter.swift in Sources */,
 				7BCAFCB50A4D4363CC753425 /* LibraryView.swift in Sources */,

@@ -11,10 +11,6 @@ struct EntryRow: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 6) {
                 Text(dateLabel).sectionLabel()
-                if entry.collection == .piece {
-                    Text("· \(entry.collection.title.lowercased())")
-                        .font(.label).foregroundStyle(Paper.inkFaint)
-                }
                 if entry.isPinned {
                     Image(systemName: "star.fill")
                         .font(.system(size: 9)).foregroundStyle(Paper.accent)

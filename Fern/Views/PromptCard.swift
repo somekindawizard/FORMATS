@@ -60,8 +60,13 @@ struct PromptCard: View {
                 Spacer()
             }
 
-            Button(kind == .journal ? "Begin writing" : "Begin a piece") { onBegin() }
-                .buttonStyle(InkButtonStyle())
+            if kind == .journal {
+                Button("Begin writing") { onBegin() }
+                    .buttonStyle(InkButtonStyle())
+            } else {
+                Button("Begin a piece") { onBegin() }
+                    .buttonStyle(OutlineButtonStyle())
+            }
         }
         .card()
     }
