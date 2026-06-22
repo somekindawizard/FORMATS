@@ -3,9 +3,13 @@ import SwiftUI
 struct LockGate<Content: View>: View {
     @Environment(BiometricLock.self) private var lock
     @Environment(\.scenePhase) private var scenePhase
-    @State private var unfurl: Double = 0
     @State private var veilOpacity: Double = 1
+    @State private var pulse = false
+    @State private var shakeX: CGFloat = 0
     let content: () -> Content
+
+    // The lock fern — deterministic, same seed as the icon/empty state.
+    private let fern = BarnsleyFern(seed: 4_211, count: 16_000)
 
     var body: some View {
         ZStack {
@@ -17,15 +21,11 @@ struct LockGate<Content: View>: View {
                     .transition(.opacity)
             }
         }
-        .onAppear { Task { await tryUnlock() } }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .background { lock.relock() }
-            if phase == .active && lock.isEnabled && !lock.isUnlocked {
-                Task { await tryUnlock() }
-            }
+            if phase == .background { relock() }
         }
         .onChange(of: lock.isEnabled) { _, enabled in
-            // Toggling off in Settings should also drop the gate immediately.
+            // Toggling off in Settings drops the gate immediately.
             if !enabled { lock.isUnlocked = true; veilOpacity = 0 }
         }
     }
@@ -33,30 +33,53 @@ struct LockGate<Content: View>: View {
     private var veil: some View {
         ZStack {
             PaperBackground()
-            VStack(spacing: 18) {
-                FiddleheadShape(unfurl: unfurl)
-                    .stroke(Paper.accent,
-                            style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
-                    .frame(width: 180, height: 240)
-                Text("Fern")
-                    .font(.masthead)
-                    .foregroundStyle(Paper.ink)
-                Button("Unlock") { Task { await tryUnlock() } }
-                    .buttonStyle(QuietButtonStyle())
+            VStack(spacing: 22) {
+                BarnsleyFernView(fern: fern)
+                    .frame(width: 200, height: 280)
+                    .scaleEffect(pulse ? 1.05 : 1.0)
+                    .offset(x: shakeX)
+                    .contentShape(Rectangle())
+                    .onTapGesture { Task { await reactAndUnlock() } }
+
+                VStack(spacing: 4) {
+                    Text("Fern")
+                        .font(.masthead)
+                        .foregroundStyle(Paper.ink)
+                    Text("Tap the fern to unlock")
+                        .font(.calloutSerif)
+                        .foregroundStyle(Paper.inkSoft)
+                }
             }
         }
     }
 
-    private func tryUnlock() async {
+    private func relock() {
+        guard lock.isEnabled else { return }
+        lock.isUnlocked = false
+        veilOpacity = 1
+        pulse = false
+        shakeX = 0
+    }
+
+    private func reactAndUnlock() async {
+        // The fern blooms slightly as the system prompt comes up.
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.55)) { pulse = true }
+
         let ok = await lock.authenticate()
-        guard ok else { return }
-        // Unfurl + dissolve sequence.
-        withAnimation(.spring(response: 0.95, dampingFraction: 0.78)) {
-            unfurl = 1
+
+        if ok {
+            // Hold the bloom, then dissolve the veil to reveal the library.
+            withAnimation(.easeOut(duration: 0.5)) { veilOpacity = 0 }
+        } else {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { pulse = false }
+            await shake()
         }
-        try? await Task.sleep(nanoseconds: 600_000_000)
-        withAnimation(.easeInOut(duration: 0.45)) {
-            veilOpacity = 0
+    }
+
+    private func shake() async {
+        for dx in [CGFloat(-10), 10, -6, 6, 0] {
+            withAnimation(.linear(duration: 0.05)) { shakeX = dx }
+            try? await Task.sleep(nanoseconds: 50_000_000)
         }
     }
 }
