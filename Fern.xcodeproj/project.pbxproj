@@ -22,6 +22,7 @@
 		80AC7B1ED6DFFBCDA716827D /* EntryRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33B710B62EE4D952BA7B3585 /* EntryRow.swift */; };
 		9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28695B781553568A042DBF4C /* DateGrouping.swift */; };
 		9B31CC201C20F047C9C7BEA4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEABECED98FEE4A7B0EF304 /* RootView.swift */; };
+		AAC0A0E5917AA096F46B77A2 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 229223438BC567429C3E5B74 /* Markdown */; };
 		B644B497FD07EFA1C899E95D /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287563240408442B1C299030 /* ModelTests.swift */; };
 		D5B3AC7B5AB7666C2BAEC1DE /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08E10046E72A3938832A9FAD /* Persistence.swift */; };
 		EFB45A7993691F8811C3B8D5 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DC35D8BD947984A93C106B /* TodayView.swift */; };
@@ -63,6 +64,17 @@
 		E55DCA828B94ADC5E1841447 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
 		E955C6672E8D66A488569630 /* SmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		0539D7349EC76DB7F4AADAAD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AAC0A0E5917AA096F46B77A2 /* Markdown in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		50B77B92874C83A911247AB7 /* Fern */ = {
@@ -157,6 +169,7 @@
 			buildConfigurationList = 54266CBDF5D736B14FB789CB /* Build configuration list for PBXNativeTarget "Fern" */;
 			buildPhases = (
 				B96F7B98DE952009051E3D6C /* Sources */,
+				0539D7349EC76DB7F4AADAAD /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -164,6 +177,7 @@
 			);
 			name = Fern;
 			packageProductDependencies = (
+				229223438BC567429C3E5B74 /* Markdown */,
 			);
 			productName = Fern;
 			productReference = 6874D40188440206C80B5EE5 /* Fern.app */;
@@ -211,6 +225,9 @@
 			);
 			mainGroup = FCC22838342F85043D78ACE0;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9EE1E04C3247D984DB2CD772 /* XCRemoteSwiftPackageReference "swift-markdown" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 8FBCC46B833172F9188C56B8 /* Products */;
 			projectDirPath = "";
@@ -496,6 +513,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9EE1E04C3247D984DB2CD772 /* XCRemoteSwiftPackageReference "swift-markdown" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/swiftlang/swift-markdown";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.5.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		229223438BC567429C3E5B74 /* Markdown */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9EE1E04C3247D984DB2CD772 /* XCRemoteSwiftPackageReference "swift-markdown" */;
+			productName = Markdown;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0CC250F26887AA7D0AF2DFF2 /* Project object */;
 }
