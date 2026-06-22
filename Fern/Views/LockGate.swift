@@ -36,8 +36,9 @@ struct LockGate<Content: View>: View {
             PaperBackground()
             VStack(spacing: 22) {
                 BarnsleyFernView(fern: fern, sway: true)
-                    .frame(width: 200, height: 280)
-                    .scaleEffect(pulse ? 1.05 : 1.0)
+                    .frame(maxWidth: 360)
+                    .frame(height: 460)
+                    .scaleEffect(pulse ? 1.04 : 1.0)
                     .offset(x: shakeX)
                     .contentShape(Rectangle())
                     .onTapGesture { Task { await reactAndUnlock() } }
