@@ -1,10 +1,12 @@
 import SwiftUI
 import SwiftData
+import PhotosUI
 
 struct EntryEditorView: View {
     @Bindable var entry: Entry
     @Environment(\.modelContext) private var context
     @FocusState private var bodyFocused: Bool
+    @State private var locator = LocationProvider()
 
     var body: some View {
         ZStack {
@@ -15,7 +17,9 @@ struct EntryEditorView: View {
                     .foregroundStyle(Paper.ink)
                     .padding(.top, 8)
 
-                ChipRow(entry: entry)
+                MetadataRow(entry: entry, locator: locator)
+
+                PhotoStrip(entry: entry)
 
                 TagsEditor(entry: entry)
                     .padding(.bottom, 4)
@@ -33,7 +37,10 @@ struct EntryEditorView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                ShareLink(item: MarkdownExporter.markdown(for: entry)) {
+                    Image(systemName: "square.and.arrow.up").foregroundStyle(Paper.accent)
+                }
                 Button {
                     entry.isPinned.toggle()
                 } label: {
@@ -44,26 +51,61 @@ struct EntryEditorView: View {
         }
         .onChange(of: entry.title) { _, _ in entry.updatedAt = .now }
         .onChange(of: entry.body)  { _, _ in entry.updatedAt = .now }
-        .onDisappear {
-            try? context.save()
-        }
+        .onDisappear { try? context.save() }
         .onAppear { bodyFocused = true }
     }
 }
 
-/// The date · mood · place strip beneath the title. Mood/place pickers
-/// arrive in Plan 4 — for now they render as read-only chips when set.
-private struct ChipRow: View {
-    let entry: Entry
+// MARK: - Metadata row (date · mood · place)
+
+private struct MetadataRow: View {
+    @Bindable var entry: Entry
+    let locator: LocationProvider
+    @State private var locating = false
+
     var body: some View {
-        HStack(spacing: 6) {
-            chip(entry.createdAt.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day()))
-            if let mood = entry.mood {
-                chip("● \(mood.label.lowercased())", accent: true)
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                chip(entry.createdAt.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day()))
+
+                Menu {
+                    Button("No mood") { entry.mood = nil }
+                    ForEach(Mood.allCases) { mood in
+                        Button { entry.mood = mood } label: {
+                            Label(mood.label, systemImage: mood.symbol)
+                        }
+                    }
+                } label: {
+                    if let mood = entry.mood {
+                        chip("● \(mood.label.lowercased())", accent: true)
+                    } else {
+                        chip("mood")
+                    }
+                }
+
+                if let place = entry.placeName {
+                    Button {
+                        entry.placeName = nil; entry.latitude = nil; entry.longitude = nil
+                    } label: { chip(place) }
+                    .buttonStyle(.plain)
+                } else {
+                    Button { Task { await addPlace() } } label: {
+                        chip(locating ? "finding…" : "add place")
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(locating)
+                }
             }
-            if let place = entry.placeName {
-                chip(place)
-            }
+        }
+    }
+
+    private func addPlace() async {
+        locating = true
+        defer { locating = false }
+        if let place = await locator.currentPlace() {
+            entry.placeName = place.name
+            entry.latitude = place.latitude
+            entry.longitude = place.longitude
         }
     }
 
@@ -78,6 +120,63 @@ private struct ChipRow: View {
             )
     }
 }
+
+// MARK: - Photos
+
+private struct PhotoStrip: View {
+    @Bindable var entry: Entry
+    @State private var picks: [PhotosPickerItem] = []
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(entry.photoFileNames, id: \.self) { name in
+                    if let image = PhotoStore.load(name) {
+                        Image(uiImage: image)
+                            .resizable().scaledToFill()
+                            .frame(width: 76, height: 76)
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .overlay(alignment: .topTrailing) {
+                                Button { remove(name) } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundStyle(.white, Paper.ink.opacity(0.5))
+                                        .padding(3)
+                                }
+                            }
+                    }
+                }
+                PhotosPicker(selection: $picks, maxSelectionCount: 4, matching: .images) {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(Paper.line, lineWidth: 1)
+                        .frame(width: 76, height: 76)
+                        .overlay(Image(systemName: "plus").foregroundStyle(Paper.inkFaint))
+                }
+            }
+            .padding(.vertical, 2)
+        }
+        .frame(height: entry.photoFileNames.isEmpty ? 84 : 84)
+        .onChange(of: picks) { _, items in
+            Task { await load(items) }
+        }
+    }
+
+    private func load(_ items: [PhotosPickerItem]) async {
+        for item in items {
+            if let data = try? await item.loadTransferable(type: Data.self),
+               let name = PhotoStore.save(data) {
+                entry.photoFileNames.append(name)
+            }
+        }
+        picks = []
+    }
+
+    private func remove(_ name: String) {
+        entry.photoFileNames.removeAll { $0 == name }
+        PhotoStore.delete(name)
+    }
+}
+
+// MARK: - Tags
 
 /// Add/remove tags. Tags are normalized (lowercased, no '#', no spaces) and
 /// stored on `entry.tagNames`.
