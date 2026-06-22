@@ -10,6 +10,7 @@
 		0D0DE355B9F5C242382E500E /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E955C6672E8D66A488569630 /* SmokeTests.swift */; };
 		12F6E70FBF359B44046B6B35 /* EntryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B628B8479289E7CC246E5C5B /* EntryEditorView.swift */; };
 		37DBA60E213431CDD95E2D8F /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ABB577E515BBF1EC0238B8 /* Enums.swift */; };
+		400A3569506D5FCD81502BBF /* BarnsleyFernView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5E1846726DBE1B8EB6ADCED /* BarnsleyFernView.swift */; };
 		418021820E5FEC3DDBC92F84 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38E46173966308F74B1857F /* SampleData.swift */; };
 		46D0ADB747D5436625E20C0C /* AccessoryBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE4457DFF57CF5D04E853B5 /* AccessoryBar.swift */; };
 		4B409622B1DBAB1DB8FA90C9 /* FernApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C576F242B37F60F2186C68E4 /* FernApp.swift */; };
@@ -73,6 +74,7 @@
 		B7ABB577E515BBF1EC0238B8 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		C494A1677F911B9B1C8BE8D4 /* Attachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Attachment.swift; sourceTree = "<group>"; };
 		C576F242B37F60F2186C68E4 /* FernApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FernApp.swift; sourceTree = "<group>"; };
+		D5E1846726DBE1B8EB6ADCED /* BarnsleyFernView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFernView.swift; sourceTree = "<group>"; };
 		E4414F13CC04DFCD17197E71 /* Palette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Palette.swift; sourceTree = "<group>"; };
 		E45CA19533DB05C24AC2162D /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		E55DCA828B94ADC5E1841447 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
@@ -177,6 +179,7 @@
 			isa = PBXGroup;
 			children = (
 				577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */,
+				D5E1846726DBE1B8EB6ADCED /* BarnsleyFernView.swift */,
 			);
 			path = Botanical;
 			sourceTree = "<group>";
@@ -299,6 +302,7 @@
 				46D0ADB747D5436625E20C0C /* AccessoryBar.swift in Sources */,
 				5B1D12E2B984FB7D230C81B8 /* Attachment.swift in Sources */,
 				D1F83BB5944806CC63145AAB /* BarnsleyFern.swift in Sources */,
+				400A3569506D5FCD81502BBF /* BarnsleyFernView.swift in Sources */,
 				62166C608582EFCE76A75612 /* Components.swift in Sources */,
 				9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */,
 				F349ECAB7A224AE4DBB6C3C5 /* Entry.swift in Sources */,
