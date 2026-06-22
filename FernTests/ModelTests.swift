@@ -5,10 +5,15 @@ import SwiftData
 @MainActor
 final class ModelTests: XCTestCase {
 
+    /// SwiftData's `isStoredInMemoryOnly: true` config has had stability
+    /// issues that trap on first insert. Use a unique on-disk store per test
+    /// instead — same isolation guarantee, no flakiness.
     func makeContext() throws -> ModelContext {
+        let url = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("fern-test-\(UUID().uuidString).store")
         let container = try ModelContainer(
             for: Entry.self, Tag.self, Attachment.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            configurations: ModelConfiguration(url: url)
         )
         return container.mainContext
     }
