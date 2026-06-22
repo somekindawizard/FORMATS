@@ -22,23 +22,25 @@ enum Destination: String, CaseIterable, Identifiable {
 
 struct RootView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
-    @State private var selection: Destination = .today
+    // Sidebar selection on iOS requires an optional binding; default to Today.
+    @State private var sidebarSelection: Destination? = .today
+    @State private var tabSelection: Destination = .today
 
     var body: some View {
         if sizeClass == .regular {
             NavigationSplitView {
-                List(selection: $selection) {
+                List(selection: $sidebarSelection) {
                     ForEach(Destination.allCases) { dest in
                         Label(dest.title, systemImage: dest.symbol).tag(dest)
                     }
                 }
                 .navigationTitle("Fern")
             } detail: {
-                NavigationStack { selection.view }
+                NavigationStack { (sidebarSelection ?? .today).view }
             }
             .tint(Paper.accent)
         } else {
-            TabView(selection: $selection) {
+            TabView(selection: $tabSelection) {
                 ForEach(Destination.allCases) { dest in
                     NavigationStack { dest.view }
                         .tabItem { Label(dest.title, systemImage: dest.symbol) }
