@@ -16,9 +16,11 @@
 		62166C608582EFCE76A75612 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD6943B8927D7DB6D40C3730 /* Components.swift */; };
 		746E38C71A4F2CEF9BEBB03D /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4414F13CC04DFCD17197E71 /* Palette.swift */; };
 		77B294B9149D84DBAF60E3AA /* PaperBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F27301B01F7D4292CF16FE /* PaperBackground.swift */; };
+		9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28695B781553568A042DBF4C /* DateGrouping.swift */; };
 		B644B497FD07EFA1C899E95D /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287563240408442B1C299030 /* ModelTests.swift */; };
 		D5B3AC7B5AB7666C2BAEC1DE /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08E10046E72A3938832A9FAD /* Persistence.swift */; };
 		F349ECAB7A224AE4DBB6C3C5 /* Entry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7151C81AE2B364DEA4C780 /* Entry.swift */; };
+		FAE502D993F02FEDCA8EA712 /* DateGroupingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400F7BE208A962AA4679EC06 /* DateGroupingTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,7 +36,9 @@
 /* Begin PBXFileReference section */
 		05F27301B01F7D4292CF16FE /* PaperBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperBackground.swift; sourceTree = "<group>"; };
 		08E10046E72A3938832A9FAD /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		28695B781553568A042DBF4C /* DateGrouping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateGrouping.swift; sourceTree = "<group>"; };
 		287563240408442B1C299030 /* ModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTests.swift; sourceTree = "<group>"; };
+		400F7BE208A962AA4679EC06 /* DateGroupingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateGroupingTests.swift; sourceTree = "<group>"; };
 		49BCF6E4EFF1274EEAC43A8B /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		6874D40188440206C80B5EE5 /* Fern.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fern.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A7151C81AE2B364DEA4C780 /* Entry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entry.swift; sourceTree = "<group>"; };
@@ -55,6 +59,7 @@
 				C576F242B37F60F2186C68E4 /* FernApp.swift */,
 				08E10046E72A3938832A9FAD /* Persistence.swift */,
 				CDF57EE06DD3F000AE26E7F4 /* Models */,
+				8B9907BC5B64DFAFC4DB41A9 /* Support */,
 				D52DB763515C2DBBEA2436F4 /* Theme */,
 			);
 			path = Fern;
@@ -63,10 +68,19 @@
 		6EF64AE7D61775BF962D3E5E /* FernTests */ = {
 			isa = PBXGroup;
 			children = (
+				400F7BE208A962AA4679EC06 /* DateGroupingTests.swift */,
 				287563240408442B1C299030 /* ModelTests.swift */,
 				E955C6672E8D66A488569630 /* SmokeTests.swift */,
 			);
 			path = FernTests;
+			sourceTree = "<group>";
+		};
+		8B9907BC5B64DFAFC4DB41A9 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				28695B781553568A042DBF4C /* DateGrouping.swift */,
+			);
+			path = Support;
 			sourceTree = "<group>";
 		};
 		8FBCC46B833172F9188C56B8 /* Products */ = {
@@ -187,6 +201,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAE502D993F02FEDCA8EA712 /* DateGroupingTests.swift in Sources */,
 				B644B497FD07EFA1C899E95D /* ModelTests.swift in Sources */,
 				0D0DE355B9F5C242382E500E /* SmokeTests.swift in Sources */,
 			);
@@ -198,6 +213,7 @@
 			files = (
 				5B1D12E2B984FB7D230C81B8 /* Attachment.swift in Sources */,
 				62166C608582EFCE76A75612 /* Components.swift in Sources */,
+				9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */,
 				F349ECAB7A224AE4DBB6C3C5 /* Entry.swift in Sources */,
 				37DBA60E213431CDD95E2D8F /* Enums.swift in Sources */,
 				4B409622B1DBAB1DB8FA90C9 /* FernApp.swift in Sources */,
