@@ -1,11 +1,10 @@
 import SwiftUI
 
-/// The thin accessory above the keyboard. Tapping a glyph inserts the
-/// corresponding Markdown at the end of the text; word count auto-updates.
-/// (Caret-aware insertion is a small follow-up — for v1, appending at end
-/// is the right default for forward typing.)
+/// The thin accessory above the keyboard. Each glyph applies Markdown to the
+/// current selection / caret via the editor controller; word count tracks text.
 struct AccessoryBar: View {
-    @Binding var text: String
+    let controller: MarkdownEditorController
+    let text: String
 
     private var wordCount: Int {
         text.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count
@@ -13,11 +12,11 @@ struct AccessoryBar: View {
 
     var body: some View {
         HStack(spacing: 22) {
-            glyph("B", weight: .bold)  { wrap("**") }
-            glyph("I", italic: true)    { wrap("*") }
-            glyph("“ ”")                { wrap("“", "”") }
-            glyph("#")                  { lineStart("# ") }
-            glyph("—")                  { insert("—") }
+            glyph("B", weight: .bold)  { controller.wrap("**") }
+            glyph("I", italic: true)    { controller.wrap("*") }
+            glyph("\u{201C} \u{201D}")  { controller.wrapPair("\u{201C}", "\u{201D}") }
+            glyph("#")                  { controller.prefixLine("# ") }
+            glyph("\u{2014}")           { controller.insert("\u{2014}") }
             Spacer()
             Text("\(wordCount) words")
                 .font(.system(size: 12, design: .monospaced))
@@ -30,8 +29,6 @@ struct AccessoryBar: View {
                 .overlay(Rectangle().frame(height: 1).foregroundStyle(Paper.line), alignment: .top)
         )
     }
-
-    // MARK: – Buttons
 
     @ViewBuilder
     private func glyph(_ s: String,
@@ -46,18 +43,5 @@ struct AccessoryBar: View {
                 .frame(minWidth: 24)
         }
         .buttonStyle(.plain)
-    }
-
-    // MARK: – Edits
-
-    private func insert(_ s: String) { text.append(s) }
-
-    private func wrap(_ open: String, _ close: String? = nil) {
-        text.append("\(open)…\(close ?? open)")
-    }
-
-    private func lineStart(_ s: String) {
-        if !text.hasSuffix("\n") && !text.isEmpty { text.append("\n") }
-        text.append(s)
     }
 }

@@ -10,6 +10,7 @@ struct EntryEditorView: View {
     @FocusState private var bodyFocused: Bool
     @State private var locator = LocationProvider()
     @State private var noteUnlocked = false
+    @State private var controller = MarkdownEditorController()
 
     var body: some View {
         ZStack {
@@ -41,14 +42,14 @@ struct EntryEditorView: View {
                 TagsEditor(entry: entry)
                     .padding(.bottom, 4)
 
-                MarkdownTextView(text: $entry.body)
+                MarkdownTextView(text: $entry.body, controller: controller)
                     .focused($bodyFocused)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .padding(.horizontal, 22)
             .safeAreaInset(edge: .bottom) {
                 if bodyFocused {
-                    AccessoryBar(text: $entry.body)
+                    AccessoryBar(controller: controller, text: entry.body)
                 }
             }
 
@@ -59,6 +60,11 @@ struct EntryEditorView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
+                NavigationLink {
+                    ReadingView(entry: entry)
+                } label: {
+                    Image(systemName: "book").foregroundStyle(Paper.accent)
+                }
                 ShareLink(item: MarkdownExporter.markdown(for: entry)) {
                     Image(systemName: "square.and.arrow.up").foregroundStyle(Paper.accent)
                 }

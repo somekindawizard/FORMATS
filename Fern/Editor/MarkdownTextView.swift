@@ -10,10 +10,12 @@ import UIKit
 /// exact characters are untouched.
 struct MarkdownTextView: UIViewRepresentable {
     @Binding var text: String
+    var controller: MarkdownEditorController? = nil
 
     func makeUIView(context: Context) -> UITextView {
         let tv = UITextView(usingTextLayoutManager: true) // TextKit 2
         tv.delegate = context.coordinator
+        controller?.textView = tv
         tv.backgroundColor = .clear
         tv.textContainerInset = UIEdgeInsets(top: 8, left: 4, bottom: 80, right: 4)
         tv.textContainer.lineFragmentPadding = 0

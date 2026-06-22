@@ -19,6 +19,8 @@
 		400A3569506D5FCD81502BBF /* BarnsleyFernView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5E1846726DBE1B8EB6ADCED /* BarnsleyFernView.swift */; };
 		418021820E5FEC3DDBC92F84 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38E46173966308F74B1857F /* SampleData.swift */; };
 		4438065D4292698772195EA0 /* Prompts+Genshin.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DB7D4229AB470CADFC0E24 /* Prompts+Genshin.swift */; };
+		452D8CE9EE66ECD1B34EC64A /* ReadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68B6BA6BD6603F605BF65B63 /* ReadingView.swift */; };
+		4622A209A674C3218FD029E6 /* MarkdownEditorController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB1ED64338FFF646CDCEB947 /* MarkdownEditorController.swift */; };
 		46D0ADB747D5436625E20C0C /* AccessoryBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE4457DFF57CF5D04E853B5 /* AccessoryBar.swift */; };
 		4B409622B1DBAB1DB8FA90C9 /* FernApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C576F242B37F60F2186C68E4 /* FernApp.swift */; };
 		51010732818FD074595FF242 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49BCF6E4EFF1274EEAC43A8B /* Typography.swift */; };
@@ -92,6 +94,7 @@
 		55662AF595DC7900135BE0CA /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFern.swift; sourceTree = "<group>"; };
 		6874D40188440206C80B5EE5 /* Fern.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fern.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		68B6BA6BD6603F605BF65B63 /* ReadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingView.swift; sourceTree = "<group>"; };
 		69C9FD6E8B7EA7C53554913F /* LockGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockGate.swift; sourceTree = "<group>"; };
 		6A87F893FEEDD086C788AEED /* Prompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prompt.swift; sourceTree = "<group>"; };
 		6E6101F538120C732D4B8695 /* MarkdownStylerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownStylerTests.swift; sourceTree = "<group>"; };
@@ -122,6 +125,7 @@
 		E7826A6B5EB47145BAAF378E /* MarkdownStyler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownStyler.swift; sourceTree = "<group>"; };
 		E955C6672E8D66A488569630 /* SmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
 		EA4BBB39E7CE32F7D86E79DC /* BiometricLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricLock.swift; sourceTree = "<group>"; };
+		EB1ED64338FFF646CDCEB947 /* MarkdownEditorController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownEditorController.swift; sourceTree = "<group>"; };
 		EC5A0D4651E2BDC4D80A6AC9 /* MarkdownTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownTheme.swift; sourceTree = "<group>"; };
 		ED830E78A8ED4F64E15ECC2C /* PromptNotifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptNotifier.swift; sourceTree = "<group>"; };
 		EE08F5EFD57674CB778E0A8B /* PromptLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptLibrary.swift; sourceTree = "<group>"; };
@@ -144,6 +148,7 @@
 			isa = PBXGroup;
 			children = (
 				3BE4457DFF57CF5D04E853B5 /* AccessoryBar.swift */,
+				EB1ED64338FFF646CDCEB947 /* MarkdownEditorController.swift */,
 				E7826A6B5EB47145BAAF378E /* MarkdownStyler.swift */,
 				3D4D39EC866C9EFD80CD9546 /* MarkdownTextView.swift */,
 				EC5A0D4651E2BDC4D80A6AC9 /* MarkdownTheme.swift */,
@@ -246,6 +251,7 @@
 				55662AF595DC7900135BE0CA /* LibraryView.swift */,
 				69C9FD6E8B7EA7C53554913F /* LockGate.swift */,
 				3EB2BB1BE40E5C8BA4A77780 /* PromptCard.swift */,
+				68B6BA6BD6603F605BF65B63 /* ReadingView.swift */,
 				1EEABECED98FEE4A7B0EF304 /* RootView.swift */,
 				74089F72177AC086B585AD67 /* SavedPromptsView.swift */,
 				E45CA19533DB05C24AC2162D /* SearchView.swift */,
@@ -419,6 +425,7 @@
 				7BCAFCB50A4D4363CC753425 /* LibraryView.swift in Sources */,
 				F644D9FD13C1AF7313F2738B /* LocationProvider.swift in Sources */,
 				CFA3B0A3A46563E0D74D4ECB /* LockGate.swift in Sources */,
+				4622A209A674C3218FD029E6 /* MarkdownEditorController.swift in Sources */,
 				1A6A86D78DFB6879B49C1D36 /* MarkdownExporter.swift in Sources */,
 				D3988507F66A8D5E8CF88039 /* MarkdownStyler.swift in Sources */,
 				CEE905C9E387AE4BFEC37187 /* MarkdownTextView.swift in Sources */,
@@ -438,6 +445,7 @@
 				F81930CCA38BB2AB13EC20F9 /* Prompts+Nature.swift in Sources */,
 				7A68060523CD303E82379DC9 /* Prompts+Nier.swift in Sources */,
 				E46E487B2EB249A714915481 /* Prompts+Reflective.swift in Sources */,
+				452D8CE9EE66ECD1B34EC64A /* ReadingView.swift in Sources */,
 				9B31CC201C20F047C9C7BEA4 /* RootView.swift in Sources */,
 				418021820E5FEC3DDBC92F84 /* SampleData.swift in Sources */,
 				F949628E768A92B2247D0559 /* SavedPromptsView.swift in Sources */,
