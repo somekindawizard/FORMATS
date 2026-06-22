@@ -18,6 +18,20 @@ struct EntryEditorView: View {
                     .foregroundStyle(Paper.ink)
                     .padding(.top, 8)
 
+                if let prompt = entry.prompt, !prompt.isEmpty {
+                    HStack(alignment: .top, spacing: 8) {
+                        Text(prompt)
+                            .font(.calloutSerif).italic()
+                            .foregroundStyle(Paper.inkFaint)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 0)
+                        Button { entry.prompt = nil } label: {
+                            Image(systemName: "xmark").font(.system(size: 10))
+                                .foregroundStyle(Paper.inkFaint)
+                        }
+                    }
+                }
+
                 MetadataRow(entry: entry, locator: locator)
 
                 PhotoStrip(entry: entry)

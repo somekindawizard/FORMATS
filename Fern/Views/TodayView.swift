@@ -91,6 +91,7 @@ struct TodayView: View {
 
     private func beginWriting() {
         let entry = Entry(title: "", body: "", collection: .journal)
+        entry.prompt = prompt
         context.insert(entry)
         draft = entry
     }

@@ -27,6 +27,9 @@ final class Entry {
     /// Optional weather captured alongside place (SF Symbol name + °C).
     var weatherSymbol: String?
     var weatherTempC: Double?
+    /// The prompt this entry was started from, if any — shown as a quiet
+    /// reminder in the editor.
+    var prompt: String?
     var isPinned: Bool
     /// Tags as a value array (not a relationship) — robust on iOS 26 SwiftData.
     /// Inline default so existing stores migrate cleanly when this is added.

@@ -33,6 +33,10 @@ targets:
       path: Fern/Fern.entitlements
       properties:
         com.apple.developer.weatherkit: true
+        # com.apple.developer.journal.allow: enable the "Journaling Suggestions"
+        # capability in Xcode (Signing & Capabilities) first — it does not
+        # auto-provision via -allowProvisioningUpdates. Then uncomment + re-add
+        # the SuggestionsButton in TodayView.
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: garden.fern.Fern
