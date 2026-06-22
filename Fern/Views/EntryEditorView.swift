@@ -7,10 +7,17 @@ import CoreLocation
 struct EntryEditorView: View {
     @Bindable var entry: Entry
     @Environment(\.modelContext) private var context
+    @Query private var allEntries: [Entry]
     @FocusState private var bodyFocused: Bool
     @State private var locator = LocationProvider()
     @State private var noteUnlocked = false
     @State private var controller = MarkdownEditorController()
+    @State private var showingNewNotebook = false
+    @State private var newNotebookName = ""
+
+    private var notebooks: [String] {
+        Array(Set(allEntries.compactMap(\.notebook))).sorted()
+    }
 
     var body: some View {
         ZStack {
@@ -60,6 +67,27 @@ struct EntryEditorView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
+                Menu {
+                    Menu("Notebook") {
+                        Button("None") { entry.notebook = nil }
+                        ForEach(notebooks, id: \.self) { nb in
+                            Button { entry.notebook = nb } label: {
+                                if entry.notebook == nb { Label(nb, systemImage: "checkmark") }
+                                else { Text(nb) }
+                            }
+                        }
+                        Divider()
+                        Button("New notebook…") { showingNewNotebook = true }
+                    }
+                    Button {
+                        entry.isFinished.toggle()
+                    } label: {
+                        Label(entry.isFinished ? "Mark as draft" : "Mark as finished",
+                              systemImage: entry.isFinished ? "circle" : "checkmark.seal")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle").foregroundStyle(Paper.accent)
+                }
                 NavigationLink {
                     ReadingView(entry: entry)
                 } label: {
@@ -82,6 +110,15 @@ struct EntryEditorView: View {
                         .foregroundStyle(Paper.accent)
                 }
             }
+        }
+        .alert("New notebook", isPresented: $showingNewNotebook) {
+            TextField("Name", text: $newNotebookName)
+            Button("Create") {
+                let name = newNotebookName.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !name.isEmpty { entry.notebook = name }
+                newNotebookName = ""
+            }
+            Button("Cancel", role: .cancel) { newNotebookName = "" }
         }
         .onChange(of: entry.title) { _, _ in entry.updatedAt = .now }
         .onChange(of: entry.body)  { _, _ in entry.updatedAt = .now }
@@ -172,6 +209,14 @@ private struct MetadataRow: View {
 
                 if let symbol = entry.weatherSymbol, let temp = entry.weatherTempC {
                     Label("\(Int(temp.rounded()))°", systemImage: symbol)
+                        .font(.calloutSerif)
+                        .foregroundStyle(Paper.inkSoft)
+                        .padding(.vertical, 5).padding(.horizontal, 10)
+                        .background(Capsule().stroke(Paper.line, lineWidth: 1)
+                            .background(Capsule().fill(Paper.raised)))
+                }
+                if let nb = entry.notebook {
+                    Label(nb, systemImage: "books.vertical")
                         .font(.calloutSerif)
                         .foregroundStyle(Paper.inkSoft)
                         .padding(.vertical, 5).padding(.horizontal, 10)

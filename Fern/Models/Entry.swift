@@ -33,6 +33,10 @@ final class Entry {
     var isPinned: Bool
     /// When true, the entry's contents are hidden until Face ID unlocks them.
     var isLocked: Bool = false
+    /// Optional named notebook (a custom collection) this entry belongs to.
+    var notebook: String?
+    /// For creative pieces: draft (false) vs finished (true).
+    var isFinished: Bool = false
     /// Tags as a value array (not a relationship) — robust on iOS 26 SwiftData.
     /// Inline default so existing stores migrate cleanly when this is added.
     var tagNames: [String] = []

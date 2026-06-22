@@ -34,6 +34,12 @@ struct EntryRow: View {
                     }
                     .foregroundStyle(Paper.inkFaint)
                 }
+                if entry.collection == .piece && !entry.isFinished {
+                    Text("· draft").font(.label).foregroundStyle(Paper.inkFaint)
+                }
+                if let nb = entry.notebook {
+                    Text("· \(nb)").font(.label).foregroundStyle(Paper.inkFaint)
+                }
             }
             Text(entry.displayTitle).font(.headlineSerif).foregroundStyle(Paper.ink)
             if entry.isLocked {

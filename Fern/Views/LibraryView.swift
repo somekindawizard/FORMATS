@@ -5,14 +5,22 @@ struct LibraryView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \Entry.createdAt, order: .reverse) private var entries: [Entry]
     @State private var selectedTag: String?
+    @State private var selectedNotebook: String?
+    @State private var draftsOnly = false
 
     private var allTags: [String] {
         Array(Set(entries.flatMap(\.tagNames))).sorted()
     }
+    private var notebooks: [String] {
+        Array(Set(entries.compactMap(\.notebook))).sorted()
+    }
 
     private var filtered: [Entry] {
-        guard let tag = selectedTag else { return entries }
-        return entries.filter { $0.tagNames.contains(tag) }
+        entries.filter { e in
+            (selectedTag == nil || e.tagNames.contains(selectedTag!))
+            && (selectedNotebook == nil || e.notebook == selectedNotebook)
+            && (!draftsOnly || (e.collection == .piece && !e.isFinished))
+        }
     }
 
     private var pinned: [Entry] { filtered.filter(\.isPinned) }
@@ -54,6 +62,29 @@ struct LibraryView: View {
             }
         }
         .navigationTitle("Library")
+        .toolbar {
+            if !notebooks.isEmpty || draftsOnly || selectedNotebook != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button("All notebooks") { selectedNotebook = nil }
+                        ForEach(notebooks, id: \.self) { nb in
+                            Button { selectedNotebook = nb } label: {
+                                if selectedNotebook == nb { Label(nb, systemImage: "checkmark") }
+                                else { Text(nb) }
+                            }
+                        }
+                        Divider()
+                        Button { draftsOnly.toggle() } label: {
+                            if draftsOnly { Label("Drafts only", systemImage: "checkmark") }
+                            else { Text("Drafts only") }
+                        }
+                    } label: {
+                        Image(systemName: "line.3.horizontal.decrease.circle")
+                            .foregroundStyle(Paper.accent)
+                    }
+                }
+            }
+        }
         .navigationDestination(for: Entry.self) { entry in
             EntryEditorView(entry: entry)
         }
