@@ -19,6 +19,10 @@ struct EntryRow: View {
                     Image(systemName: "star.fill")
                         .font(.system(size: 9)).foregroundStyle(Paper.accent)
                 }
+                if entry.isLocked {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 9)).foregroundStyle(Paper.inkFaint)
+                }
                 if let mood = entry.mood {
                     Text("· \(mood.label.lowercased())")
                         .font(.label).foregroundStyle(Paper.accent)
@@ -32,13 +36,17 @@ struct EntryRow: View {
                 }
             }
             Text(entry.displayTitle).font(.headlineSerif).foregroundStyle(Paper.ink)
-            if !entry.body.isEmpty {
-                Text(entry.body).font(.calloutSerif).foregroundStyle(Paper.inkSoft)
-                    .lineLimit(2)
-            }
-            if !entry.tagNames.isEmpty {
-                Text(entry.tagNames.map { "#\($0)" }.joined(separator: "  "))
-                    .font(.label).foregroundStyle(Paper.inkFaint)
+            if entry.isLocked {
+                Text("Locked").font(.calloutSerif).italic().foregroundStyle(Paper.inkFaint)
+            } else {
+                if !entry.body.isEmpty {
+                    Text(entry.body).font(.calloutSerif).foregroundStyle(Paper.inkSoft)
+                        .lineLimit(2)
+                }
+                if !entry.tagNames.isEmpty {
+                    Text(entry.tagNames.map { "#\($0)" }.joined(separator: "  "))
+                        .font(.label).foregroundStyle(Paper.inkFaint)
+                }
             }
         }
         .padding(.vertical, 6)

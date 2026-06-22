@@ -9,6 +9,7 @@ struct EntryEditorView: View {
     @Environment(\.modelContext) private var context
     @FocusState private var bodyFocused: Bool
     @State private var locator = LocationProvider()
+    @State private var noteUnlocked = false
 
     var body: some View {
         ZStack {
@@ -50,12 +51,23 @@ struct EntryEditorView: View {
                     AccessoryBar(text: $entry.body)
                 }
             }
+
+            if entry.isLocked && !noteUnlocked {
+                lockVeil
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 ShareLink(item: MarkdownExporter.markdown(for: entry)) {
                     Image(systemName: "square.and.arrow.up").foregroundStyle(Paper.accent)
+                }
+                Button {
+                    entry.isLocked.toggle()
+                    if entry.isLocked { noteUnlocked = true } // stay open this session
+                } label: {
+                    Image(systemName: entry.isLocked ? "lock.fill" : "lock")
+                        .foregroundStyle(Paper.accent)
                 }
                 Button {
                     entry.isPinned.toggle()
@@ -67,8 +79,47 @@ struct EntryEditorView: View {
         }
         .onChange(of: entry.title) { _, _ in entry.updatedAt = .now }
         .onChange(of: entry.body)  { _, _ in entry.updatedAt = .now }
-        .onDisappear { try? context.save() }
-        .onAppear { bodyFocused = true }
+        .onDisappear {
+            // Discard a note that was started but never written in.
+            if entry.isBlank {
+                context.delete(entry)
+            }
+            try? context.save()
+        }
+        .onAppear {
+            if entry.isLocked && !noteUnlocked {
+                Task { await tryUnlockNote() }
+            } else {
+                bodyFocused = true
+            }
+        }
+    }
+
+    private var lockVeil: some View {
+        ZStack {
+            PaperBackground()
+            VStack(spacing: 16) {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 38))
+                    .foregroundStyle(Paper.accent)
+                Text("This note is locked")
+                    .font(.titleSerif)
+                    .foregroundStyle(Paper.ink)
+                Button("Unlock") { Task { await tryUnlockNote() } }
+                    .buttonStyle(OutlineButtonStyle())
+                    .frame(width: 200)
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { Task { await tryUnlockNote() } }
+    }
+
+    private func tryUnlockNote() async {
+        let ok = await BiometricLock.authenticateOnce(reason: "Unlock this note")
+        if ok {
+            withAnimation(.easeOut(duration: 0.3)) { noteUnlocked = true }
+            bodyFocused = true
+        }
     }
 }
 

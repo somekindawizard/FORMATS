@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct LibraryView: View {
+    @Environment(\.modelContext) private var context
     @Query(sort: \Entry.createdAt, order: .reverse) private var entries: [Entry]
     @State private var selectedTag: String?
 
@@ -25,30 +26,30 @@ struct LibraryView: View {
             if entries.isEmpty {
                 EmptyStateFern()
             } else {
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 0) {
-                        if !allTags.isEmpty { tagBar }
-
+                VStack(spacing: 0) {
+                    if !allTags.isEmpty {
+                        tagBar.padding(.horizontal, 22)
+                    }
+                    List {
                         if !pinned.isEmpty {
-                            Text("Pinned").sectionLabel()
-                                .padding(.top, 18).padding(.bottom, 6)
-                            ForEach(pinned) { entry in
-                                row(entry); Rule()
+                            Section {
+                                ForEach(pinned) { row($0) }
+                            } header: {
+                                Text("Pinned").sectionLabel()
                             }
                         }
-
                         ForEach(sections) { section in
-                            Text(section.day.formatted(.dateTime.weekday(.wide).month(.wide).day()))
-                                .sectionLabel()
-                                .padding(.top, 22).padding(.bottom, 6)
-                            ForEach(section.entries) { entry in
-                                row(entry); Rule()
+                            Section {
+                                ForEach(section.entries) { row($0) }
+                            } header: {
+                                Text(section.day.formatted(.dateTime.weekday(.wide).month(.wide).day()))
+                                    .sectionLabel()
                             }
                         }
                     }
-                    .padding(.horizontal, 22)
-                    .padding(.bottom, 40)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .textCase(nil)
                 }
             }
         }
@@ -60,7 +61,20 @@ struct LibraryView: View {
 
     private func row(_ entry: Entry) -> some View {
         NavigationLink(value: entry) { EntryRow(entry: entry) }
-            .buttonStyle(.plain)
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
+            .listRowInsets(EdgeInsets(top: 2, leading: 22, bottom: 2, trailing: 22))
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                Button(role: .destructive) { delete(entry) } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            }
+    }
+
+    private func delete(_ entry: Entry) {
+        for name in entry.photoFileNames { PhotoStore.delete(name) }
+        context.delete(entry)
+        try? context.save()
     }
 
     private var tagBar: some View {

@@ -44,4 +44,17 @@ final class BiometricLock {
 
     /// Called when the app is backgrounded so re-foregrounding re-locks.
     func relock() { if isEnabled { isUnlocked = false } }
+
+    /// A standalone Face ID / passcode check, independent of the app lock —
+    /// used to unlock an individual locked note. Degrades open if biometrics
+    /// are unavailable.
+    static func authenticateOnce(reason: String) async -> Bool {
+        let ctx = LAContext()
+        var err: NSError?
+        guard ctx.canEvaluatePolicy(.deviceOwnerAuthentication, error: &err) else {
+            return true
+        }
+        return (try? await ctx.evaluatePolicy(.deviceOwnerAuthentication,
+                                              localizedReason: reason)) ?? false
+    }
 }

@@ -31,6 +31,8 @@ final class Entry {
     /// reminder in the editor.
     var prompt: String?
     var isPinned: Bool
+    /// When true, the entry's contents are hidden until Face ID unlocks them.
+    var isLocked: Bool = false
     /// Tags as a value array (not a relationship) — robust on iOS 26 SwiftData.
     /// Inline default so existing stores migrate cleanly when this is added.
     var tagNames: [String] = []
@@ -76,6 +78,15 @@ extension Entry {
     /// Whitespace-separated token count of the body.
     var wordCount: Int {
         body.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count
+    }
+
+    /// True when the entry has no meaningful content — used to discard a
+    /// note that was started ("Begin writing") but never written in.
+    var isBlank: Bool {
+        title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && photoFileNames.isEmpty
+            && tagNames.isEmpty
     }
 
     /// What to show in lists: the title, else the first non-empty line of the
