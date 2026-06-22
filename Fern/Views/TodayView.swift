@@ -31,12 +31,21 @@ struct TodayView: View {
             PaperBackground()
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    Text(Date.now.formatted(.dateTime.weekday(.wide).month(.wide).day()))
-                        .sectionLabel()
-                        .padding(.top, 8)
-                    Text("\(greeting)\nAustin.")
-                        .font(.masthead)
-                        .foregroundStyle(Paper.ink)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(Date.now.formatted(.dateTime.weekday(.wide).month(.wide).day()))
+                            .sectionLabel()
+                        HStack(alignment: .center) {
+                            Text("Today")
+                                .font(.display(42))
+                                .foregroundStyle(Paper.ink)
+                            Spacer()
+                            ComposeButton(action: freeWrite)
+                        }
+                        Text("\(greeting) Austin.")
+                            .font(.titleSerif)
+                            .foregroundStyle(Paper.inkSoft)
+                    }
+                    .padding(.top, 10)
 
                     PromptCard(kind: .journal, theme: $journalTheme, prompt: journalPrompt,
                                onShuffle: { shuffle(.journal) },
@@ -78,15 +87,7 @@ struct TodayView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
-        .navigationTitle("Today")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { freeWrite() } label: {
-                    Image(systemName: "square.and.pencil").foregroundStyle(Paper.accent)
-                }
-                .accessibilityLabel("New free write")
-            }
-        }
+        .toolbar(.hidden, for: .navigationBar)
         .navigationDestination(for: Entry.self) { entry in
             EntryEditorView(entry: entry)
         }
