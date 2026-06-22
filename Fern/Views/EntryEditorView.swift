@@ -130,7 +130,10 @@ struct EntryEditorView: View {
         .onDisappear {
             // Discard a note that was started but never written in.
             if entry.isBlank {
+                SpotlightIndexer.deindex(id: entry.id)
                 context.delete(entry)
+            } else {
+                SpotlightIndexer.index(entry)
             }
             try? context.save()
         }

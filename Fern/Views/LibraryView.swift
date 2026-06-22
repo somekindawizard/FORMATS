@@ -104,6 +104,7 @@ struct LibraryView: View {
 
     private func delete(_ entry: Entry) {
         for name in entry.photoFileNames { PhotoStore.delete(name) }
+        SpotlightIndexer.deindex(id: entry.id)
         context.delete(entry)
         try? context.save()
     }

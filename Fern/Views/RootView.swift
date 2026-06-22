@@ -1,4 +1,6 @@
 import SwiftUI
+import SwiftData
+import CoreSpotlight
 
 enum Destination: String, CaseIterable, Identifiable {
     case today, library, search, settings
@@ -24,10 +26,13 @@ enum Destination: String, CaseIterable, Identifiable {
 
 struct RootView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.modelContext) private var context
+    @Query private var entries: [Entry]
     // Sidebar selection on iOS requires an optional binding; default to Today.
     @State private var sidebarSelection: Destination? = .today
     // Persisted so a theme change (which rebuilds the tree) keeps you on the tab.
     @AppStorage("fern.tab") private var tabSelection: Destination = .today
+    @State private var spotlightEntry: Entry?
 
     var body: some View {
         Group {
@@ -54,6 +59,23 @@ struct RootView: View {
                 .tint(Paper.accent)
             }
         }
-        .task { await PromptNotifier.refresh() }
+        .task {
+            await PromptNotifier.refresh()
+            SpotlightIndexer.reindexAll(entries)
+        }
+        .onContinueUserActivity(CSSearchableItemActionType) { activity in
+            if let id = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String,
+               let uuid = UUID(uuidString: id) {
+                openEntry(uuid)
+            }
+        }
+        .sheet(item: $spotlightEntry) { entry in
+            NavigationStack { EntryEditorView(entry: entry) }
+        }
+    }
+
+    private func openEntry(_ uuid: UUID) {
+        let descriptor = FetchDescriptor<Entry>(predicate: #Predicate { $0.id == uuid })
+        spotlightEntry = try? context.fetch(descriptor).first
     }
 }
