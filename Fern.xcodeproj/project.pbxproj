@@ -15,6 +15,7 @@
 		46D0ADB747D5436625E20C0C /* AccessoryBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE4457DFF57CF5D04E853B5 /* AccessoryBar.swift */; };
 		4B409622B1DBAB1DB8FA90C9 /* FernApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C576F242B37F60F2186C68E4 /* FernApp.swift */; };
 		51010732818FD074595FF242 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49BCF6E4EFF1274EEAC43A8B /* Typography.swift */; };
+		533F6945C4B9BFA4D02EEE09 /* BiometricLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA4BBB39E7CE32F7D86E79DC /* BiometricLock.swift */; };
 		5B1D12E2B984FB7D230C81B8 /* Attachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C494A1677F911B9B1C8BE8D4 /* Attachment.swift */; };
 		60C086345B355A05871432A9 /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55DCA828B94ADC5E1841447 /* Tag.swift */; };
 		62166C608582EFCE76A75612 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD6943B8927D7DB6D40C3730 /* Components.swift */; };
@@ -82,6 +83,7 @@
 		E55DCA828B94ADC5E1841447 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
 		E7826A6B5EB47145BAAF378E /* MarkdownStyler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownStyler.swift; sourceTree = "<group>"; };
 		E955C6672E8D66A488569630 /* SmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
+		EA4BBB39E7CE32F7D86E79DC /* BiometricLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricLock.swift; sourceTree = "<group>"; };
 		EC5A0D4651E2BDC4D80A6AC9 /* MarkdownTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownTheme.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -117,11 +119,20 @@
 				CE35430BC9A01FE8982D34A1 /* Botanical */,
 				15367DA11C3B7DC6E4E3266B /* Editor */,
 				CDF57EE06DD3F000AE26E7F4 /* Models */,
+				6EEE2E73B5155373BF1D2496 /* Services */,
 				8B9907BC5B64DFAFC4DB41A9 /* Support */,
 				D52DB763515C2DBBEA2436F4 /* Theme */,
 				98369E2AF3EA08A2C06290BA /* Views */,
 			);
 			path = Fern;
+			sourceTree = "<group>";
+		};
+		6EEE2E73B5155373BF1D2496 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				EA4BBB39E7CE32F7D86E79DC /* BiometricLock.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 		6EF64AE7D61775BF962D3E5E /* FernTests */ = {
@@ -318,6 +329,7 @@
 				5B1D12E2B984FB7D230C81B8 /* Attachment.swift in Sources */,
 				D1F83BB5944806CC63145AAB /* BarnsleyFern.swift in Sources */,
 				400A3569506D5FCD81502BBF /* BarnsleyFernView.swift in Sources */,
+				533F6945C4B9BFA4D02EEE09 /* BiometricLock.swift in Sources */,
 				62166C608582EFCE76A75612 /* Components.swift in Sources */,
 				9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */,
 				F349ECAB7A224AE4DBB6C3C5 /* Entry.swift in Sources */,
