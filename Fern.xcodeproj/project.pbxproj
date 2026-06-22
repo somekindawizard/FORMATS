@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0517271B1D128E80B8942A3F /* OnThisDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35FC6DC207A6791C7446EE4 /* OnThisDay.swift */; };
 		0D0DE355B9F5C242382E500E /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E955C6672E8D66A488569630 /* SmokeTests.swift */; };
+		1109D39F0468942D5FEE7DA6 /* PaperCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 280EC49A5562C111FA2CD94C /* PaperCard.swift */; };
 		121EC7706CC6B8DD6B0B1CDE /* PromptLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE08F5EFD57674CB778E0A8B /* PromptLibrary.swift */; };
 		12F6E70FBF359B44046B6B35 /* EntryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B628B8479289E7CC246E5C5B /* EntryEditorView.swift */; };
 		1A6A86D78DFB6879B49C1D36 /* MarkdownExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12337FE2289C85966902B783 /* MarkdownExporter.swift */; };
@@ -29,6 +30,7 @@
 		65A3BFB4A131C784AA20BB46 /* Prompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A87F893FEEDD086C788AEED /* Prompt.swift */; };
 		669E6EE6DF023A2CC97C609E /* BarnsleyFernTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22055322740852F3A76C7F93 /* BarnsleyFernTests.swift */; };
 		70EBAECB0734E21D12105353 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E45CA19533DB05C24AC2162D /* SearchView.swift */; };
+		7247B5144A9C2346788FEE39 /* LibraryExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38E27EF4D706838525532A07 /* LibraryExporter.swift */; };
 		746E38C71A4F2CEF9BEBB03D /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4414F13CC04DFCD17197E71 /* Palette.swift */; };
 		77B294B9149D84DBAF60E3AA /* PaperBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F27301B01F7D4292CF16FE /* PaperBackground.swift */; };
 		78EF513543605A8FB978D60C /* WritingStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366CCE747C235C4026B4A7CA /* WritingStats.swift */; };
@@ -38,6 +40,7 @@
 		8C55FFD856258A9B5FAD3C30 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A9DEAFC77D976210B3D73F /* SettingsView.swift */; };
 		91D3B0870053AE6264E7441B /* PromptStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FDEB25A3B8570A4FFF61024 /* PromptStore.swift */; };
 		9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28695B781553568A042DBF4C /* DateGrouping.swift */; };
+		9A64942EF4BF90D9AA61656A /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E26486E72AA73E121EBA526 /* ActivityView.swift */; };
 		9B31CC201C20F047C9C7BEA4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEABECED98FEE4A7B0EF304 /* RootView.swift */; };
 		A1608D2E62B4B1917A46A610 /* Prompts+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A20EA5F23C21B6ACF018CE /* Prompts+Extras.swift */; };
 		AAC0A0E5917AA096F46B77A2 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 229223438BC567429C3E5B74 /* Markdown */; };
@@ -79,10 +82,12 @@
 		12337FE2289C85966902B783 /* MarkdownExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownExporter.swift; sourceTree = "<group>"; };
 		1EEABECED98FEE4A7B0EF304 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		22055322740852F3A76C7F93 /* BarnsleyFernTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFernTests.swift; sourceTree = "<group>"; };
+		280EC49A5562C111FA2CD94C /* PaperCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperCard.swift; sourceTree = "<group>"; };
 		28695B781553568A042DBF4C /* DateGrouping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateGrouping.swift; sourceTree = "<group>"; };
 		287563240408442B1C299030 /* ModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTests.swift; sourceTree = "<group>"; };
 		33B710B62EE4D952BA7B3585 /* EntryRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryRow.swift; sourceTree = "<group>"; };
 		366CCE747C235C4026B4A7CA /* WritingStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingStats.swift; sourceTree = "<group>"; };
+		38E27EF4D706838525532A07 /* LibraryExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryExporter.swift; sourceTree = "<group>"; };
 		3BE4457DFF57CF5D04E853B5 /* AccessoryBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessoryBar.swift; sourceTree = "<group>"; };
 		3D4D39EC866C9EFD80CD9546 /* MarkdownTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownTextView.swift; sourceTree = "<group>"; };
 		3EB2BB1BE40E5C8BA4A77780 /* PromptCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptCard.swift; sourceTree = "<group>"; };
@@ -97,6 +102,7 @@
 		68B6BA6BD6603F605BF65B63 /* ReadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingView.swift; sourceTree = "<group>"; };
 		69C9FD6E8B7EA7C53554913F /* LockGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockGate.swift; sourceTree = "<group>"; };
 		6A87F893FEEDD086C788AEED /* Prompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prompt.swift; sourceTree = "<group>"; };
+		6E26486E72AA73E121EBA526 /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
 		6E6101F538120C732D4B8695 /* MarkdownStylerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownStylerTests.swift; sourceTree = "<group>"; };
 		70573A969736F0D4419D6DA6 /* WeatherProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherProvider.swift; sourceTree = "<group>"; };
 		74089F72177AC086B585AD67 /* SavedPromptsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPromptsView.swift; sourceTree = "<group>"; };
@@ -192,6 +198,7 @@
 			isa = PBXGroup;
 			children = (
 				EA4BBB39E7CE32F7D86E79DC /* BiometricLock.swift */,
+				38E27EF4D706838525532A07 /* LibraryExporter.swift */,
 				CBC7E99A123649E4FFAC4ECD /* LocationProvider.swift */,
 				12337FE2289C85966902B783 /* MarkdownExporter.swift */,
 				8179EB32444953EE697C2342 /* PhotoStore.swift */,
@@ -246,10 +253,12 @@
 		98369E2AF3EA08A2C06290BA /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				6E26486E72AA73E121EBA526 /* ActivityView.swift */,
 				B628B8479289E7CC246E5C5B /* EntryEditorView.swift */,
 				33B710B62EE4D952BA7B3585 /* EntryRow.swift */,
 				55662AF595DC7900135BE0CA /* LibraryView.swift */,
 				69C9FD6E8B7EA7C53554913F /* LockGate.swift */,
+				280EC49A5562C111FA2CD94C /* PaperCard.swift */,
 				3EB2BB1BE40E5C8BA4A77780 /* PromptCard.swift */,
 				68B6BA6BD6603F605BF65B63 /* ReadingView.swift */,
 				1EEABECED98FEE4A7B0EF304 /* RootView.swift */,
@@ -411,6 +420,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				46D0ADB747D5436625E20C0C /* AccessoryBar.swift in Sources */,
+				9A64942EF4BF90D9AA61656A /* ActivityView.swift in Sources */,
 				D1F83BB5944806CC63145AAB /* BarnsleyFern.swift in Sources */,
 				400A3569506D5FCD81502BBF /* BarnsleyFernView.swift in Sources */,
 				533F6945C4B9BFA4D02EEE09 /* BiometricLock.swift in Sources */,
@@ -422,6 +432,7 @@
 				37DBA60E213431CDD95E2D8F /* Enums.swift in Sources */,
 				4B409622B1DBAB1DB8FA90C9 /* FernApp.swift in Sources */,
 				3D0FB454E38EAC3E80B50E90 /* FiddleheadShape.swift in Sources */,
+				7247B5144A9C2346788FEE39 /* LibraryExporter.swift in Sources */,
 				7BCAFCB50A4D4363CC753425 /* LibraryView.swift in Sources */,
 				F644D9FD13C1AF7313F2738B /* LocationProvider.swift in Sources */,
 				CFA3B0A3A46563E0D74D4ECB /* LockGate.swift in Sources */,
@@ -433,6 +444,7 @@
 				0517271B1D128E80B8942A3F /* OnThisDay.swift in Sources */,
 				746E38C71A4F2CEF9BEBB03D /* Palette.swift in Sources */,
 				77B294B9149D84DBAF60E3AA /* PaperBackground.swift in Sources */,
+				1109D39F0468942D5FEE7DA6 /* PaperCard.swift in Sources */,
 				D5B3AC7B5AB7666C2BAEC1DE /* Persistence.swift in Sources */,
 				CA4B3D83E81920AEAC18A28C /* PhotoStore.swift in Sources */,
 				65A3BFB4A131C784AA20BB46 /* Prompt.swift in Sources */,

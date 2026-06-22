@@ -14,6 +14,7 @@ struct EntryEditorView: View {
     @State private var controller = MarkdownEditorController()
     @State private var showingNewNotebook = false
     @State private var newNotebookName = ""
+    @State private var shareItems: ShareItems?
 
     private var notebooks: [String] {
         Array(Set(allEntries.compactMap(\.notebook))).sorted()
@@ -85,6 +86,9 @@ struct EntryEditorView: View {
                         Label(entry.isFinished ? "Mark as draft" : "Mark as finished",
                               systemImage: entry.isFinished ? "circle" : "checkmark.seal")
                     }
+                    Button { shareCard() } label: {
+                        Label("Share as card", systemImage: "photo")
+                    }
                 } label: {
                     Image(systemName: "ellipsis.circle").foregroundStyle(Paper.accent)
                 }
@@ -111,6 +115,7 @@ struct EntryEditorView: View {
                 }
             }
         }
+        .sheet(item: $shareItems) { ActivityView(items: $0.items) }
         .alert("New notebook", isPresented: $showingNewNotebook) {
             TextField("Name", text: $newNotebookName)
             Button("Create") {
@@ -162,6 +167,15 @@ struct EntryEditorView: View {
         if ok {
             withAnimation(.easeOut(duration: 0.3)) { noteUnlocked = true }
             bodyFocused = true
+        }
+    }
+
+    @MainActor
+    private func shareCard() {
+        let renderer = ImageRenderer(content: PaperCard(entry: entry))
+        renderer.scale = 2
+        if let image = renderer.uiImage {
+            shareItems = ShareItems(items: [image])
         }
     }
 }
