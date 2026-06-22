@@ -17,6 +17,7 @@
 		5B1D12E2B984FB7D230C81B8 /* Attachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C494A1677F911B9B1C8BE8D4 /* Attachment.swift */; };
 		60C086345B355A05871432A9 /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55DCA828B94ADC5E1841447 /* Tag.swift */; };
 		62166C608582EFCE76A75612 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD6943B8927D7DB6D40C3730 /* Components.swift */; };
+		669E6EE6DF023A2CC97C609E /* BarnsleyFernTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22055322740852F3A76C7F93 /* BarnsleyFernTests.swift */; };
 		70EBAECB0734E21D12105353 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E45CA19533DB05C24AC2162D /* SearchView.swift */; };
 		746E38C71A4F2CEF9BEBB03D /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4414F13CC04DFCD17197E71 /* Palette.swift */; };
 		77B294B9149D84DBAF60E3AA /* PaperBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F27301B01F7D4292CF16FE /* PaperBackground.swift */; };
@@ -29,6 +30,7 @@
 		CAF77756FD782FF6B9B4F45E /* MarkdownTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5A0D4651E2BDC4D80A6AC9 /* MarkdownTheme.swift */; };
 		CC0328D5AF564B8CA598788A /* MarkdownStylerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E6101F538120C732D4B8695 /* MarkdownStylerTests.swift */; };
 		CEE905C9E387AE4BFEC37187 /* MarkdownTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D4D39EC866C9EFD80CD9546 /* MarkdownTextView.swift */; };
+		D1F83BB5944806CC63145AAB /* BarnsleyFern.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */; };
 		D3988507F66A8D5E8CF88039 /* MarkdownStyler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7826A6B5EB47145BAAF378E /* MarkdownStyler.swift */; };
 		D5B3AC7B5AB7666C2BAEC1DE /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08E10046E72A3938832A9FAD /* Persistence.swift */; };
 		EFB45A7993691F8811C3B8D5 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DC35D8BD947984A93C106B /* TodayView.swift */; };
@@ -50,6 +52,7 @@
 		05F27301B01F7D4292CF16FE /* PaperBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperBackground.swift; sourceTree = "<group>"; };
 		08E10046E72A3938832A9FAD /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		1EEABECED98FEE4A7B0EF304 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		22055322740852F3A76C7F93 /* BarnsleyFernTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFernTests.swift; sourceTree = "<group>"; };
 		28695B781553568A042DBF4C /* DateGrouping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateGrouping.swift; sourceTree = "<group>"; };
 		287563240408442B1C299030 /* ModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTests.swift; sourceTree = "<group>"; };
 		33B710B62EE4D952BA7B3585 /* EntryRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryRow.swift; sourceTree = "<group>"; };
@@ -59,6 +62,7 @@
 		44DC35D8BD947984A93C106B /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
 		49BCF6E4EFF1274EEAC43A8B /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		55662AF595DC7900135BE0CA /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFern.swift; sourceTree = "<group>"; };
 		6874D40188440206C80B5EE5 /* Fern.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fern.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6E6101F538120C732D4B8695 /* MarkdownStylerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownStylerTests.swift; sourceTree = "<group>"; };
 		9A7151C81AE2B364DEA4C780 /* Entry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entry.swift; sourceTree = "<group>"; };
@@ -105,6 +109,7 @@
 			children = (
 				C576F242B37F60F2186C68E4 /* FernApp.swift */,
 				08E10046E72A3938832A9FAD /* Persistence.swift */,
+				CE35430BC9A01FE8982D34A1 /* Botanical */,
 				15367DA11C3B7DC6E4E3266B /* Editor */,
 				CDF57EE06DD3F000AE26E7F4 /* Models */,
 				8B9907BC5B64DFAFC4DB41A9 /* Support */,
@@ -117,6 +122,7 @@
 		6EF64AE7D61775BF962D3E5E /* FernTests */ = {
 			isa = PBXGroup;
 			children = (
+				22055322740852F3A76C7F93 /* BarnsleyFernTests.swift */,
 				400F7BE208A962AA4679EC06 /* DateGroupingTests.swift */,
 				6E6101F538120C732D4B8695 /* MarkdownStylerTests.swift */,
 				287563240408442B1C299030 /* ModelTests.swift */,
@@ -165,6 +171,14 @@
 				E55DCA828B94ADC5E1841447 /* Tag.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		CE35430BC9A01FE8982D34A1 /* Botanical */ = {
+			isa = PBXGroup;
+			children = (
+				577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */,
+			);
+			path = Botanical;
 			sourceTree = "<group>";
 		};
 		D52DB763515C2DBBEA2436F4 /* Theme */ = {
@@ -270,6 +284,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				669E6EE6DF023A2CC97C609E /* BarnsleyFernTests.swift in Sources */,
 				FAE502D993F02FEDCA8EA712 /* DateGroupingTests.swift in Sources */,
 				CC0328D5AF564B8CA598788A /* MarkdownStylerTests.swift in Sources */,
 				B644B497FD07EFA1C899E95D /* ModelTests.swift in Sources */,
@@ -283,6 +298,7 @@
 			files = (
 				46D0ADB747D5436625E20C0C /* AccessoryBar.swift in Sources */,
 				5B1D12E2B984FB7D230C81B8 /* Attachment.swift in Sources */,
+				D1F83BB5944806CC63145AAB /* BarnsleyFern.swift in Sources */,
 				62166C608582EFCE76A75612 /* Components.swift in Sources */,
 				9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */,
 				F349ECAB7A224AE4DBB6C3C5 /* Entry.swift in Sources */,
