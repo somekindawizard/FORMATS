@@ -26,6 +26,7 @@
 		77B294B9149D84DBAF60E3AA /* PaperBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F27301B01F7D4292CF16FE /* PaperBackground.swift */; };
 		7BCAFCB50A4D4363CC753425 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55662AF595DC7900135BE0CA /* LibraryView.swift */; };
 		80AC7B1ED6DFFBCDA716827D /* EntryRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33B710B62EE4D952BA7B3585 /* EntryRow.swift */; };
+		8C55FFD856258A9B5FAD3C30 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A9DEAFC77D976210B3D73F /* SettingsView.swift */; };
 		9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28695B781553568A042DBF4C /* DateGrouping.swift */; };
 		9B31CC201C20F047C9C7BEA4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEABECED98FEE4A7B0EF304 /* RootView.swift */; };
 		AAC0A0E5917AA096F46B77A2 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 229223438BC567429C3E5B74 /* Markdown */; };
@@ -34,6 +35,7 @@
 		CAF77756FD782FF6B9B4F45E /* MarkdownTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5A0D4651E2BDC4D80A6AC9 /* MarkdownTheme.swift */; };
 		CC0328D5AF564B8CA598788A /* MarkdownStylerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E6101F538120C732D4B8695 /* MarkdownStylerTests.swift */; };
 		CEE905C9E387AE4BFEC37187 /* MarkdownTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D4D39EC866C9EFD80CD9546 /* MarkdownTextView.swift */; };
+		CFA3B0A3A46563E0D74D4ECB /* LockGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69C9FD6E8B7EA7C53554913F /* LockGate.swift */; };
 		D1F83BB5944806CC63145AAB /* BarnsleyFern.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */; };
 		D3988507F66A8D5E8CF88039 /* MarkdownStyler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7826A6B5EB47145BAAF378E /* MarkdownStyler.swift */; };
 		D5B3AC7B5AB7666C2BAEC1DE /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08E10046E72A3938832A9FAD /* Persistence.swift */; };
@@ -68,9 +70,11 @@
 		55662AF595DC7900135BE0CA /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFern.swift; sourceTree = "<group>"; };
 		6874D40188440206C80B5EE5 /* Fern.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fern.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		69C9FD6E8B7EA7C53554913F /* LockGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockGate.swift; sourceTree = "<group>"; };
 		6E6101F538120C732D4B8695 /* MarkdownStylerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownStylerTests.swift; sourceTree = "<group>"; };
 		970190D4D04CBD9FA602D885 /* FiddleheadShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiddleheadShape.swift; sourceTree = "<group>"; };
 		9A7151C81AE2B364DEA4C780 /* Entry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entry.swift; sourceTree = "<group>"; };
+		A1A9DEAFC77D976210B3D73F /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A38E46173966308F74B1857F /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
 		AD6943B8927D7DB6D40C3730 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		B572112FB741A611B6732471 /* FernTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = FernTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -173,8 +177,10 @@
 				B628B8479289E7CC246E5C5B /* EntryEditorView.swift */,
 				33B710B62EE4D952BA7B3585 /* EntryRow.swift */,
 				55662AF595DC7900135BE0CA /* LibraryView.swift */,
+				69C9FD6E8B7EA7C53554913F /* LockGate.swift */,
 				1EEABECED98FEE4A7B0EF304 /* RootView.swift */,
 				E45CA19533DB05C24AC2162D /* SearchView.swift */,
+				A1A9DEAFC77D976210B3D73F /* SettingsView.swift */,
 				44DC35D8BD947984A93C106B /* TodayView.swift */,
 			);
 			path = Views;
@@ -342,6 +348,7 @@
 				4B409622B1DBAB1DB8FA90C9 /* FernApp.swift in Sources */,
 				3D0FB454E38EAC3E80B50E90 /* FiddleheadShape.swift in Sources */,
 				7BCAFCB50A4D4363CC753425 /* LibraryView.swift in Sources */,
+				CFA3B0A3A46563E0D74D4ECB /* LockGate.swift in Sources */,
 				D3988507F66A8D5E8CF88039 /* MarkdownStyler.swift in Sources */,
 				CEE905C9E387AE4BFEC37187 /* MarkdownTextView.swift in Sources */,
 				CAF77756FD782FF6B9B4F45E /* MarkdownTheme.swift in Sources */,
@@ -351,6 +358,7 @@
 				9B31CC201C20F047C9C7BEA4 /* RootView.swift in Sources */,
 				418021820E5FEC3DDBC92F84 /* SampleData.swift in Sources */,
 				70EBAECB0734E21D12105353 /* SearchView.swift in Sources */,
+				8C55FFD856258A9B5FAD3C30 /* SettingsView.swift in Sources */,
 				60C086345B355A05871432A9 /* Tag.swift in Sources */,
 				EFB45A7993691F8811C3B8D5 /* TodayView.swift in Sources */,
 				51010732818FD074595FF242 /* Typography.swift in Sources */,

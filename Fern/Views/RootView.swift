@@ -1,21 +1,23 @@
 import SwiftUI
 
 enum Destination: String, CaseIterable, Identifiable {
-    case today, library, search
+    case today, library, search, settings
     var id: String { rawValue }
     var title: String { rawValue.capitalized }
     var symbol: String {
         switch self {
-        case .today:   return "sun.max"
-        case .library: return "books.vertical"
-        case .search:  return "magnifyingglass"
+        case .today:    return "sun.max"
+        case .library:  return "books.vertical"
+        case .search:   return "magnifyingglass"
+        case .settings: return "gearshape"
         }
     }
     @ViewBuilder var view: some View {
         switch self {
-        case .today:   TodayView()
-        case .library: LibraryView()
-        case .search:  SearchView()
+        case .today:    TodayView()
+        case .library:  LibraryView()
+        case .search:   SearchView()
+        case .settings: SettingsView()
         }
     }
 }
