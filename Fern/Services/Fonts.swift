@@ -6,7 +6,10 @@ import Foundation
 /// resource is ever missing.
 enum Fonts {
     static func register() {
-        guard let url = Bundle.main.url(forResource: "Fraunces", withExtension: "ttf") else { return }
-        CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+        for ext in ["ttf", "otf"] {
+            for url in Bundle.main.urls(forResourcesWithExtension: ext, subdirectory: nil) ?? [] {
+                CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+            }
+        }
     }
 }

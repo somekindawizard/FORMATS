@@ -14,11 +14,15 @@ final class ThemeStore {
     var accent: AccentTone {
         didSet { UserDefaults.standard.set(accent.rawValue, forKey: "fern.theme.accent") }
     }
+    var displayFont: DisplayFont {
+        didSet { UserDefaults.standard.set(displayFont.rawValue, forKey: "fern.theme.font") }
+    }
 
     private init() {
         tone = PaperTone(rawValue: UserDefaults.standard.string(forKey: "fern.theme.tone") ?? "") ?? .mist
         accent = AccentTone(rawValue: UserDefaults.standard.string(forKey: "fern.theme.accent") ?? "") ?? .sienna
+        displayFont = DisplayFont(rawValue: UserDefaults.standard.string(forKey: "fern.theme.font") ?? "") ?? .fraunces
     }
 
-    var paletteKey: String { "\(tone.rawValue)-\(accent.rawValue)" }
+    var paletteKey: String { "\(tone.rawValue)-\(accent.rawValue)-\(displayFont.rawValue)" }
 }

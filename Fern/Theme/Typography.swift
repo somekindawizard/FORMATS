@@ -6,10 +6,17 @@ extension Font {
         .system(size: size, weight: weight, design: .serif)
     }
 
-    /// Fern's bundled display face — Fraunces, a warm soft serif. Falls back to
-    /// the system serif if it isn't registered.
+    /// Fern's display face for mastheads — the user's chosen typeface. Static
+    /// faces (Gambetta/Redaction) carry their own weight; Fraunces (variable)
+    /// honors the requested weight; Classic falls back to the system serif.
     static func display(_ size: CGFloat, _ weight: Font.Weight = .semibold) -> Font {
-        .custom("Fraunces", size: size).weight(weight)
+        let choice = ThemeStore.shared.displayFont
+        let name = choice.postScriptName
+        guard !name.isEmpty else {
+            return .system(size: size, weight: weight, design: .serif)
+        }
+        let font = Font.custom(name, size: size)
+        return choice == .fraunces ? font.weight(weight) : font
     }
 
     static let mastheadXL   = Font.display(52, .semibold)

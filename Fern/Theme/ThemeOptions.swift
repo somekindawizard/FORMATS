@@ -45,6 +45,30 @@ enum PaperTone: String, CaseIterable, Identifiable {
     }
 }
 
+/// Display typeface for the mastheads. Body text stays the system serif.
+enum DisplayFont: String, CaseIterable, Identifiable {
+    case fraunces, gambetta, redaction, classic
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .fraunces:  return "Fraunces"
+        case .gambetta:  return "Gambetta"
+        case .redaction: return "Redaction"
+        case .classic:   return "Classic"
+        }
+    }
+    /// PostScript name to render with (empty = system serif). Static faces carry
+    /// their own weight; only Fraunces (variable) honors a requested weight.
+    var postScriptName: String {
+        switch self {
+        case .fraunces:  return "Fraunces"
+        case .gambetta:  return "Gambetta-Semibold"
+        case .redaction: return "Redaction-Regular"
+        case .classic:   return ""
+        }
+    }
+}
+
 /// Accent presets — light value + brightened dark-mode value.
 enum AccentTone: String, CaseIterable, Identifiable {
     case sienna, sage, indigo, plum, ochre

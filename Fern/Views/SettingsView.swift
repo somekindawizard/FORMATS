@@ -24,6 +24,11 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    Picker("Display font", selection: $theme.displayFont) {
+                        ForEach(DisplayFont.allCases) { f in
+                            Text(f.title).tag(f)
+                        }
+                    }
                     Picker("Paper", selection: $theme.tone) {
                         ForEach(PaperTone.allCases) { Text($0.title).tag($0) }
                     }
