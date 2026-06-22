@@ -26,7 +26,8 @@ final class Entry {
     var longitude: Double?
     var isPinned: Bool
     /// Tags as a value array (not a relationship) — robust on iOS 26 SwiftData.
-    var tagNames: [String]
+    /// Inline default so existing stores migrate cleanly when this is added.
+    var tagNames: [String] = []
 
     init(
         id: UUID = UUID(),
