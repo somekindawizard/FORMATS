@@ -35,7 +35,13 @@ targets:
       path: Fern/Fern.entitlements
       properties:
         com.apple.developer.weatherkit: true
-        com.apple.developer.journal.allow: true
+        # Journaling Suggestions (com.apple.developer.journal.allow) is a MANAGED
+        # capability: it needs an Apple Capability Request approval on the App ID
+        # before it can be provisioned, even for development. Submit the request
+        # at developer.apple.com (App ID garden.fern.Fern → Capability Requests),
+        # and once approved, re-add the line above + the SuggestionsButton usage
+        # in TodayView. The SuggestionsButton.swift code is ready and guarded.
+        #
         # CloudKit does NOT auto-provision via -allowProvisioningUpdates. To
         # enable sync: Xcode → target Fern → Signing & Capabilities → + iCloud →
         # check CloudKit → add container "iCloud.garden.fern.Fern", then re-add

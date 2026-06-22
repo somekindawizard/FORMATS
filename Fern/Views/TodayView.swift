@@ -1,6 +1,5 @@
 import SwiftUI
 import SwiftData
-import UIKit
 
 struct TodayView: View {
     @Environment(\.modelContext) private var context
@@ -44,12 +43,6 @@ struct TodayView: View {
                         Button("Begin writing") { beginWriting() }
                             .buttonStyle(InkButtonStyle())
                             .padding(.top, 4)
-
-                        // iPhone only — the system Journaling Suggestions picker.
-                        if UIDevice.current.userInterfaceIdiom == .phone {
-                            SuggestionsButton { entry in draft = entry }
-                                .padding(.top, 2)
-                        }
                     }
                     .card()
 
