@@ -16,6 +16,8 @@ struct EntryEditorView: View {
                     .padding(.top, 8)
 
                 ChipRow(entry: entry)
+
+                TagsEditor(entry: entry)
                     .padding(.bottom, 4)
 
                 MarkdownTextView(text: $entry.body)
@@ -74,6 +76,57 @@ private struct ChipRow: View {
                 Capsule().stroke(accent ? Paper.accent.opacity(0.25) : Paper.line, lineWidth: 1)
                     .background(Capsule().fill(accent ? Paper.accent.opacity(0.07) : Paper.raised))
             )
+    }
+}
+
+/// Add/remove tags. Tags are normalized (lowercased, no '#', no spaces) and
+/// stored on `entry.tagNames`.
+private struct TagsEditor: View {
+    @Bindable var entry: Entry
+    @State private var newTag = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if !entry.tagNames.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(entry.tagNames, id: \.self) { tag in
+                            HStack(spacing: 4) {
+                                Text("#\(tag)").font(.calloutSerif).foregroundStyle(Paper.inkSoft)
+                                Button {
+                                    entry.tagNames.removeAll { $0 == tag }
+                                } label: {
+                                    Image(systemName: "xmark").font(.system(size: 9))
+                                        .foregroundStyle(Paper.inkFaint)
+                                }
+                            }
+                            .padding(.vertical, 5).padding(.horizontal, 10)
+                            .background(Capsule().stroke(Paper.line, lineWidth: 1)
+                                .background(Capsule().fill(Paper.raised)))
+                        }
+                    }
+                }
+            }
+            TextField("Add a tag", text: $newTag)
+                .font(.calloutSerif)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .onSubmit(addTag)
+                .submitLabel(.done)
+        }
+    }
+
+    private func addTag() {
+        let normalized = newTag
+            .lowercased()
+            .replacingOccurrences(of: "#", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: " ", with: "-")
+        guard !normalized.isEmpty, !entry.tagNames.contains(normalized) else {
+            newTag = ""; return
+        }
+        entry.tagNames.append(normalized)
+        newTag = ""
     }
 }
 
