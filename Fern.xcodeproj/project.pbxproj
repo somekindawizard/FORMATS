@@ -10,6 +10,7 @@
 		0517271B1D128E80B8942A3F /* OnThisDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35FC6DC207A6791C7446EE4 /* OnThisDay.swift */; };
 		0D0DE355B9F5C242382E500E /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E955C6672E8D66A488569630 /* SmokeTests.swift */; };
 		12F6E70FBF359B44046B6B35 /* EntryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B628B8479289E7CC246E5C5B /* EntryEditorView.swift */; };
+		1A6A86D78DFB6879B49C1D36 /* MarkdownExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12337FE2289C85966902B783 /* MarkdownExporter.swift */; };
 		30B54EE715B224CE938A6A97 /* JournalingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA4F12FB548A792178852EC /* JournalingTests.swift */; };
 		37DBA60E213431CDD95E2D8F /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ABB577E515BBF1EC0238B8 /* Enums.swift */; };
 		3D0FB454E38EAC3E80B50E90 /* FiddleheadShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 970190D4D04CBD9FA602D885 /* FiddleheadShape.swift */; };
@@ -46,6 +47,7 @@
 		D5B3AC7B5AB7666C2BAEC1DE /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08E10046E72A3938832A9FAD /* Persistence.swift */; };
 		EFB45A7993691F8811C3B8D5 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DC35D8BD947984A93C106B /* TodayView.swift */; };
 		F349ECAB7A224AE4DBB6C3C5 /* Entry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7151C81AE2B364DEA4C780 /* Entry.swift */; };
+		F644D9FD13C1AF7313F2738B /* LocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC7E99A123649E4FFAC4ECD /* LocationProvider.swift */; };
 		FAE502D993F02FEDCA8EA712 /* DateGroupingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400F7BE208A962AA4679EC06 /* DateGroupingTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -62,6 +64,7 @@
 /* Begin PBXFileReference section */
 		05F27301B01F7D4292CF16FE /* PaperBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperBackground.swift; sourceTree = "<group>"; };
 		08E10046E72A3938832A9FAD /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		12337FE2289C85966902B783 /* MarkdownExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownExporter.swift; sourceTree = "<group>"; };
 		1EEABECED98FEE4A7B0EF304 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		22055322740852F3A76C7F93 /* BarnsleyFernTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFernTests.swift; sourceTree = "<group>"; };
 		28695B781553568A042DBF4C /* DateGrouping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateGrouping.swift; sourceTree = "<group>"; };
@@ -90,6 +93,7 @@
 		B7ABB577E515BBF1EC0238B8 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		C494A1677F911B9B1C8BE8D4 /* Attachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Attachment.swift; sourceTree = "<group>"; };
 		C576F242B37F60F2186C68E4 /* FernApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FernApp.swift; sourceTree = "<group>"; };
+		CBC7E99A123649E4FFAC4ECD /* LocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationProvider.swift; sourceTree = "<group>"; };
 		D35FC6DC207A6791C7446EE4 /* OnThisDay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnThisDay.swift; sourceTree = "<group>"; };
 		D5E1846726DBE1B8EB6ADCED /* BarnsleyFernView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFernView.swift; sourceTree = "<group>"; };
 		D7A67E4C33A31B4DDC79FE4E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -147,6 +151,8 @@
 			isa = PBXGroup;
 			children = (
 				EA4BBB39E7CE32F7D86E79DC /* BiometricLock.swift */,
+				CBC7E99A123649E4FFAC4ECD /* LocationProvider.swift */,
+				12337FE2289C85966902B783 /* MarkdownExporter.swift */,
 				8179EB32444953EE697C2342 /* PhotoStore.swift */,
 			);
 			path = Services;
@@ -364,7 +370,9 @@
 				4B409622B1DBAB1DB8FA90C9 /* FernApp.swift in Sources */,
 				3D0FB454E38EAC3E80B50E90 /* FiddleheadShape.swift in Sources */,
 				7BCAFCB50A4D4363CC753425 /* LibraryView.swift in Sources */,
+				F644D9FD13C1AF7313F2738B /* LocationProvider.swift in Sources */,
 				CFA3B0A3A46563E0D74D4ECB /* LockGate.swift in Sources */,
+				1A6A86D78DFB6879B49C1D36 /* MarkdownExporter.swift in Sources */,
 				D3988507F66A8D5E8CF88039 /* MarkdownStyler.swift in Sources */,
 				CEE905C9E387AE4BFEC37187 /* MarkdownTextView.swift in Sources */,
 				CAF77756FD782FF6B9B4F45E /* MarkdownTheme.swift in Sources */,
