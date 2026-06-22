@@ -28,6 +28,9 @@ final class Entry {
     /// Tags as a value array (not a relationship) — robust on iOS 26 SwiftData.
     /// Inline default so existing stores migrate cleanly when this is added.
     var tagNames: [String] = []
+    /// Filenames of attached photos, stored in Documents/Photos (see PhotoStore).
+    /// A value array, not a relationship — same robustness reasoning as tags.
+    var photoFileNames: [String] = []
 
     init(
         id: UUID = UUID(),
