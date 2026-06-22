@@ -79,6 +79,14 @@ struct TodayView: View {
             }
         }
         .navigationTitle("Today")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { freeWrite() } label: {
+                    Image(systemName: "square.and.pencil").foregroundStyle(Paper.accent)
+                }
+                .accessibilityLabel("New free write")
+            }
+        }
         .navigationDestination(for: Entry.self) { entry in
             EntryEditorView(entry: entry)
         }
@@ -116,6 +124,13 @@ struct TodayView: View {
         guard let picked = PromptLibrary.random(kind: kind, theme: theme, excluding: current) else { return }
         if kind == .journal { journalPrompt = picked } else { creativePrompt = picked }
         promptStore.recordShown(picked.text)
+    }
+
+    /// A blank piece with no prompt — pure free writing.
+    private func freeWrite() {
+        let entry = Entry(title: "", body: "", collection: .piece)
+        context.insert(entry)
+        draft = entry
     }
 
     private func begin(_ kind: PromptKind, prompt: Prompt?) {
