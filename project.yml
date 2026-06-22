@@ -22,6 +22,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: garden.fern.Fern
         TARGETED_DEVICE_FAMILY: "1,2"
+        DEVELOPMENT_TEAM: 775QLS4P2V
+        CODE_SIGN_STYLE: Automatic
   FernTests:
     type: bundle.unit-test
     platform: iOS

@@ -8,11 +8,17 @@
 
 /* Begin PBXBuildFile section */
 		0D0DE355B9F5C242382E500E /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E955C6672E8D66A488569630 /* SmokeTests.swift */; };
+		37DBA60E213431CDD95E2D8F /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ABB577E515BBF1EC0238B8 /* Enums.swift */; };
 		4B409622B1DBAB1DB8FA90C9 /* FernApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C576F242B37F60F2186C68E4 /* FernApp.swift */; };
 		51010732818FD074595FF242 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49BCF6E4EFF1274EEAC43A8B /* Typography.swift */; };
+		5B1D12E2B984FB7D230C81B8 /* Attachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C494A1677F911B9B1C8BE8D4 /* Attachment.swift */; };
+		60C086345B355A05871432A9 /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55DCA828B94ADC5E1841447 /* Tag.swift */; };
 		62166C608582EFCE76A75612 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD6943B8927D7DB6D40C3730 /* Components.swift */; };
 		746E38C71A4F2CEF9BEBB03D /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4414F13CC04DFCD17197E71 /* Palette.swift */; };
 		77B294B9149D84DBAF60E3AA /* PaperBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F27301B01F7D4292CF16FE /* PaperBackground.swift */; };
+		B644B497FD07EFA1C899E95D /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287563240408442B1C299030 /* ModelTests.swift */; };
+		D5B3AC7B5AB7666C2BAEC1DE /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08E10046E72A3938832A9FAD /* Persistence.swift */; };
+		F349ECAB7A224AE4DBB6C3C5 /* Entry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7151C81AE2B364DEA4C780 /* Entry.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,12 +33,18 @@
 
 /* Begin PBXFileReference section */
 		05F27301B01F7D4292CF16FE /* PaperBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperBackground.swift; sourceTree = "<group>"; };
+		08E10046E72A3938832A9FAD /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		287563240408442B1C299030 /* ModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTests.swift; sourceTree = "<group>"; };
 		49BCF6E4EFF1274EEAC43A8B /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		6874D40188440206C80B5EE5 /* Fern.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fern.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9A7151C81AE2B364DEA4C780 /* Entry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entry.swift; sourceTree = "<group>"; };
 		AD6943B8927D7DB6D40C3730 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		B572112FB741A611B6732471 /* FernTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = FernTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B7ABB577E515BBF1EC0238B8 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
+		C494A1677F911B9B1C8BE8D4 /* Attachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Attachment.swift; sourceTree = "<group>"; };
 		C576F242B37F60F2186C68E4 /* FernApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FernApp.swift; sourceTree = "<group>"; };
 		E4414F13CC04DFCD17197E71 /* Palette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Palette.swift; sourceTree = "<group>"; };
+		E55DCA828B94ADC5E1841447 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
 		E955C6672E8D66A488569630 /* SmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -41,6 +53,8 @@
 			isa = PBXGroup;
 			children = (
 				C576F242B37F60F2186C68E4 /* FernApp.swift */,
+				08E10046E72A3938832A9FAD /* Persistence.swift */,
+				CDF57EE06DD3F000AE26E7F4 /* Models */,
 				D52DB763515C2DBBEA2436F4 /* Theme */,
 			);
 			path = Fern;
@@ -49,6 +63,7 @@
 		6EF64AE7D61775BF962D3E5E /* FernTests */ = {
 			isa = PBXGroup;
 			children = (
+				287563240408442B1C299030 /* ModelTests.swift */,
 				E955C6672E8D66A488569630 /* SmokeTests.swift */,
 			);
 			path = FernTests;
@@ -61,6 +76,17 @@
 				B572112FB741A611B6732471 /* FernTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		CDF57EE06DD3F000AE26E7F4 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				C494A1677F911B9B1C8BE8D4 /* Attachment.swift */,
+				9A7151C81AE2B364DEA4C780 /* Entry.swift */,
+				B7ABB577E515BBF1EC0238B8 /* Enums.swift */,
+				E55DCA828B94ADC5E1841447 /* Tag.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		D52DB763515C2DBBEA2436F4 /* Theme */ = {
@@ -130,6 +156,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					A7E908288E69270DC8559670 = {
+						DevelopmentTeam = 775QLS4P2V;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = B3D23560C4BBD3A917D39683 /* Build configuration list for PBXProject "Fern" */;
@@ -157,6 +187,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B644B497FD07EFA1C899E95D /* ModelTests.swift in Sources */,
 				0D0DE355B9F5C242382E500E /* SmokeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -165,10 +196,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5B1D12E2B984FB7D230C81B8 /* Attachment.swift in Sources */,
 				62166C608582EFCE76A75612 /* Components.swift in Sources */,
+				F349ECAB7A224AE4DBB6C3C5 /* Entry.swift in Sources */,
+				37DBA60E213431CDD95E2D8F /* Enums.swift in Sources */,
 				4B409622B1DBAB1DB8FA90C9 /* FernApp.swift in Sources */,
 				746E38C71A4F2CEF9BEBB03D /* Palette.swift in Sources */,
 				77B294B9149D84DBAF60E3AA /* PaperBackground.swift in Sources */,
+				D5B3AC7B5AB7666C2BAEC1DE /* Persistence.swift in Sources */,
+				60C086345B355A05871432A9 /* Tag.swift in Sources */,
 				51010732818FD074595FF242 /* Typography.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -189,6 +225,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 775QLS4P2V;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -220,6 +258,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 775QLS4P2V;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
