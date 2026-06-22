@@ -10,6 +10,7 @@
 		0D0DE355B9F5C242382E500E /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E955C6672E8D66A488569630 /* SmokeTests.swift */; };
 		12F6E70FBF359B44046B6B35 /* EntryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B628B8479289E7CC246E5C5B /* EntryEditorView.swift */; };
 		37DBA60E213431CDD95E2D8F /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ABB577E515BBF1EC0238B8 /* Enums.swift */; };
+		3D0FB454E38EAC3E80B50E90 /* FiddleheadShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 970190D4D04CBD9FA602D885 /* FiddleheadShape.swift */; };
 		400A3569506D5FCD81502BBF /* BarnsleyFernView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5E1846726DBE1B8EB6ADCED /* BarnsleyFernView.swift */; };
 		418021820E5FEC3DDBC92F84 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38E46173966308F74B1857F /* SampleData.swift */; };
 		46D0ADB747D5436625E20C0C /* AccessoryBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE4457DFF57CF5D04E853B5 /* AccessoryBar.swift */; };
@@ -68,6 +69,7 @@
 		577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFern.swift; sourceTree = "<group>"; };
 		6874D40188440206C80B5EE5 /* Fern.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fern.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6E6101F538120C732D4B8695 /* MarkdownStylerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownStylerTests.swift; sourceTree = "<group>"; };
+		970190D4D04CBD9FA602D885 /* FiddleheadShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiddleheadShape.swift; sourceTree = "<group>"; };
 		9A7151C81AE2B364DEA4C780 /* Entry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entry.swift; sourceTree = "<group>"; };
 		A38E46173966308F74B1857F /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
 		AD6943B8927D7DB6D40C3730 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
@@ -194,6 +196,7 @@
 			children = (
 				577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */,
 				D5E1846726DBE1B8EB6ADCED /* BarnsleyFernView.swift */,
+				970190D4D04CBD9FA602D885 /* FiddleheadShape.swift */,
 			);
 			path = Botanical;
 			sourceTree = "<group>";
@@ -337,6 +340,7 @@
 				80AC7B1ED6DFFBCDA716827D /* EntryRow.swift in Sources */,
 				37DBA60E213431CDD95E2D8F /* Enums.swift in Sources */,
 				4B409622B1DBAB1DB8FA90C9 /* FernApp.swift in Sources */,
+				3D0FB454E38EAC3E80B50E90 /* FiddleheadShape.swift in Sources */,
 				7BCAFCB50A4D4363CC753425 /* LibraryView.swift in Sources */,
 				D3988507F66A8D5E8CF88039 /* MarkdownStyler.swift in Sources */,
 				CEE905C9E387AE4BFEC37187 /* MarkdownTextView.swift in Sources */,
