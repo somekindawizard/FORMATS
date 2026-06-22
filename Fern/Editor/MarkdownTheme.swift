@@ -16,7 +16,14 @@ enum MarkdownTheme {
     static let inkSoft = dyn((0.357, 0.341, 0.314), (0.718, 0.698, 0.651))
     /// Used to dim Markdown syntax marks (`**`, `*`, `#`, etc.).
     static let faint   = dyn((0.541, 0.525, 0.486), (0.498, 0.475, 0.435))
-    static let accent  = dyn((0.604, 0.290, 0.176), (0.761, 0.412, 0.247))
+    /// Follows the chosen theme accent.
+    static var accent: UIColor {
+        let a = ThemeStore.shared.accent
+        return UIColor { trait in
+            let c = trait.userInterfaceStyle == .dark ? a.dark : a.light
+            return UIColor(red: CGFloat(c.0), green: CGFloat(c.1), blue: CGFloat(c.2), alpha: 1)
+        }
+    }
 
     // Fonts — system "New York" serif, scaled to the editor's body size.
     static let bodySize: CGFloat = 18

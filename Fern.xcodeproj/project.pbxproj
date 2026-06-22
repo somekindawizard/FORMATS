@@ -39,6 +39,7 @@
 		80AC7B1ED6DFFBCDA716827D /* EntryRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33B710B62EE4D952BA7B3585 /* EntryRow.swift */; };
 		8C55FFD856258A9B5FAD3C30 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A9DEAFC77D976210B3D73F /* SettingsView.swift */; };
 		91D3B0870053AE6264E7441B /* PromptStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FDEB25A3B8570A4FFF61024 /* PromptStore.swift */; };
+		92ED5F2A942664849205A3E5 /* ThemeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B28F822C8468BE267C3F3293 /* ThemeStore.swift */; };
 		9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28695B781553568A042DBF4C /* DateGrouping.swift */; };
 		9A64942EF4BF90D9AA61656A /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E26486E72AA73E121EBA526 /* ActivityView.swift */; };
 		9B31CC201C20F047C9C7BEA4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEABECED98FEE4A7B0EF304 /* RootView.swift */; };
@@ -47,6 +48,7 @@
 		B644B497FD07EFA1C899E95D /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287563240408442B1C299030 /* ModelTests.swift */; };
 		B860398E1BA261EE37594B57 /* SuggestionsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F742AB1A0EB1B95CC7A91A9D /* SuggestionsButton.swift */; };
 		BE12B4B0AD2AF461EE824738 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D7A67E4C33A31B4DDC79FE4E /* Assets.xcassets */; };
+		C0E4621C3F0203251652A3FE /* ThemeOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FED160A738BC3DE663C28045 /* ThemeOptions.swift */; };
 		C4066C9745B5F006C924AE4C /* WeatherProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70573A969736F0D4419D6DA6 /* WeatherProvider.swift */; };
 		CA4B3D83E81920AEAC18A28C /* PhotoStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8179EB32444953EE697C2342 /* PhotoStore.swift */; };
 		CAF77756FD782FF6B9B4F45E /* MarkdownTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5A0D4651E2BDC4D80A6AC9 /* MarkdownTheme.swift */; };
@@ -115,6 +117,7 @@
 		A38E46173966308F74B1857F /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
 		A6827187FF4941AE39243B9E /* Prompts+Nier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Nier.swift"; sourceTree = "<group>"; };
 		AD6943B8927D7DB6D40C3730 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
+		B28F822C8468BE267C3F3293 /* ThemeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeStore.swift; sourceTree = "<group>"; };
 		B572112FB741A611B6732471 /* FernTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = FernTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B628B8479289E7CC246E5C5B /* EntryEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryEditorView.swift; sourceTree = "<group>"; };
 		B7ABB577E515BBF1EC0238B8 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
@@ -136,6 +139,7 @@
 		ED830E78A8ED4F64E15ECC2C /* PromptNotifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptNotifier.swift; sourceTree = "<group>"; };
 		EE08F5EFD57674CB778E0A8B /* PromptLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptLibrary.swift; sourceTree = "<group>"; };
 		F742AB1A0EB1B95CC7A91A9D /* SuggestionsButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionsButton.swift; sourceTree = "<group>"; };
+		FED160A738BC3DE663C28045 /* ThemeOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeOptions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -226,6 +230,7 @@
 			children = (
 				EE08F5EFD57674CB778E0A8B /* PromptLibrary.swift */,
 				3FDEB25A3B8570A4FFF61024 /* PromptStore.swift */,
+				B28F822C8468BE267C3F3293 /* ThemeStore.swift */,
 			);
 			path = Store;
 			sourceTree = "<group>";
@@ -297,6 +302,7 @@
 				AD6943B8927D7DB6D40C3730 /* Components.swift */,
 				E4414F13CC04DFCD17197E71 /* Palette.swift */,
 				05F27301B01F7D4292CF16FE /* PaperBackground.swift */,
+				FED160A738BC3DE663C28045 /* ThemeOptions.swift */,
 				49BCF6E4EFF1274EEAC43A8B /* Typography.swift */,
 			);
 			path = Theme;
@@ -464,6 +470,8 @@
 				70EBAECB0734E21D12105353 /* SearchView.swift in Sources */,
 				8C55FFD856258A9B5FAD3C30 /* SettingsView.swift in Sources */,
 				B860398E1BA261EE37594B57 /* SuggestionsButton.swift in Sources */,
+				C0E4621C3F0203251652A3FE /* ThemeOptions.swift in Sources */,
+				92ED5F2A942664849205A3E5 /* ThemeStore.swift in Sources */,
 				EFB45A7993691F8811C3B8D5 /* TodayView.swift in Sources */,
 				51010732818FD074595FF242 /* Typography.swift in Sources */,
 				C4066C9745B5F006C924AE4C /* WeatherProvider.swift in Sources */,

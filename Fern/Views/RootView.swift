@@ -26,7 +26,8 @@ struct RootView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     // Sidebar selection on iOS requires an optional binding; default to Today.
     @State private var sidebarSelection: Destination? = .today
-    @State private var tabSelection: Destination = .today
+    // Persisted so a theme change (which rebuilds the tree) keeps you on the tab.
+    @AppStorage("fern.tab") private var tabSelection: Destination = .today
 
     var body: some View {
         Group {

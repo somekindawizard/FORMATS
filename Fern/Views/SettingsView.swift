@@ -3,6 +3,7 @@ import SwiftData
 
 struct SettingsView: View {
     @Environment(BiometricLock.self) private var lock
+    @Environment(ThemeStore.self) private var theme
     @Query(sort: \Entry.createdAt, order: .reverse) private var entries: [Entry]
     @State private var promptReminder = PromptNotifier.isEnabled
     @State private var shareItems: ShareItems?
@@ -10,6 +11,7 @@ struct SettingsView: View {
 
     var body: some View {
         @Bindable var lock = lock
+        @Bindable var theme = theme
         ZStack {
             PaperBackground()
             Form {
@@ -19,6 +21,23 @@ struct SettingsView: View {
                     } label: {
                         Label("Saved prompts", systemImage: "heart.text.square")
                     }
+                }
+
+                Section {
+                    Picker("Paper", selection: $theme.tone) {
+                        ForEach(PaperTone.allCases) { Text($0.title).tag($0) }
+                    }
+                    HStack(spacing: 14) {
+                        Text("Accent")
+                        Spacer()
+                        ForEach(AccentTone.allCases) { a in
+                            Circle().fill(a.swatch).frame(width: 26, height: 26)
+                                .overlay(Circle().stroke(Paper.ink, lineWidth: theme.accent == a ? 2 : 0).padding(1))
+                                .onTapGesture { theme.accent = a }
+                        }
+                    }
+                } header: {
+                    Text("Appearance")
                 }
 
                 Section {
