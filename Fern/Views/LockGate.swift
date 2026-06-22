@@ -9,7 +9,8 @@ struct LockGate<Content: View>: View {
     let content: () -> Content
 
     // The lock fern — deterministic, same seed as the icon/empty state.
-    private let fern = BarnsleyFern(seed: 4_211, count: 16_000)
+    // Slightly fewer points since it re-draws every frame while swaying.
+    private let fern = BarnsleyFern(seed: 4_211, count: 11_000)
 
     var body: some View {
         ZStack {
@@ -34,7 +35,7 @@ struct LockGate<Content: View>: View {
         ZStack {
             PaperBackground()
             VStack(spacing: 22) {
-                BarnsleyFernView(fern: fern)
+                BarnsleyFernView(fern: fern, sway: true)
                     .frame(width: 200, height: 280)
                     .scaleEffect(pulse ? 1.05 : 1.0)
                     .offset(x: shakeX)
