@@ -25,6 +25,8 @@ final class Entry {
     var latitude: Double?
     var longitude: Double?
     var isPinned: Bool
+    /// Tags as a value array (not a relationship) — robust on iOS 26 SwiftData.
+    var tagNames: [String]
 
     init(
         id: UUID = UUID(),
@@ -33,7 +35,8 @@ final class Entry {
         collection: Collection,
         createdAt: Date = .now,
         mood: Mood? = nil,
-        isPinned: Bool = false
+        isPinned: Bool = false,
+        tagNames: [String] = []
     ) {
         self.id = id
         self.title = title
@@ -43,6 +46,7 @@ final class Entry {
         self.updatedAt = createdAt
         self.moodRaw = mood?.rawValue
         self.isPinned = isPinned
+        self.tagNames = tagNames
     }
 }
 
@@ -62,5 +66,17 @@ extension Entry {
     /// Whitespace-separated token count of the body.
     var wordCount: Int {
         body.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count
+    }
+
+    /// What to show in lists: the title, else the first non-empty line of the
+    /// body, else a quiet placeholder.
+    var displayTitle: String {
+        let t = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !t.isEmpty { return t }
+        let firstLine = body
+            .split(whereSeparator: \.isNewline)
+            .first { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+        if let firstLine { return String(firstLine).trimmingCharacters(in: .whitespaces) }
+        return "Untitled"
     }
 }
