@@ -31,6 +31,7 @@ targets:
     dependencies:
       - package: swift-markdown
         product: Markdown
+      - target: FernWidget
     entitlements:
       path: Fern/Fern.entitlements
       properties:
@@ -62,6 +63,22 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: garden.fern.FernTests
+  FernWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - FernWidget
+      - Fern/Models/Prompt.swift
+      - Fern/Store/PromptLibrary.swift
+      - Fern/Content
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: garden.fern.Fern.FernWidget
+        DEVELOPMENT_TEAM: 775QLS4P2V
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: FernWidget/Info.plist
+        TARGETED_DEVICE_FAMILY: "1,2"
 schemes:
   Fern:
     build:
