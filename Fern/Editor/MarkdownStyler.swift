@@ -1,169 +1,90 @@
 import UIKit
-import Markdown
 
-/// Pure-logic walker: Markdown source → NSAttributedString styled per
-/// `MarkdownTheme`. Syntax marks (`**`, `*`, `#`, backticks, `>`) are
-/// preserved in the visible text and **dimmed** so the user sees what
-/// they typed but the formatting reads correctly.
+/// Styles Markdown **in place**: returns an attributed string whose characters
+/// are byte-for-byte the source (so the editor never rewrites what you typed —
+/// spaces and line breaks are preserved). It only assigns fonts/colors over
+/// ranges found by lightweight scanning. Syntax marks (`**`, `*`, `#`, `>`,
+/// backticks) stay visible but dimmed.
 enum MarkdownStyler {
 
+    /// The default body attributes — also used to reset before re-styling.
+    static func baseAttributes() -> [NSAttributedString.Key: Any] {
+        [
+            .font: MarkdownTheme.body(),
+            .foregroundColor: MarkdownTheme.ink,
+            .paragraphStyle: MarkdownTheme.paragraphStyle()
+        ]
+    }
+
     static func attributed(for source: String) -> NSAttributedString {
-        let doc = Document(parsing: source)
-        let out = NSMutableAttributedString()
-        var walker = Walker(out: out)
-        walker.visit(doc)
-        return out
-    }
+        let text = NSMutableAttributedString(string: source, attributes: baseAttributes())
+        let ns = source as NSString
+        let whole = NSRange(location: 0, length: ns.length)
 
-    // MARK: – Walker
-
-    private struct Walker: MarkupWalker {
-        let out: NSMutableAttributedString
-        var stack: [Style] = [.body]
-
-        mutating func visitText(_ text: Text) {
-            append(text.string, style: stack.last ?? .body)
+        func dim(_ range: NSRange) {
+            guard range.location >= 0, NSMaxRange(range) <= ns.length else { return }
+            text.addAttribute(.foregroundColor, value: MarkdownTheme.faint, range: range)
         }
 
-        mutating func visitEmphasis(_ e: Emphasis) {
-            appendMark("*")
-            push((stack.last ?? .body).adding(.italic)); defer { pop() }
-            descendInto(e)
-            appendMark("*")
-        }
-
-        mutating func visitStrong(_ s: Strong) {
-            appendMark("**")
-            push((stack.last ?? .body).adding(.bold)); defer { pop() }
-            descendInto(s)
-            appendMark("**")
-        }
-
-        mutating func visitInlineCode(_ c: InlineCode) {
-            appendMark("`")
-            append(c.code, style: .code)
-            appendMark("`")
-        }
-
-        mutating func visitHeading(_ h: Heading) {
-            appendMark(String(repeating: "#", count: h.level) + " ")
-            push(.heading(h.level)); defer { pop() }
-            descendInto(h)
-            append("\n", style: .body)
-        }
-
-        mutating func visitBlockQuote(_ bq: BlockQuote) {
-            appendMark("> ")
-            push(.blockquote); defer { pop() }
-            descendInto(bq)
-            append("\n", style: .body)
-        }
-
-        mutating func visitParagraph(_ p: Paragraph) {
-            descendInto(p)
-            append("\n", style: .body)
-        }
-
-        mutating func visitOrderedList(_ list: OrderedList) {
-            let children = Array(list.children)
-            for (i, item) in children.enumerated() {
-                appendMark("\(i + 1). ")
-                descendInto(item)
-                if i < children.count - 1 { append("\n", style: .body) }
+        func eachMatch(_ pattern: String, _ options: NSRegularExpression.Options = [],
+                       _ body: (NSTextCheckingResult) -> Void) {
+            guard let re = try? NSRegularExpression(pattern: pattern, options: options) else { return }
+            re.enumerateMatches(in: source, range: whole) { match, _, _ in
+                if let match { body(match) }
             }
-            append("\n", style: .body)
         }
 
-        mutating func visitUnorderedList(_ list: UnorderedList) {
-            let children = Array(list.children)
-            for (i, item) in children.enumerated() {
-                appendMark("• ")
-                descendInto(item)
-                if i < children.count - 1 { append("\n", style: .body) }
-            }
-            append("\n", style: .body)
-        }
-
-        // MARK: – Helpers
-
-        private mutating func descendInto(_ markup: Markup) {
-            for child in markup.children { visit(child) }
-        }
-
-        private mutating func push(_ s: Style) { stack.append(s) }
-        private mutating func pop() { _ = stack.popLast() }
-
-        private mutating func append(_ s: String, style: Style) {
-            out.append(NSAttributedString(string: s, attributes: style.attributes()))
-        }
-
-        private mutating func appendMark(_ s: String) {
-            var attrs = (stack.last ?? .body).attributes()
-            attrs[.foregroundColor] = MarkdownTheme.faint
-            out.append(NSAttributedString(string: s, attributes: attrs))
-        }
-    }
-
-    // MARK: – Style descriptor
-
-    private enum Style {
-        case body, code, blockquote
-        case heading(Int)
-        indirect case modified(Style, traits: Traits)
-
-        struct Traits: OptionSet {
-            let rawValue: Int
-            static let bold   = Traits(rawValue: 1 << 0)
-            static let italic = Traits(rawValue: 1 << 1)
-        }
-
-        var traits: Traits {
-            if case .modified(_, let t) = self { return t }
-            return []
-        }
-
-        func adding(_ t: Traits) -> Style { .modified(self, traits: traits.union(t)) }
-
-        func attributes() -> [NSAttributedString.Key: Any] {
-            switch self {
-            case .body:
-                return [
-                    .font: fontWithTraits(MarkdownTheme.body(), traits: traits),
-                    .foregroundColor: MarkdownTheme.ink,
-                    .paragraphStyle: MarkdownTheme.paragraphStyle()
-                ]
-            case .code:
-                return [
-                    .font: MarkdownTheme.mono(),
-                    .foregroundColor: MarkdownTheme.ink,
-                    .paragraphStyle: MarkdownTheme.paragraphStyle()
-                ]
-            case .blockquote:
-                return [
-                    .font: fontWithTraits(MarkdownTheme.body(), traits: traits.union(.italic)),
-                    .foregroundColor: MarkdownTheme.inkSoft,
-                    .paragraphStyle: MarkdownTheme.blockquoteParagraphStyle()
-                ]
-            case .heading(let lvl):
-                return [
-                    .font: MarkdownTheme.heading(level: lvl),
-                    .foregroundColor: MarkdownTheme.ink,
-                    .paragraphStyle: MarkdownTheme.headingParagraphStyle()
-                ]
-            case .modified(let inner, _):
-                var attrs = inner.attributes()
-                if let f = attrs[.font] as? UIFont {
-                    attrs[.font] = fontWithTraits(f, traits: traits)
+        func addTrait(_ trait: UIFontDescriptor.SymbolicTraits, over range: NSRange) {
+            text.enumerateAttribute(.font, in: range, options: []) { value, sub, _ in
+                let base = (value as? UIFont) ?? MarkdownTheme.body()
+                var traits = base.fontDescriptor.symbolicTraits
+                traits.insert(trait)
+                if let desc = base.fontDescriptor.withSymbolicTraits(traits) {
+                    text.addAttribute(.font, value: UIFont(descriptor: desc, size: base.pointSize), range: sub)
                 }
-                return attrs
             }
         }
-    }
 
-    private static func fontWithTraits(_ base: UIFont, traits: Style.Traits) -> UIFont {
-        if traits.contains([.bold, .italic]) { return MarkdownTheme.boldItalic() }
-        if traits.contains(.bold)   { return MarkdownTheme.bold() }
-        if traits.contains(.italic) { return MarkdownTheme.italic() }
-        return base
+        // Headings: leading #'s + space, whole line in heading font.
+        eachMatch("^(#{1,6})[ \\t]+(.+)$", [.anchorsMatchLines]) { m in
+            let hashes = m.range(at: 1)
+            let level = min(hashes.length, 6)
+            let lineRange = NSRange(location: hashes.location, length: NSMaxRange(m.range) - hashes.location)
+            text.addAttribute(.font, value: MarkdownTheme.heading(level: level), range: lineRange)
+            text.addAttribute(.foregroundColor, value: MarkdownTheme.ink, range: lineRange)
+            text.addAttribute(.paragraphStyle, value: MarkdownTheme.headingParagraphStyle(), range: m.range)
+            dim(NSRange(location: hashes.location, length: hashes.length + 1)) // #'s + the space
+        }
+
+        // Block quotes: leading > .
+        eachMatch("^(>[ \\t]?)(.*)$", [.anchorsMatchLines]) { m in
+            text.addAttribute(.foregroundColor, value: MarkdownTheme.inkSoft, range: m.range)
+            text.addAttribute(.paragraphStyle, value: MarkdownTheme.blockquoteParagraphStyle(), range: m.range)
+            addTrait(.traitItalic, over: m.range)
+            dim(m.range(at: 1))
+        }
+
+        // Bold **…**
+        eachMatch("\\*\\*(.+?)\\*\\*") { m in
+            addTrait(.traitBold, over: m.range)
+            dim(NSRange(location: m.range.location, length: 2))
+            dim(NSRange(location: NSMaxRange(m.range) - 2, length: 2))
+        }
+
+        // Italic *…* (single asterisks, not adjacent to another *)
+        eachMatch("(?<!\\*)\\*(?!\\*)([^*\\n]+)\\*(?!\\*)") { m in
+            addTrait(.traitItalic, over: m.range)
+            dim(NSRange(location: m.range.location, length: 1))
+            dim(NSRange(location: NSMaxRange(m.range) - 1, length: 1))
+        }
+
+        // Inline code `…`
+        eachMatch("`([^`\\n]+)`") { m in
+            text.addAttribute(.font, value: MarkdownTheme.mono(), range: m.range)
+            dim(NSRange(location: m.range.location, length: 1))
+            dim(NSRange(location: NSMaxRange(m.range) - 1, length: 1))
+        }
+
+        return text
     }
 }

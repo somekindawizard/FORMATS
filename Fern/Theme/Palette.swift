@@ -1,29 +1,39 @@
 import SwiftUI
+import UIKit
 
-/// Fern's visual language: cool soft paper, warm near-black ink,
-/// hairline rules, and a single restrained sienna accent.
-/// Retuned from the sibling Press app to a cleaner, cooler paper.
+/// Resolves to one color in light mode, its inverse in dark mode.
+private func adaptive(_ light: (Double, Double, Double),
+                      _ dark: (Double, Double, Double)) -> Color {
+    Color(uiColor: UIColor { trait in
+        let c = trait.userInterfaceStyle == .dark ? dark : light
+        return UIColor(red: CGFloat(c.0), green: CGFloat(c.1), blue: CGFloat(c.2), alpha: 1)
+    })
+}
+
+/// Fern's visual language: cool soft paper, warm near-black ink, hairline
+/// rules, and a single restrained sienna accent — inverted for dark mode
+/// (dark warm paper, cream ink, a brighter terracotta accent).
 enum Paper {
 
     // MARK: Surfaces
-    /// Primary canvas — "Mist", a soft de-greened paper white.
-    static let bg      = Color(red: 0.965, green: 0.961, blue: 0.945)  // #F6F5F1
-    /// Raised surfaces (cards, sheets) — clean white.
-    static let raised  = Color(red: 1.000, green: 1.000, blue: 1.000)  // #FFFFFF
-    /// A slightly toned inset for wells and pressed states.
-    static let sunken  = Color(red: 0.925, green: 0.918, blue: 0.886)  // #ECEAE2
+    /// Primary canvas — "Mist" (light) / warm charcoal (dark).
+    static let bg      = adaptive((0.965, 0.961, 0.945), (0.102, 0.094, 0.082))  // #F6F5F1 / #1A1815
+    /// Raised surfaces (cards, sheets).
+    static let raised  = adaptive((1.000, 1.000, 1.000), (0.141, 0.133, 0.125))  // #FFFFFF / #242220
+    /// A toned inset for wells and pressed states.
+    static let sunken  = adaptive((0.925, 0.918, 0.886), (0.063, 0.059, 0.051))  // #ECEAE2 / #100F0D
 
     // MARK: Ink
-    /// Primary text and strokes — a warm near-black, never pure #000.
-    static let ink      = Color(red: 0.110, green: 0.102, blue: 0.090) // #1C1A17
+    /// Primary text and strokes — near-black (light) / warm cream (dark).
+    static let ink      = adaptive((0.110, 0.102, 0.090), (0.949, 0.937, 0.910)) // #1C1A17 / #F2EFE8
     /// Secondary text.
-    static let inkSoft  = Color(red: 0.357, green: 0.341, blue: 0.314) // #5B5750
+    static let inkSoft  = adaptive((0.357, 0.341, 0.314), (0.718, 0.698, 0.651)) // #5B5750 / #B7B2A6
     /// Tertiary / hints / dimmed Markdown syntax marks.
-    static let inkFaint = Color(red: 0.541, green: 0.525, blue: 0.486) // #8A867C
+    static let inkFaint = adaptive((0.541, 0.525, 0.486), (0.498, 0.475, 0.435)) // #8A867C / #7F796F
     /// Hairline rules and quiet borders.
-    static let line     = Color(red: 0.922, green: 0.914, blue: 0.882) // #EBE9E1
+    static let line     = adaptive((0.922, 0.914, 0.882), (0.204, 0.196, 0.176)) // #EBE9E1 / #34322D
 
     // MARK: Accent
     /// Used sparingly — selection, the active tab, a pinned star, the fern mark.
-    static let accent   = Color(red: 0.604, green: 0.290, blue: 0.176) // #9A4A2D
+    static let accent   = adaptive((0.604, 0.290, 0.176), (0.761, 0.412, 0.247)) // #9A4A2D / #C2693F
 }

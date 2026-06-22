@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import PhotosUI
+import Photos
 import CoreLocation
 
 struct EntryEditorView: View {
@@ -184,9 +185,16 @@ private struct PhotoStrip: View {
             }
             .padding(.vertical, 2)
         }
-        .frame(height: entry.photoFileNames.isEmpty ? 84 : 84)
+        .frame(height: 84)
         .onChange(of: picks) { _, items in
             Task { await load(items) }
+        }
+        .task {
+            // Ask once for full photo access so Fern leaves "limited" mode and
+            // appears in Settings ▸ Privacy ▸ Photos with a Full Access option.
+            if PHPhotoLibrary.authorizationStatus(for: .readWrite) == .notDetermined {
+                _ = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
+            }
         }
     }
 

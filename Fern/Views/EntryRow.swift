@@ -23,6 +23,13 @@ struct EntryRow: View {
                     Text("· \(mood.label.lowercased())")
                         .font(.label).foregroundStyle(Paper.accent)
                 }
+                if let symbol = entry.weatherSymbol, let temp = entry.weatherTempC {
+                    HStack(spacing: 2) {
+                        Image(systemName: symbol).font(.system(size: 9))
+                        Text("\(Int(temp.rounded()))°").font(.label)
+                    }
+                    .foregroundStyle(Paper.inkFaint)
+                }
             }
             Text(entry.displayTitle).font(.headlineSerif).foregroundStyle(Paper.ink)
             if !entry.body.isEmpty {

@@ -11,7 +11,7 @@ struct FernApp: App {
                 RootView()
             }
             .environment(lock)
-            .preferredColorScheme(.light)   // Fern is light-mode only, by design
+            // Follows the system appearance — light paper, or its dark inverse.
         }
         .modelContainer(Persistence.shared)
     }

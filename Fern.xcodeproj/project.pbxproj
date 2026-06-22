@@ -510,6 +510,8 @@
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Fern uses Face ID to keep your private writing for your eyes only.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Fern can note where an entry was written, if you choose to add a place.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Fern can save images to your photo library.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Fern adds the photos you choose to your entries.";
 				INFOPLIST_KEY_UIFileSharingEnabled = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -577,6 +579,8 @@
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Fern uses Face ID to keep your private writing for your eyes only.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Fern can note where an entry was written, if you choose to add a place.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Fern can save images to your photo library.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Fern adds the photos you choose to your entries.";
 				INFOPLIST_KEY_UIFileSharingEnabled = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

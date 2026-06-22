@@ -4,12 +4,19 @@ import UIKit
 /// CommonMark inline. Everything stylable from one place.
 enum MarkdownTheme {
 
-    // Colors — pulled from the same RGB values as Paper.* (UIColor for UITextView).
-    static let ink     = UIColor(red: 0.110, green: 0.102, blue: 0.090, alpha: 1)
-    static let inkSoft = UIColor(red: 0.357, green: 0.341, blue: 0.314, alpha: 1)
+    // Colors — adaptive (light / inverted dark), matching Paper.* in Palette.swift.
+    private static func dyn(_ l: (CGFloat, CGFloat, CGFloat),
+                            _ d: (CGFloat, CGFloat, CGFloat)) -> UIColor {
+        UIColor { trait in
+            let c = trait.userInterfaceStyle == .dark ? d : l
+            return UIColor(red: c.0, green: c.1, blue: c.2, alpha: 1)
+        }
+    }
+    static let ink     = dyn((0.110, 0.102, 0.090), (0.949, 0.937, 0.910))
+    static let inkSoft = dyn((0.357, 0.341, 0.314), (0.718, 0.698, 0.651))
     /// Used to dim Markdown syntax marks (`**`, `*`, `#`, etc.).
-    static let faint   = UIColor(red: 0.541, green: 0.525, blue: 0.486, alpha: 1)
-    static let accent  = UIColor(red: 0.604, green: 0.290, blue: 0.176, alpha: 1)
+    static let faint   = dyn((0.541, 0.525, 0.486), (0.498, 0.475, 0.435))
+    static let accent  = dyn((0.604, 0.290, 0.176), (0.761, 0.412, 0.247))
 
     // Fonts — system "New York" serif, scaled to the editor's body size.
     static let bodySize: CGFloat = 18
