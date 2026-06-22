@@ -53,4 +53,29 @@ final class JournalingTests: XCTestCase {
         let entries = [Entry(title: "", body: "x", collection: .journal, createdAt: date(2026, 6, 16))]
         XCTAssertEqual(WritingStats.currentStreak(entries, asOf: now), 0)
     }
+
+    // MARK: prompts
+
+    func test_prompt_isStableForSameDay() {
+        let morning = date(2026, 6, 17, 7)
+        let evening = date(2026, 6, 17, 22)
+        XCTAssertEqual(Prompts.forToday(morning), Prompts.forToday(evening))
+    }
+
+    func test_prompt_isAlwaysFromTheList() {
+        XCTAssertTrue(Prompts.all.contains(Prompts.forToday(date(2026, 6, 17))))
+    }
+
+    // MARK: on this day
+
+    func test_onThisDay_findsPastYearsSameDay() {
+        let now = date(2026, 6, 17)
+        let lastYear = Entry(title: "then", body: "x", collection: .journal, createdAt: date(2025, 6, 17, 8))
+        let twoYears = Entry(title: "older", body: "x", collection: .journal, createdAt: date(2024, 6, 17, 8))
+        let otherDay = Entry(title: "no", body: "x", collection: .journal, createdAt: date(2025, 6, 18, 8))
+        let today    = Entry(title: "today", body: "x", collection: .journal, createdAt: now)
+
+        let found = OnThisDay.entries(from: [lastYear, twoYears, otherDay, today], asOf: now)
+        XCTAssertEqual(found.map(\.title), ["then", "older"])
+    }
 }

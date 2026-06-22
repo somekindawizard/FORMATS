@@ -3,6 +3,7 @@ import SwiftData
 
 struct TodayView: View {
     @Environment(\.modelContext) private var context
+    @Query(sort: \Entry.createdAt, order: .reverse) private var entries: [Entry]
     @State private var draft: Entry?
 
     private var greeting: String {
@@ -14,6 +15,11 @@ struct TodayView: View {
         default:      return "Hello,"
         }
     }
+
+    private var prompt: String { Prompts.forToday() }
+    private var onThisDay: [Entry] { OnThisDay.entries(from: entries) }
+    private var wordsThisWeek: Int { WritingStats.wordsThisWeek(entries) }
+    private var streak: Int { WritingStats.currentStreak(entries) }
 
     var body: some View {
         ZStack {
@@ -27,20 +33,47 @@ struct TodayView: View {
                         .font(.masthead)
                         .foregroundStyle(Paper.ink)
 
+                    // Prompt + begin
                     VStack(alignment: .leading, spacing: 10) {
                         Text("A prompt for today").sectionLabel()
-                        Text("What has quietly stayed with you?")
+                        Text(prompt)
                             .font(.titleSerif)
                             .foregroundStyle(Paper.ink)
-                        Button("Begin writing") {
-                            let entry = Entry(title: "", body: "", collection: .journal)
-                            context.insert(entry)
-                            draft = entry
-                        }
-                        .buttonStyle(InkButtonStyle())
-                        .padding(.top, 4)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Button("Begin writing") { beginWriting() }
+                            .buttonStyle(InkButtonStyle())
+                            .padding(.top, 4)
                     }
                     .card()
+
+                    // Stats glance
+                    if wordsThisWeek > 0 || streak > 0 {
+                        HStack(spacing: 0) {
+                            statCell("\(wordsThisWeek)", "words this week")
+                            Rule().frame(width: 1, height: 36)
+                            statCell(streak == 1 ? "1 day" : "\(streak) days", "writing streak")
+                        }
+                        .card(padding: 14)
+                    }
+
+                    // On this day
+                    if let past = onThisDay.first {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("One year ago today").sectionLabel()
+                            NavigationLink(value: past) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(past.displayTitle)
+                                        .font(.headlineSerif).foregroundStyle(Paper.ink)
+                                    if !past.body.isEmpty {
+                                        Text(past.body).font(.calloutSerif)
+                                            .foregroundStyle(Paper.inkSoft).lineLimit(2)
+                                    }
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .card()
+                    }
                 }
                 .padding(.horizontal, 22)
                 .padding(.bottom, 40)
@@ -48,9 +81,27 @@ struct TodayView: View {
             }
         }
         .navigationTitle("Today")
+        .navigationDestination(for: Entry.self) { entry in
+            EntryEditorView(entry: entry)
+        }
         .navigationDestination(item: $draft) { entry in
             EntryEditorView(entry: entry)
         }
+    }
+
+    private func beginWriting() {
+        let entry = Entry(title: "", body: "", collection: .journal)
+        context.insert(entry)
+        draft = entry
+    }
+
+    private func statCell(_ value: String, _ label: String) -> some View {
+        VStack(spacing: 3) {
+            Text(value).font(.figure(20)).foregroundStyle(Paper.accent)
+            Text(label).font(.label).textCase(.uppercase).tracking(1.2)
+                .foregroundStyle(Paper.inkFaint)
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 
