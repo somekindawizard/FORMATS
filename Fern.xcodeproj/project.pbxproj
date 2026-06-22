@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0D0DE355B9F5C242382E500E /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E955C6672E8D66A488569630 /* SmokeTests.swift */; };
+		12F6E70FBF359B44046B6B35 /* EntryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B628B8479289E7CC246E5C5B /* EntryEditorView.swift */; };
 		37DBA60E213431CDD95E2D8F /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ABB577E515BBF1EC0238B8 /* Enums.swift */; };
 		418021820E5FEC3DDBC92F84 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38E46173966308F74B1857F /* SampleData.swift */; };
 		46D0ADB747D5436625E20C0C /* AccessoryBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE4457DFF57CF5D04E853B5 /* AccessoryBar.swift */; };
@@ -64,6 +65,7 @@
 		A38E46173966308F74B1857F /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
 		AD6943B8927D7DB6D40C3730 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		B572112FB741A611B6732471 /* FernTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = FernTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B628B8479289E7CC246E5C5B /* EntryEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryEditorView.swift; sourceTree = "<group>"; };
 		B7ABB577E515BBF1EC0238B8 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		C494A1677F911B9B1C8BE8D4 /* Attachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Attachment.swift; sourceTree = "<group>"; };
 		C576F242B37F60F2186C68E4 /* FernApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FernApp.swift; sourceTree = "<group>"; };
@@ -144,6 +146,7 @@
 		98369E2AF3EA08A2C06290BA /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				B628B8479289E7CC246E5C5B /* EntryEditorView.swift */,
 				33B710B62EE4D952BA7B3585 /* EntryRow.swift */,
 				55662AF595DC7900135BE0CA /* LibraryView.swift */,
 				1EEABECED98FEE4A7B0EF304 /* RootView.swift */,
@@ -283,6 +286,7 @@
 				62166C608582EFCE76A75612 /* Components.swift in Sources */,
 				9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */,
 				F349ECAB7A224AE4DBB6C3C5 /* Entry.swift in Sources */,
+				12F6E70FBF359B44046B6B35 /* EntryEditorView.swift in Sources */,
 				80AC7B1ED6DFFBCDA716827D /* EntryRow.swift in Sources */,
 				37DBA60E213431CDD95E2D8F /* Enums.swift in Sources */,
 				4B409622B1DBAB1DB8FA90C9 /* FernApp.swift in Sources */,
