@@ -16,7 +16,10 @@ struct LibraryView: View {
                             .sectionLabel()
                             .padding(.top, 22).padding(.bottom, 6)
                         ForEach(section.entries) { entry in
-                            EntryRow(entry: entry)
+                            NavigationLink(value: entry) {
+                                EntryRow(entry: entry)
+                            }
+                            .buttonStyle(.plain)
                             Rule()
                         }
                     }
@@ -27,6 +30,9 @@ struct LibraryView: View {
             }
         }
         .navigationTitle("Library")
+        .navigationDestination(for: Entry.self) { entry in
+            EntryEditorView(entry: entry)
+        }
     }
 }
 

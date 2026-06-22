@@ -1,6 +1,10 @@
 import SwiftUI
+import SwiftData
 
 struct TodayView: View {
+    @Environment(\.modelContext) private var context
+    @State private var draft: Entry?
+
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: .now)
         switch h {
@@ -28,9 +32,13 @@ struct TodayView: View {
                         Text("What has quietly stayed with you?")
                             .font(.titleSerif)
                             .foregroundStyle(Paper.ink)
-                        Button("Begin writing") { /* wired in Plan 2 */ }
-                            .buttonStyle(InkButtonStyle())
-                            .padding(.top, 4)
+                        Button("Begin writing") {
+                            let entry = Entry(title: "", body: "", collection: .journal)
+                            context.insert(entry)
+                            draft = entry
+                        }
+                        .buttonStyle(InkButtonStyle())
+                        .padding(.top, 4)
                     }
                     .card()
                 }
@@ -40,7 +48,13 @@ struct TodayView: View {
             }
         }
         .navigationTitle("Today")
+        .navigationDestination(item: $draft) { entry in
+            EntryEditorView(entry: entry)
+        }
     }
 }
 
-#Preview { NavigationStack { TodayView() } }
+#Preview {
+    NavigationStack { TodayView() }
+        .modelContainer(SampleData.previewContainer())
+}
