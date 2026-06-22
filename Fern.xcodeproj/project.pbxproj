@@ -33,6 +33,7 @@
 		9B31CC201C20F047C9C7BEA4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEABECED98FEE4A7B0EF304 /* RootView.swift */; };
 		AAC0A0E5917AA096F46B77A2 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 229223438BC567429C3E5B74 /* Markdown */; };
 		B644B497FD07EFA1C899E95D /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287563240408442B1C299030 /* ModelTests.swift */; };
+		B860398E1BA261EE37594B57 /* SuggestionsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F742AB1A0EB1B95CC7A91A9D /* SuggestionsButton.swift */; };
 		BE12B4B0AD2AF461EE824738 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D7A67E4C33A31B4DDC79FE4E /* Assets.xcassets */; };
 		C1636D6C383C96B5A58C8FA6 /* Prompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB87F5E11E2C5F313CF7C328 /* Prompts.swift */; };
 		C4066C9745B5F006C924AE4C /* WeatherProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70573A969736F0D4419D6DA6 /* WeatherProvider.swift */; };
@@ -104,6 +105,7 @@
 		EA4BBB39E7CE32F7D86E79DC /* BiometricLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricLock.swift; sourceTree = "<group>"; };
 		EB87F5E11E2C5F313CF7C328 /* Prompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prompts.swift; sourceTree = "<group>"; };
 		EC5A0D4651E2BDC4D80A6AC9 /* MarkdownTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownTheme.swift; sourceTree = "<group>"; };
+		F742AB1A0EB1B95CC7A91A9D /* SuggestionsButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionsButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -203,6 +205,7 @@
 				1EEABECED98FEE4A7B0EF304 /* RootView.swift */,
 				E45CA19533DB05C24AC2162D /* SearchView.swift */,
 				A1A9DEAFC77D976210B3D73F /* SettingsView.swift */,
+				F742AB1A0EB1B95CC7A91A9D /* SuggestionsButton.swift */,
 				44DC35D8BD947984A93C106B /* TodayView.swift */,
 			);
 			path = Views;
@@ -384,6 +387,7 @@
 				418021820E5FEC3DDBC92F84 /* SampleData.swift in Sources */,
 				70EBAECB0734E21D12105353 /* SearchView.swift in Sources */,
 				8C55FFD856258A9B5FAD3C30 /* SettingsView.swift in Sources */,
+				B860398E1BA261EE37594B57 /* SuggestionsButton.swift in Sources */,
 				EFB45A7993691F8811C3B8D5 /* TodayView.swift in Sources */,
 				51010732818FD074595FF242 /* Typography.swift in Sources */,
 				C4066C9745B5F006C924AE4C /* WeatherProvider.swift in Sources */,
