@@ -27,8 +27,10 @@ struct RootView: View {
     var body: some View {
         if sizeClass == .regular {
             NavigationSplitView {
-                List(Destination.allCases, selection: $selection) { dest in
-                    Label(dest.title, systemImage: dest.symbol).tag(dest)
+                List(selection: $selection) {
+                    ForEach(Destination.allCases) { dest in
+                        Label(dest.title, systemImage: dest.symbol).tag(dest)
+                    }
                 }
                 .navigationTitle("Fern")
             } detail: {
