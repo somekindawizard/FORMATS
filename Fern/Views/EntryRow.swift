@@ -24,10 +24,14 @@ struct EntryRow: View {
                         .font(.label).foregroundStyle(Paper.accent)
                 }
             }
-            Text(entry.title).font(.headlineSerif).foregroundStyle(Paper.ink)
+            Text(entry.displayTitle).font(.headlineSerif).foregroundStyle(Paper.ink)
             if !entry.body.isEmpty {
                 Text(entry.body).font(.calloutSerif).foregroundStyle(Paper.inkSoft)
                     .lineLimit(2)
+            }
+            if !entry.tagNames.isEmpty {
+                Text(entry.tagNames.map { "#\($0)" }.joined(separator: "  "))
+                    .font(.label).foregroundStyle(Paper.inkFaint)
             }
         }
         .padding(.vertical, 6)
