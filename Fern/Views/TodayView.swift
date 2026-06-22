@@ -3,8 +3,14 @@ import SwiftData
 
 struct TodayView: View {
     @Environment(\.modelContext) private var context
+    @Environment(PromptStore.self) private var promptStore
     @Query(sort: \Entry.createdAt, order: .reverse) private var entries: [Entry]
+
     @State private var draft: Entry?
+    @State private var journalTheme: PromptTheme?
+    @State private var creativeTheme: PromptTheme?
+    @State private var journalPrompt: Prompt?
+    @State private var creativePrompt: Prompt?
 
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: .now)
@@ -16,7 +22,6 @@ struct TodayView: View {
         }
     }
 
-    private var prompt: String { Prompts.forToday() }
     private var onThisDay: [Entry] { OnThisDay.entries(from: entries) }
     private var wordsThisWeek: Int { WritingStats.wordsThisWeek(entries) }
     private var streak: Int { WritingStats.currentStreak(entries) }
@@ -33,20 +38,14 @@ struct TodayView: View {
                         .font(.masthead)
                         .foregroundStyle(Paper.ink)
 
-                    // Prompt + begin
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("A prompt for today").sectionLabel()
-                        Text(prompt)
-                            .font(.titleSerif)
-                            .foregroundStyle(Paper.ink)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Button("Begin writing") { beginWriting() }
-                            .buttonStyle(InkButtonStyle())
-                            .padding(.top, 4)
-                    }
-                    .card()
+                    PromptCard(kind: .journal, theme: $journalTheme, prompt: journalPrompt,
+                               onShuffle: { shuffle(.journal) },
+                               onBegin: { begin(.journal, prompt: journalPrompt) })
 
-                    // Stats glance
+                    PromptCard(kind: .creative, theme: $creativeTheme, prompt: creativePrompt,
+                               onShuffle: { shuffle(.creative) },
+                               onBegin: { begin(.creative, prompt: creativePrompt) })
+
                     if wordsThisWeek > 0 || streak > 0 {
                         HStack(spacing: 0) {
                             statCell("\(wordsThisWeek)", "words this week")
@@ -56,7 +55,6 @@ struct TodayView: View {
                         .card(padding: 14)
                     }
 
-                    // On this day
                     if let past = onThisDay.first {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("One year ago today").sectionLabel()
@@ -87,11 +85,43 @@ struct TodayView: View {
         .navigationDestination(item: $draft) { entry in
             EntryEditorView(entry: entry)
         }
+        .onAppear { loadInitialPrompts() }
+        .onChange(of: journalTheme) { _, _ in refresh(.journal) }
+        .onChange(of: creativeTheme) { _, _ in refresh(.creative) }
     }
 
-    private func beginWriting() {
-        let entry = Entry(title: "", body: "", collection: .journal)
-        entry.prompt = prompt
+    // MARK: prompts
+
+    private func loadInitialPrompts() {
+        if journalPrompt == nil {
+            journalPrompt = PromptLibrary.daily(kind: .journal, theme: journalTheme)
+            if let t = journalPrompt?.text { promptStore.recordShown(t) }
+        }
+        if creativePrompt == nil {
+            creativePrompt = PromptLibrary.daily(kind: .creative, theme: creativeTheme)
+            if let t = creativePrompt?.text { promptStore.recordShown(t) }
+        }
+    }
+
+    private func refresh(_ kind: PromptKind) {
+        let theme = kind == .journal ? journalTheme : creativeTheme
+        let picked = PromptLibrary.daily(kind: kind, theme: theme)
+        if kind == .journal { journalPrompt = picked } else { creativePrompt = picked }
+        if let t = picked?.text { promptStore.recordShown(t) }
+    }
+
+    private func shuffle(_ kind: PromptKind) {
+        let theme = kind == .journal ? journalTheme : creativeTheme
+        let current = kind == .journal ? journalPrompt?.text : creativePrompt?.text
+        guard let picked = PromptLibrary.random(kind: kind, theme: theme, excluding: current) else { return }
+        if kind == .journal { journalPrompt = picked } else { creativePrompt = picked }
+        promptStore.recordShown(picked.text)
+    }
+
+    private func begin(_ kind: PromptKind, prompt: Prompt?) {
+        let collection: Collection = kind == .journal ? .journal : .piece
+        let entry = Entry(title: "", body: "", collection: collection)
+        entry.prompt = prompt?.text
         context.insert(entry)
         draft = entry
     }
@@ -108,5 +138,6 @@ struct TodayView: View {
 
 #Preview {
     NavigationStack { TodayView() }
+        .environment(PromptStore())
         .modelContainer(SampleData.previewContainer())
 }

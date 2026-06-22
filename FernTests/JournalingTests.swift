@@ -56,14 +56,21 @@ final class JournalingTests: XCTestCase {
 
     // MARK: prompts
 
-    func test_prompt_isStableForSameDay() {
+    func test_dailyPrompt_isStableForSameDay() {
         let morning = date(2026, 6, 17, 7)
         let evening = date(2026, 6, 17, 22)
-        XCTAssertEqual(Prompts.forToday(morning), Prompts.forToday(evening))
+        XCTAssertEqual(PromptLibrary.daily(kind: .journal, theme: nil, on: morning)?.text,
+                       PromptLibrary.daily(kind: .journal, theme: nil, on: evening)?.text)
     }
 
-    func test_prompt_isAlwaysFromTheList() {
-        XCTAssertTrue(Prompts.all.contains(Prompts.forToday(date(2026, 6, 17))))
+    func test_promptLibrary_isLarge() {
+        XCTAssertGreaterThan(PromptLibrary.all.count, 700)
+    }
+
+    func test_dailyPrompt_matchesKindAndTheme() {
+        let p = PromptLibrary.daily(kind: .creative, theme: .nature, on: date(2026, 6, 17))
+        XCTAssertEqual(p?.kind, .creative)
+        XCTAssertEqual(p?.theme, .nature)
     }
 
     // MARK: on this day

@@ -9,6 +9,13 @@ struct SettingsView: View {
             PaperBackground()
             Form {
                 Section {
+                    NavigationLink {
+                        SavedPromptsView()
+                    } label: {
+                        Label("Saved prompts", systemImage: "heart.text.square")
+                    }
+                }
+                Section {
                     Toggle("Lock with Face ID", isOn: $lock.isEnabled)
                         .tint(Paper.accent)
                 } footer: {
