@@ -36,13 +36,13 @@ struct TodayView: View {
                             .sectionLabel()
                         HStack(alignment: .center) {
                             Text("Today")
-                                .font(.display(42))
+                                .font(.display(30))
                                 .foregroundStyle(Paper.ink)
                             Spacer()
                             ComposeButton(action: freeWrite)
                         }
                         Text("\(greeting) Austin.")
-                            .font(.titleSerif)
+                            .font(.serif(17))
                             .foregroundStyle(Paper.inkSoft)
                     }
                     .padding(.top, 10)

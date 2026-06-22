@@ -40,7 +40,7 @@ struct PromptCard: View {
             }
 
             Text(prompt?.text ?? "—")
-                .font(.titleSerif)
+                .font(.serif(19))
                 .foregroundStyle(Paper.ink)
                 .fixedSize(horizontal: false, vertical: true)
 
