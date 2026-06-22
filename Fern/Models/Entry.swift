@@ -3,40 +3,28 @@ import Foundation
 
 /// One piece of writing — a dated journal entry or a longer creative piece.
 ///
-/// The foundation Entry is **scalar-only**. Stored relationships (`tags`,
-/// `attachments`) are introduced where they're first used and tested:
-/// - `tags` in Plan 3 (with a proper inverse on Tag and predicate queries)
+/// The foundation `Entry` is **scalar-only**. Stored relationships (`tags`,
+/// `attachments`) arrive where they're first used and tested:
+/// - `tags` in Plan 3 (with a proper inverse on `Tag`)
 /// - `attachments` in Plan 4 (photos)
 ///
-/// Enums (`Collection`, `Mood`) are stored as raw strings with typed
-/// accessors. SwiftData on iOS 26 traps on insert when a stored property
-/// is a custom `enum` — the raw-string indirection is the smallest fix
-/// that keeps the public API (`entry.collection`, `entry.mood`) intact.
+/// Enums are stored as raw strings (`collectionRaw`, `moodRaw`) and surfaced
+/// as typed properties via an **extension** below. Keeping the typed
+/// accessors out of the `@Model` class avoids any chance of the macro
+/// treating them as persistent (which can crash `insert` at runtime).
 @Model
 final class Entry {
     var id: UUID
     var title: String
-    var body: String                  // Markdown
+    var body: String                 // Markdown
+    var collectionRaw: String
     var createdAt: Date
     var updatedAt: Date
+    var moodRaw: String?
     var placeName: String?
     var latitude: Double?
     var longitude: Double?
     var isPinned: Bool
-
-    // MARK: – Enum storage (raw under the hood, typed in the API)
-
-    private var collectionRaw: String
-    var collection: Collection {
-        get { Collection(rawValue: collectionRaw) ?? .journal }
-        set { collectionRaw = newValue.rawValue }
-    }
-
-    private var moodRaw: String?
-    var mood: Mood? {
-        get { moodRaw.flatMap(Mood.init(rawValue:)) }
-        set { moodRaw = newValue?.rawValue }
-    }
 
     init(
         id: UUID = UUID(),
@@ -55,6 +43,20 @@ final class Entry {
         self.updatedAt = createdAt
         self.moodRaw = mood?.rawValue
         self.isPinned = isPinned
+    }
+}
+
+// MARK: – Typed enum accessors (kept out of the @Model body)
+
+extension Entry {
+    var collection: Collection {
+        get { Collection(rawValue: collectionRaw) ?? .journal }
+        set { collectionRaw = newValue.rawValue }
+    }
+
+    var mood: Mood? {
+        get { moodRaw.flatMap(Mood.init(rawValue:)) }
+        set { moodRaw = newValue?.rawValue }
     }
 
     /// Whitespace-separated token count of the body.
