@@ -28,6 +28,7 @@
 		9B31CC201C20F047C9C7BEA4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEABECED98FEE4A7B0EF304 /* RootView.swift */; };
 		AAC0A0E5917AA096F46B77A2 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 229223438BC567429C3E5B74 /* Markdown */; };
 		B644B497FD07EFA1C899E95D /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287563240408442B1C299030 /* ModelTests.swift */; };
+		BE12B4B0AD2AF461EE824738 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D7A67E4C33A31B4DDC79FE4E /* Assets.xcassets */; };
 		CAF77756FD782FF6B9B4F45E /* MarkdownTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5A0D4651E2BDC4D80A6AC9 /* MarkdownTheme.swift */; };
 		CC0328D5AF564B8CA598788A /* MarkdownStylerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E6101F538120C732D4B8695 /* MarkdownStylerTests.swift */; };
 		CEE905C9E387AE4BFEC37187 /* MarkdownTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D4D39EC866C9EFD80CD9546 /* MarkdownTextView.swift */; };
@@ -75,6 +76,7 @@
 		C494A1677F911B9B1C8BE8D4 /* Attachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Attachment.swift; sourceTree = "<group>"; };
 		C576F242B37F60F2186C68E4 /* FernApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FernApp.swift; sourceTree = "<group>"; };
 		D5E1846726DBE1B8EB6ADCED /* BarnsleyFernView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFernView.swift; sourceTree = "<group>"; };
+		D7A67E4C33A31B4DDC79FE4E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E4414F13CC04DFCD17197E71 /* Palette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Palette.swift; sourceTree = "<group>"; };
 		E45CA19533DB05C24AC2162D /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		E55DCA828B94ADC5E1841447 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 		50B77B92874C83A911247AB7 /* Fern */ = {
 			isa = PBXGroup;
 			children = (
+				D7A67E4C33A31B4DDC79FE4E /* Assets.xcassets */,
 				C576F242B37F60F2186C68E4 /* FernApp.swift */,
 				08E10046E72A3938832A9FAD /* Persistence.swift */,
 				CE35430BC9A01FE8982D34A1 /* Botanical */,
@@ -212,6 +215,7 @@
 			buildConfigurationList = 54266CBDF5D736B14FB789CB /* Build configuration list for PBXNativeTarget "Fern" */;
 			buildPhases = (
 				B96F7B98DE952009051E3D6C /* Sources */,
+				7DD26EC3470FB2258B91276E /* Resources */,
 				0539D7349EC76DB7F4AADAAD /* Frameworks */,
 			);
 			buildRules = (
@@ -281,6 +285,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7DD26EC3470FB2258B91276E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE12B4B0AD2AF461EE824738 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		0C4EFD3113D5F9C2B1BA7F9C /* Sources */ = {
