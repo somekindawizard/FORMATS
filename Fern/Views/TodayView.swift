@@ -50,7 +50,7 @@ struct TodayView: View {
                     if wordsThisWeek > 0 || streak > 0 {
                         HStack(spacing: 0) {
                             statCell("\(wordsThisWeek)", "words this week")
-                            Rule().frame(width: 1, height: 36)
+                            Rectangle().fill(Paper.line).frame(width: 1, height: 36)
                             statCell(streak == 1 ? "1 day" : "\(streak) days", "writing streak")
                         }
                         .card(padding: 14)
