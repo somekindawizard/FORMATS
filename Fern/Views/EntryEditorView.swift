@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import PhotosUI
+import CoreLocation
 
 struct EntryEditorView: View {
     @Bindable var entry: Entry
@@ -86,6 +87,7 @@ private struct MetadataRow: View {
                 if let place = entry.placeName {
                     Button {
                         entry.placeName = nil; entry.latitude = nil; entry.longitude = nil
+                        entry.weatherSymbol = nil; entry.weatherTempC = nil
                     } label: { chip(place) }
                     .buttonStyle(.plain)
                 } else {
@@ -94,6 +96,15 @@ private struct MetadataRow: View {
                     }
                     .buttonStyle(.plain)
                     .disabled(locating)
+                }
+
+                if let symbol = entry.weatherSymbol, let temp = entry.weatherTempC {
+                    Label("\(Int(temp.rounded()))°", systemImage: symbol)
+                        .font(.calloutSerif)
+                        .foregroundStyle(Paper.inkSoft)
+                        .padding(.vertical, 5).padding(.horizontal, 10)
+                        .background(Capsule().stroke(Paper.line, lineWidth: 1)
+                            .background(Capsule().fill(Paper.raised)))
                 }
             }
         }
@@ -106,6 +117,11 @@ private struct MetadataRow: View {
             entry.placeName = place.name
             entry.latitude = place.latitude
             entry.longitude = place.longitude
+            let location = CLLocation(latitude: place.latitude, longitude: place.longitude)
+            if let weather = await WeatherProvider.current(for: location) {
+                entry.weatherSymbol = weather.symbol
+                entry.weatherTempC = weather.tempC
+            }
         }
     }
 

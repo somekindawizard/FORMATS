@@ -29,6 +29,10 @@ targets:
     dependencies:
       - package: swift-markdown
         product: Markdown
+    entitlements:
+      path: Fern/Fern.entitlements
+      properties:
+        com.apple.developer.weatherkit: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: garden.fern.Fern
