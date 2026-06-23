@@ -48,7 +48,8 @@ struct EntryEditorView: View {
                 PhotoStrip(entry: entry)
 
                 TagsEditor(entry: entry)
-                    .padding(.bottom, 4)
+
+                WritingRule()
 
                 MarkdownTextView(text: $entry.body, controller: controller)
                     .focused($bodyFocused)
@@ -182,6 +183,27 @@ struct EntryEditorView: View {
         if let image = renderer.uiImage {
             shareItems = ShareItems(items: [image])
         }
+    }
+}
+
+// MARK: - Writing rule
+
+/// A quiet hairline that marks where the header ends and the writing begins.
+/// Fades at both ends around a small centered leaf — a soft Fern fingerprint.
+private struct WritingRule: View {
+    var body: some View {
+        HStack(spacing: 12) {
+            LinearGradient(colors: [Paper.line.opacity(0), Paper.line.opacity(0.9)],
+                           startPoint: .leading, endPoint: .trailing)
+                .frame(height: 1)
+            Image(systemName: "leaf")
+                .font(.system(size: 9))
+                .foregroundStyle(Paper.inkFaint)
+            LinearGradient(colors: [Paper.line.opacity(0.9), Paper.line.opacity(0)],
+                           startPoint: .leading, endPoint: .trailing)
+                .frame(height: 1)
+        }
+        .padding(.vertical, 6)
     }
 }
 

@@ -82,6 +82,7 @@
 		F349ECAB7A224AE4DBB6C3C5 /* Entry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7151C81AE2B364DEA4C780 /* Entry.swift */; };
 		F47842091633FBF109B3AA8F /* FernWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1E61F4A394060DA98CFFDC6B /* FernWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		F644D9FD13C1AF7313F2738B /* LocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC7E99A123649E4FFAC4ECD /* LocationProvider.swift */; };
+		F68045FA8F51CCC21E75F553 /* Thesaurus.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF0A860ABA882ECEE54F2A7 /* Thesaurus.swift */; };
 		F81930CCA38BB2AB13EC20F9 /* Prompts+Nature.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AD8AFAC01175AC14737031 /* Prompts+Nature.swift */; };
 		F949628E768A92B2247D0559 /* SavedPromptsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74089F72177AC086B585AD67 /* SavedPromptsView.swift */; };
 		FAE502D993F02FEDCA8EA712 /* DateGroupingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400F7BE208A962AA4679EC06 /* DateGroupingTests.swift */; };
@@ -180,6 +181,7 @@
 		D3A20EA5F23C21B6ACF018CE /* Prompts+Extras.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Extras.swift"; sourceTree = "<group>"; };
 		D5E1846726DBE1B8EB6ADCED /* BarnsleyFernView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFernView.swift; sourceTree = "<group>"; };
 		D7A67E4C33A31B4DDC79FE4E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DAF0A860ABA882ECEE54F2A7 /* Thesaurus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Thesaurus.swift; sourceTree = "<group>"; };
 		DDDBBE40B1B0CA3FFA37EB3D /* Fern.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Fern.entitlements; sourceTree = "<group>"; };
 		E4414F13CC04DFCD17197E71 /* Palette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Palette.swift; sourceTree = "<group>"; };
 		E45CA19533DB05C24AC2162D /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
@@ -215,6 +217,7 @@
 				E7826A6B5EB47145BAAF378E /* MarkdownStyler.swift */,
 				3D4D39EC866C9EFD80CD9546 /* MarkdownTextView.swift */,
 				EC5A0D4651E2BDC4D80A6AC9 /* MarkdownTheme.swift */,
+				DAF0A860ABA882ECEE54F2A7 /* Thesaurus.swift */,
 			);
 			path = Editor;
 			sourceTree = "<group>";
@@ -603,6 +606,7 @@
 				B860398E1BA261EE37594B57 /* SuggestionsButton.swift in Sources */,
 				C0E4621C3F0203251652A3FE /* ThemeOptions.swift in Sources */,
 				92ED5F2A942664849205A3E5 /* ThemeStore.swift in Sources */,
+				F68045FA8F51CCC21E75F553 /* Thesaurus.swift in Sources */,
 				EFB45A7993691F8811C3B8D5 /* TodayView.swift in Sources */,
 				51010732818FD074595FF242 /* Typography.swift in Sources */,
 				C4066C9745B5F006C924AE4C /* WeatherProvider.swift in Sources */,

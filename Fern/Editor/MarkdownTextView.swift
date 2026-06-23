@@ -49,6 +49,11 @@ struct MarkdownTextView: UIViewRepresentable {
         func textViewDidChange(_ textView: UITextView) {
             parent.text = textView.text ?? ""
             restyle(textView)
+            parent.controller?.refreshCurrentWord()
+        }
+
+        func textViewDidChangeSelection(_ textView: UITextView) {
+            parent.controller?.refreshCurrentWord()
         }
 
         /// Re-apply Markdown attributes over the existing characters.
