@@ -15,45 +15,40 @@ struct PaperCard: View {
     private let line    = Color(red: 0.922, green: 0.914, blue: 0.882)
     private let fern = BarnsleyFern(seed: 4_211, count: 14_000)
 
-    /// The full body, Markdown rendered (no raw `**`/`#`). Falls back to the
-    /// prompt for a still-blank piece.
-    private var rendered: AttributedString {
-        let body = entry.body.trimmingCharacters(in: .whitespacesAndNewlines)
-        let raw = body.isEmpty ? (entry.prompt ?? "") : entry.body
-        // Inline photo tokens are rendered separately below, not as text.
-        let source = raw.replacingOccurrences(of: PhotoToken.pattern, with: "",
-                                              options: .regularExpression)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !source.isEmpty else { return AttributedString("") }
-        return MarkdownRender.styled(source, .init(
-            body: .system(size: 34, design: .serif),
-            heading: { level in .system(size: level <= 1 ? 46 : 40,
-                                        weight: .semibold, design: .serif) },
+    /// Card typography — large, fixed-light, with the editorial figure/ligature
+    /// features. Fed to the same `RenderedBody` renderer the reader uses.
+    private var cardStyle: MarkdownRender.Style {
+        MarkdownRender.Style(
+            body: EditorialType.font(34),
+            heading: { level in EditorialType.font(level <= 1 ? 46 : 40, weight: .semibold) },
             mono: .system(size: 31, design: .monospaced),
-            ink: ink, soft: inkSoft, accent: accent))
+            ink: ink, soft: inkSoft, accent: accent)
+    }
+
+    private var source: String {
+        let body = entry.body.trimmingCharacters(in: .whitespacesAndNewlines)
+        return body.isEmpty ? (entry.prompt ?? "") : entry.body
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
-            Text(entry.createdAt.formatted(.dateTime.month(.wide).day().year()))
-                .font(.system(size: 26, weight: .semibold, design: .serif))
-                .textCase(.uppercase).tracking(3)
+            Text(entry.createdAt.formatted(.dateTime.weekday(.wide).month(.wide).day().year()))
+                .font(EditorialType.font(24, smallCaps: true)).tracking(2.5)
                 .foregroundStyle(inkSoft)
 
             Text(entry.displayTitle)
-                .font(.system(size: 64, weight: .medium, design: .serif))
+                .font(EditorialType.font(64, weight: .medium))
                 .foregroundStyle(ink)
                 .fixedSize(horizontal: false, vertical: true)
 
-            let text = rendered
-            if !text.characters.isEmpty {
-                Text(text)
-                    .foregroundStyle(inkSoft)
-                    .lineSpacing(8)
-                    .fixedSize(horizontal: false, vertical: true)
+            if !source.isEmpty {
+                RenderedBody(markdown: source, wash: entry.photoWash,
+                             style: cardStyle, dropCap: false, photoWidth: 900,
+                             captionFont: EditorialType.font(26, italic: true),
+                             ruleSize: 30, spacing: 22)
             }
 
-            if !photos.isEmpty {
+            if !loosePhotos.isEmpty {
                 cardPhotos
             }
 
@@ -82,10 +77,14 @@ struct PaperCard: View {
         .frame(width: 1080, alignment: .topLeading)
         .frame(minHeight: 1080, alignment: .topLeading)
         .background(paper)
+        .environment(\.colorScheme, .light)   // card is always light, regardless of device
     }
 
-    private var photos: [UIImage] {
-        entry.photoFileNames.prefix(3).compactMap { PhotoStore.load($0) }
+    /// Attachments not embedded inline (those render in the body); shown at the foot.
+    private var loosePhotos: [UIImage] {
+        entry.photoFileNames
+            .filter { !entry.body.contains("fern://\($0)") }
+            .prefix(3).compactMap { PhotoStore.load($0) }
     }
 
     /// The note's Apple Pencil ink, rendered to an image for the card.
@@ -97,12 +96,13 @@ struct PaperCard: View {
     }
 
     private var cardPhotos: some View {
-        HStack(spacing: 16) {
-            ForEach(Array(photos.enumerated()), id: \.offset) { _, img in
+        let imgs = loosePhotos
+        return HStack(spacing: 16) {
+            ForEach(Array(imgs.enumerated()), id: \.offset) { _, img in
                 Image(uiImage: entry.photoWash ? EditorPhotos.washed(img) : img)
                     .resizable().scaledToFill()
-                    .frame(width: photos.count == 1 ? 952 : 300,
-                           height: photos.count == 1 ? 560 : 300)
+                    .frame(width: imgs.count == 1 ? 952 : 300,
+                           height: imgs.count == 1 ? 560 : 300)
                     .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
             }
         }

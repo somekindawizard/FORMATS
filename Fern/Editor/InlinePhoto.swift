@@ -74,17 +74,27 @@ enum ReaderBlock {
 struct RenderedBody: View {
     let markdown: String
     let wash: Bool
-    /// Disabled for PDF export (ImageRenderer can't snapshot the UIKit drop cap).
+    /// Typography/colors — reader defaults; the share card passes a larger, fixed-light style.
+    var style: MarkdownRender.Style = ReadingView.readerStyle
+    /// Disabled for PDF export / the card (ImageRenderer can't snapshot the UIKit drop cap).
     var dropCap: Bool = true
+    /// Fixed inline-photo width (card). When nil, adapts to the size class.
+    var photoWidth: CGFloat? = nil
+    var captionFont: Font = .calloutSerif
+    var ruleSize: CGFloat = 13
+    var spacing: CGFloat = 16
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     private var blocks: [ReaderBlock] { RenderedBody.blocks(markdown) }
     private var firstTextIndex: Int? {
         blocks.firstIndex { if case .text = $0 { return true } else { return false } }
     }
+    private var resolvedPhotoWidth: CGFloat? {
+        photoWidth ?? (sizeClass == .regular ? 460 : nil)
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: spacing) {
             ForEach(Array(blocks.enumerated()), id: \.offset) { i, block in
                 switch block {
                 case .text(let s):
@@ -92,31 +102,31 @@ struct RenderedBody: View {
                         DropCapText(markdown: s)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     } else {
-                        Text(MarkdownRender.styled(s, ReadingView.readerStyle))
+                        Text(MarkdownRender.styled(s, style))
                             .lineSpacing(6)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .textSelection(.enabled)
                     }
                 case .photo(let name):
                     WashedImage(name: name, wash: wash)
-                        .frame(maxWidth: sizeClass == .regular ? 460 : .infinity)
+                        .frame(maxWidth: resolvedPhotoWidth ?? .infinity)
                         .frame(maxWidth: .infinity, alignment: .center)
                 case .quote(let s):
-                    Text(MarkdownRender.styled(s, ReadingView.readerStyle))
+                    Text(MarkdownRender.styled(s, style))
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.vertical, 4)
                 case .caption(let s):
                     Text(s)
-                        .font(.calloutSerif).italic()
-                        .foregroundStyle(Paper.inkSoft)
+                        .font(captionFont).italic()
+                        .foregroundStyle(style.soft)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.top, -8)
                 case .rule:
                     Image(systemName: "leaf")
-                        .font(.system(size: 13))
-                        .foregroundStyle(Paper.inkFaint)
+                        .font(.system(size: ruleSize))
+                        .foregroundStyle(style.soft)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.vertical, 8)
                 }
