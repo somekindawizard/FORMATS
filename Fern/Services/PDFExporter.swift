@@ -71,7 +71,7 @@ private struct PrintPage: View {
                     .font(.system(size: 26, weight: .semibold, design: .serif))
             }
 
-            RenderedBody(markdown: entry.body, wash: entry.photoWash)
+            RenderedBody(markdown: entry.body, wash: entry.photoWash, dropCap: false)
 
             if let drawing {
                 Image(uiImage: drawing)

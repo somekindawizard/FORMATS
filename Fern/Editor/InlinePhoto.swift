@@ -68,11 +68,14 @@ enum ReaderBlock {
     case photo(String)
     case rule
     case caption(String)
+    case quote(String)   // raw "> …" lines, rendered centered italic
 }
 
 struct RenderedBody: View {
     let markdown: String
     let wash: Bool
+    /// Disabled for PDF export (ImageRenderer can't snapshot the UIKit drop cap).
+    var dropCap: Bool = true
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     private var blocks: [ReaderBlock] { RenderedBody.blocks(markdown) }
@@ -85,14 +88,24 @@ struct RenderedBody: View {
             ForEach(Array(blocks.enumerated()), id: \.offset) { i, block in
                 switch block {
                 case .text(let s):
-                    Text(RenderedBody.styled(s, dropCap: i == firstTextIndex))
-                        .lineSpacing(6)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .textSelection(.enabled)
+                    if dropCap && i == firstTextIndex && RenderedBody.dropCapEligible(s) {
+                        DropCapText(markdown: s)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    } else {
+                        Text(MarkdownRender.styled(s, ReadingView.readerStyle))
+                            .lineSpacing(6)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .textSelection(.enabled)
+                    }
                 case .photo(let name):
                     WashedImage(name: name, wash: wash)
                         .frame(maxWidth: sizeClass == .regular ? 460 : .infinity)
                         .frame(maxWidth: .infinity, alignment: .center)
+                case .quote(let s):
+                    Text(MarkdownRender.styled(s, ReadingView.readerStyle))
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 4)
                 case .caption(let s):
                     Text(s)
                         .font(.calloutSerif).italic()
@@ -121,35 +134,40 @@ struct RenderedBody: View {
                 out.append(.photo(name))
             case .text(let text):
                 var buffer: [String] = []
-                func flush() {
+                var quoteBuffer: [String] = []
+                func flushText() {
                     let s = buffer.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
                     if !s.isEmpty { out.append(.text(s)) }
                     buffer = []
                 }
+                func flushQuote() {
+                    if !quoteBuffer.isEmpty { out.append(.quote(quoteBuffer.joined(separator: "\n"))) }
+                    quoteBuffer = []
+                }
                 for line in text.components(separatedBy: "\n") {
                     let t = line.trimmingCharacters(in: .whitespaces)
-                    if t.count >= 3, Set(t).count == 1, "-*_".contains(t.first!) {
-                        flush(); out.append(.rule)
+                    if t.hasPrefix(">") {
+                        flushText(); quoteBuffer.append(t)
+                    } else if t.count >= 3, Set(t).count == 1, "-*_".contains(t.first!) {
+                        flushText(); flushQuote(); out.append(.rule)
                     } else if t.hasPrefix("// ") {
-                        flush(); out.append(.caption(String(t.dropFirst(3))))
+                        flushText(); flushQuote(); out.append(.caption(String(t.dropFirst(3))))
                     } else {
-                        buffer.append(line)
+                        flushQuote(); buffer.append(line)
                     }
                 }
-                flush()
+                flushText(); flushQuote()
             }
         }
         return out
     }
 
-    /// Render a prose block; optionally raise a decorative initial (drop cap).
-    static func styled(_ s: String, dropCap: Bool) -> AttributedString {
-        var a = MarkdownRender.styled(s, ReadingView.readerStyle)
-        guard dropCap, !s.hasPrefix("#"),
-              let idx = a.characters.firstIndex(where: { $0.isLetter }) else { return a }
-        let next = a.index(afterCharacter: idx)
-        a[idx..<next].font = .custom("Fraunces", size: 46).weight(.semibold)
-        a[idx..<next].foregroundColor = Paper.accent
-        return a
+    /// A block can open with a drop cap if it's plain prose (not a heading/list).
+    static func dropCapEligible(_ s: String) -> Bool {
+        let t = s.trimmingCharacters(in: .whitespaces)
+        guard !t.isEmpty, !t.hasPrefix("#"), !t.hasPrefix(">"),
+              t.range(of: #"^([-*+]|\d+\.)\s"#, options: .regularExpression) == nil
+        else { return false }
+        return t.contains(where: { $0.isLetter })
     }
 }
