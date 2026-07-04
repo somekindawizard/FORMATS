@@ -32,6 +32,7 @@ enum MarkdownRender {
         }
         let inline = [
             (#"!\[[^\]]*\]\(fern://[^)]+\)"#, ""),   // inline photo tokens
+            (#"\[([^\]]+)\]\([^)]+\)"#, "$1"),       // links → label
             (#"\*\*(.+?)\*\*"#, "$1"),
             (#"(?<!\*)\*(?!\*)([^*\n]+)\*(?!\*)"#, "$1"),
             (#"~~(.+?)~~"#, "$1"),
@@ -123,7 +124,29 @@ enum MarkdownRender {
             guard idx + dc.count <= chars.count else { return false }
             return Array(chars[idx..<idx + dc.count]) == dc
         }
+        func indexOf(_ ch: Character, from: Int) -> Int? {
+            var k = from
+            while k < chars.count { if chars[k] == ch { return k }; k += 1 }
+            return nil
+        }
         while i < chars.count {
+            // Link: [label](url) — but not an image ![..](..)
+            if chars[i] == "[", !(i > 0 && chars[i - 1] == "!"),
+               let bracket = indexOf("]", from: i + 1),
+               bracket + 1 < chars.count, chars[bracket + 1] == "(",
+               let paren = indexOf(")", from: bracket + 2) {
+                flush()
+                let label = String(chars[(i + 1)..<bracket])
+                let urlString = String(chars[(bracket + 2)..<paren])
+                var link = AttributedString(label)
+                link.font = font
+                link.foregroundColor = s.accent
+                link.underlineStyle = .single
+                if let url = URL(string: urlString) { link.link = url }
+                out += link
+                i = paren + 1
+                continue
+            }
             if let d = delimiters.first(where: { starts($0, at: i) }) {
                 let open = i + d.count
                 var j = open

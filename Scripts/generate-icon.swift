@@ -4,9 +4,25 @@ import CoreGraphics
 import ImageIO
 import UniformTypeIdentifiers
 
-// Palette (matches Paper.* RGB)
-let paper  = CGColor(red: 0.965, green: 0.961, blue: 0.945, alpha: 1)
-let accent = CGColor(red: 0.604, green: 0.290, blue: 0.176, alpha: 1)
+// Mode: light (default) | dark | tinted. Usage: generate-icon.swift <mode> <outPath>
+let mode = CommandLine.arguments.dropFirst().first ?? "light"
+
+// Palette (matches Paper.* RGB). Background + fern ink vary by mode.
+let bg: CGColor
+let fernColor: CGColor
+switch mode {
+case "dark":
+    // Cream fern on a warm designer-black.
+    bg        = CGColor(red: 0.086, green: 0.078, blue: 0.068, alpha: 1)
+    fernColor = CGColor(red: 0.965, green: 0.961, blue: 0.945, alpha: 0.74)
+case "tinted":
+    // Grayscale on black — iOS applies the user's chosen tint.
+    bg        = CGColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1)
+    fernColor = CGColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.82)
+default:
+    bg        = CGColor(red: 0.965, green: 0.961, blue: 0.945, alpha: 1)
+    fernColor = CGColor(red: 0.604, green: 0.290, blue: 0.176, alpha: 0.62)
+}
 
 let size = 1024
 let cs = CGColorSpaceCreateDeviceRGB()
@@ -18,8 +34,8 @@ guard let ctx = CGContext(
     bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
 ) else { fatalError("ctx") }
 
-// Paper background — fill the whole bitmap.
-ctx.setFillColor(paper)
+// Background — fill the whole bitmap.
+ctx.setFillColor(bg)
 ctx.fill(CGRect(x: 0, y: 0, width: size, height: size))
 
 // Splitmix64 inline (same constants as the app)
@@ -75,7 +91,7 @@ let scale = min(drawW / spanX, drawH / spanY)
 let offX = (Double(size) - spanX * scale) / 2
 let offY = (Double(size) - spanY * scale) / 2
 
-ctx.setFillColor(accent.copy(alpha: 0.62) ?? accent)
+ctx.setFillColor(fernColor)
 let dot = 2.6
 for (rx, ry) in rpts {
     let sx = offX + (rx - mnx) * scale - dot / 2
@@ -85,7 +101,7 @@ for (rx, ry) in rpts {
 
 guard let image = ctx.makeImage() else { fatalError("image") }
 
-let outURL = URL(fileURLWithPath: CommandLine.arguments.dropFirst().first
+let outURL = URL(fileURLWithPath: CommandLine.arguments.dropFirst(2).first
                  ?? "Fern/Assets.xcassets/AppIcon.appiconset/icon-1024.png")
 guard let dest = CGImageDestinationCreateWithURL(
     outURL as CFURL, UTType.png.identifier as CFString, 1, nil

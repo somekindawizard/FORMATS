@@ -1,10 +1,23 @@
 import SwiftUI
 import UIKit
+import PencilKit
 
 /// A distraction-free, read-only view of an entry — the Markdown rendered and
 /// typeset, no editing chrome.
 struct ReadingView: View {
     let entry: Entry
+
+    private var wordCount: Int {
+        MarkdownRender.plainText(entry.body)
+            .split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count
+    }
+    private var readMinutes: Int { max(1, Int((Double(wordCount) / 220).rounded(.up))) }
+
+    private var ink: UIImage? {
+        guard let d = DrawingStore.load(entry.id), !d.strokes.isEmpty,
+              d.bounds.width > 1, d.bounds.height > 1 else { return nil }
+        return d.image(from: d.bounds, scale: UIScreen.main.scale)
+    }
 
     var body: some View {
         ZStack {
@@ -18,7 +31,19 @@ struct ReadingView: View {
                             .font(.masthead)
                             .foregroundStyle(Paper.ink)
                     }
+                    if wordCount > 0 {
+                        Text("\(wordCount) words · \(readMinutes) min read")
+                            .font(.calloutSerif)
+                            .foregroundStyle(Paper.inkFaint)
+                    }
                     RenderedBody(markdown: entry.body, wash: entry.photoWash)
+
+                    if let ink {
+                        Image(uiImage: ink)
+                            .resizable().scaledToFit()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, 8)
+                    }
                 }
                 .padding(.horizontal, 26)
                 .padding(.top, 12)
@@ -27,6 +52,7 @@ struct ReadingView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .tint(Paper.accent)
     }
 
     /// Reading-mode typography — the same serif scale as the app, syntax removed.
