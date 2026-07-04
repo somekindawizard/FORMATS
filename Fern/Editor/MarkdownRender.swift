@@ -31,6 +31,7 @@ enum MarkdownRender {
             s = s.replacingOccurrences(of: p, with: "", options: .regularExpression)
         }
         let inline = [
+            (#"!\[[^\]]*\]\(fern://[^)]+\)"#, ""),   // inline photo tokens
             (#"\*\*(.+?)\*\*"#, "$1"),
             (#"(?<!\*)\*(?!\*)([^*\n]+)\*(?!\*)"#, "$1"),
             (#"~~(.+?)~~"#, "$1"),

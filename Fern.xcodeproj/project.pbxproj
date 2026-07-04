@@ -57,6 +57,7 @@
 		AAC0A0E5917AA096F46B77A2 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 229223438BC567429C3E5B74 /* Markdown */; };
 		B644B497FD07EFA1C899E95D /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287563240408442B1C299030 /* ModelTests.swift */; };
 		B860398E1BA261EE37594B57 /* SuggestionsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F742AB1A0EB1B95CC7A91A9D /* SuggestionsButton.swift */; };
+		BAAD7E05C3F0C47032BF6E88 /* InlinePhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD7A3372E778227A40182354 /* InlinePhoto.swift */; };
 		BB8ECF80E64C3F7845CD07C5 /* Redaction-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9BC51BE11191B28C0AA2C34F /* Redaction-Bold.ttf */; };
 		BDB9D4177DA66409E04B8B4D /* ComposeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E10DFCAB855A14CE7D486A /* ComposeButton.swift */; };
 		BE12B4B0AD2AF461EE824738 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D7A67E4C33A31B4DDC79FE4E /* Assets.xcassets */; };
@@ -178,6 +179,7 @@
 		C576F242B37F60F2186C68E4 /* FernApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FernApp.swift; sourceTree = "<group>"; };
 		C9AD8AFAC01175AC14737031 /* Prompts+Nature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Nature.swift"; sourceTree = "<group>"; };
 		CBC7E99A123649E4FFAC4ECD /* LocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationProvider.swift; sourceTree = "<group>"; };
+		CD7A3372E778227A40182354 /* InlinePhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlinePhoto.swift; sourceTree = "<group>"; };
 		D35FC6DC207A6791C7446EE4 /* OnThisDay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnThisDay.swift; sourceTree = "<group>"; };
 		D383A32ED71D29BD1C19B13C /* FernTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FernTabBar.swift; sourceTree = "<group>"; };
 		D3A20EA5F23C21B6ACF018CE /* Prompts+Extras.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Extras.swift"; sourceTree = "<group>"; };
@@ -215,6 +217,7 @@
 			isa = PBXGroup;
 			children = (
 				3BE4457DFF57CF5D04E853B5 /* AccessoryBar.swift */,
+				CD7A3372E778227A40182354 /* InlinePhoto.swift */,
 				EB1ED64338FFF646CDCEB947 /* MarkdownEditorController.swift */,
 				372C0EB975F143697FA69E96 /* MarkdownRender.swift */,
 				E7826A6B5EB47145BAAF378E /* MarkdownStyler.swift */,
@@ -574,6 +577,7 @@
 				E473E6FD8FFFD9B1D6D51332 /* FernTabBar.swift in Sources */,
 				3D0FB454E38EAC3E80B50E90 /* FiddleheadShape.swift in Sources */,
 				C0291DEC6228E55CC51444BF /* Fonts.swift in Sources */,
+				BAAD7E05C3F0C47032BF6E88 /* InlinePhoto.swift in Sources */,
 				7247B5144A9C2346788FEE39 /* LibraryExporter.swift in Sources */,
 				7BCAFCB50A4D4363CC753425 /* LibraryView.swift in Sources */,
 				F644D9FD13C1AF7313F2738B /* LocationProvider.swift in Sources */,

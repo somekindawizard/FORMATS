@@ -18,7 +18,11 @@ struct PaperCard: View {
     /// prompt for a still-blank piece.
     private var rendered: AttributedString {
         let body = entry.body.trimmingCharacters(in: .whitespacesAndNewlines)
-        let source = body.isEmpty ? (entry.prompt ?? "") : entry.body
+        let raw = body.isEmpty ? (entry.prompt ?? "") : entry.body
+        // Inline photo tokens are rendered separately below, not as text.
+        let source = raw.replacingOccurrences(of: PhotoToken.pattern, with: "",
+                                              options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
         guard !source.isEmpty else { return AttributedString("") }
         return MarkdownRender.styled(source, .init(
             body: .system(size: 34, design: .serif),
@@ -83,6 +87,7 @@ struct PaperCard: View {
                     .resizable().scaledToFill()
                     .frame(width: photos.count == 1 ? 952 : 300,
                            height: photos.count == 1 ? 560 : 300)
+                    .modifier(Wash(on: entry.photoWash))
                     .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
             }
         }

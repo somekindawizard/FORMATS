@@ -42,7 +42,10 @@ final class Entry {
     var tagNames: [String] = []
     /// Filenames of attached photos, stored in Documents/Photos (see PhotoStore).
     /// A value array, not a relationship — same robustness reasoning as tags.
+    /// Photos may also be embedded inline in `body` as `![](fern://<name>)`.
     var photoFileNames: [String] = []
+    /// When true, inline photos render in a theme-toned black-and-white wash.
+    var photoWash: Bool = false
 
     init(
         id: UUID = UUID(),
@@ -98,7 +101,7 @@ extension Entry {
     var displayTitle: String {
         let t = title.trimmingCharacters(in: .whitespacesAndNewlines)
         if !t.isEmpty { return t }
-        let firstLine = body
+        let firstLine = MarkdownRender.plainText(body)
             .split(whereSeparator: \.isNewline)
             .first { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
         if let firstLine { return String(firstLine).trimmingCharacters(in: .whitespaces) }

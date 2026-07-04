@@ -125,6 +125,12 @@ enum MarkdownStyler {
             dim(m.range)
         }
 
+        // Inline photo token — shown as a quiet placeholder in the editor.
+        eachMatch("!\\[[^\\]]*\\]\\(fern://[^)]+\\)") { m in
+            dim(m.range)
+            addTrait(.traitItalic, over: m.range)
+        }
+
         return text
     }
 }

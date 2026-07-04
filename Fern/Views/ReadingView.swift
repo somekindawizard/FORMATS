@@ -18,10 +18,7 @@ struct ReadingView: View {
                             .font(.masthead)
                             .foregroundStyle(Paper.ink)
                     }
-                    Text(MarkdownRender.styled(entry.body, Self.readerStyle))
-                        .lineSpacing(6)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .textSelection(.enabled)
+                    RenderedBody(markdown: entry.body, wash: entry.photoWash)
                 }
                 .padding(.horizontal, 26)
                 .padding(.top, 12)

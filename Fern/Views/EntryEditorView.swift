@@ -15,6 +15,8 @@ struct EntryEditorView: View {
     @State private var showingNewNotebook = false
     @State private var newNotebookName = ""
     @State private var shareItems: ShareItems?
+    @State private var showInlinePhotoPicker = false
+    @State private var inlinePhotoPicks: [PhotosPickerItem] = []
 
     private var notebooks: [String] {
         Array(Set(allEntries.compactMap(\.notebook))).sorted()
@@ -58,7 +60,8 @@ struct EntryEditorView: View {
             .padding(.horizontal, 22)
             .safeAreaInset(edge: .bottom) {
                 if bodyFocused {
-                    AccessoryBar(controller: controller, text: entry.body)
+                    AccessoryBar(controller: controller, text: entry.body,
+                                 onInsertPhoto: { showInlinePhotoPicker = true })
                 }
             }
 
@@ -106,6 +109,10 @@ struct EntryEditorView: View {
                         Divider()
                         Button("New notebook…") { showingNewNotebook = true }
                     }
+                    Button { entry.photoWash.toggle() } label: {
+                        Label(entry.photoWash ? "Photo wash: on" : "Photo wash",
+                              systemImage: entry.photoWash ? "camera.filters" : "photo.on.rectangle")
+                    }
                     Divider()
                     Button { shareCard() } label: {
                         Label("Share as card", systemImage: "photo")
@@ -119,6 +126,11 @@ struct EntryEditorView: View {
             }
         }
         .sheet(item: $shareItems) { ActivityView(items: $0.items) }
+        .photosPicker(isPresented: $showInlinePhotoPicker, selection: $inlinePhotoPicks,
+                      maxSelectionCount: 1, matching: .images)
+        .onChange(of: inlinePhotoPicks) { _, items in
+            Task { await insertInlinePhotos(items) }
+        }
         .alert("New notebook", isPresented: $showingNewNotebook) {
             TextField("Name", text: $newNotebookName)
             Button("Create") {
@@ -174,6 +186,18 @@ struct EntryEditorView: View {
             withAnimation(.easeOut(duration: 0.3)) { noteUnlocked = true }
             bodyFocused = true
         }
+    }
+
+    /// Save picked images and drop a `fern://` token at the caret for each.
+    private func insertInlinePhotos(_ items: [PhotosPickerItem]) async {
+        for item in items {
+            if let data = try? await item.loadTransferable(type: Data.self),
+               let name = PhotoStore.save(data) {
+                entry.photoFileNames.append(name)
+                controller.insert(PhotoToken.make(name))
+            }
+        }
+        inlinePhotoPicks = []
     }
 
     @MainActor
@@ -301,10 +325,15 @@ private struct PhotoStrip: View {
     @Bindable var entry: Entry
     @State private var picks: [PhotosPickerItem] = []
 
+    /// Only photos that aren't embedded inline in the body — those show in text.
+    private var loosePhotos: [String] {
+        entry.photoFileNames.filter { !entry.body.contains("fern://\($0)") }
+    }
+
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(entry.photoFileNames, id: \.self) { name in
+                ForEach(loosePhotos, id: \.self) { name in
                     if let image = PhotoStore.load(name) {
                         Image(uiImage: image)
                             .resizable().scaledToFill()
