@@ -13,6 +13,8 @@ struct MarkdownTextView: UIViewRepresentable {
     var controller: MarkdownEditorController? = nil
     /// Render inline photos in the theme-toned wash.
     var wash: Bool = false
+    /// Entry id, so the Pencil ink layer can persist per note.
+    var entryID: UUID? = nil
 
     func makeUIView(context: Context) -> UITextView {
         let tv = UITextView(usingTextLayoutManager: true) // TextKit 2
@@ -31,6 +33,7 @@ struct MarkdownTextView: UIViewRepresentable {
         tv.allowsEditingTextAttributes = false
         tv.typingAttributes = MarkdownStyler.baseAttributes()
         tv.attributedText = EditorPhotos.attributed(fromMarkdown: text, width: Self.contentWidth(tv), wash: wash)
+        if let entryID { controller?.setupCanvas(on: tv, entryID: entryID) }
         return tv
     }
 

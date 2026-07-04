@@ -53,13 +53,16 @@ struct EntryEditorView: View {
 
                 WritingRule()
 
-                MarkdownTextView(text: $entry.body, controller: controller, wash: entry.photoWash)
+                MarkdownTextView(text: $entry.body, controller: controller,
+                                 wash: entry.photoWash, entryID: entry.id)
                     .focused($bodyFocused)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .padding(.horizontal, 22)
             .safeAreaInset(edge: .bottom) {
-                if bodyFocused {
+                if controller.isDrawing {
+                    InkToolbar(controller: controller)
+                } else if bodyFocused {
                     AccessoryBar(controller: controller, text: entry.body,
                                  onInsertPhoto: { showInlinePhotoPicker = true })
                 }
@@ -73,6 +76,12 @@ struct EntryEditorView: View {
         .hidesFernTabBar()
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
+                Button {
+                    controller.setDrawing(!controller.isDrawing)
+                } label: {
+                    Image(systemName: controller.isDrawing ? "pencil.and.scribble" : "pencil.tip.crop.circle")
+                        .foregroundStyle(controller.isDrawing ? Paper.accent : Paper.inkSoft)
+                }
                 NavigationLink {
                     ReadingView(entry: entry)
                 } label: {

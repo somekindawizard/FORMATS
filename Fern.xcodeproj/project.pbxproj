@@ -55,6 +55,7 @@
 		9B5B8E807FC24E81E98A7BCD /* Prompts+Nature.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AD8AFAC01175AC14737031 /* Prompts+Nature.swift */; };
 		A1608D2E62B4B1917A46A610 /* Prompts+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A20EA5F23C21B6ACF018CE /* Prompts+Extras.swift */; };
 		AAC0A0E5917AA096F46B77A2 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 229223438BC567429C3E5B74 /* Markdown */; };
+		B4260379C7DF075F533DC4AB /* DrawingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22A673B3EBE896C5204141A1 /* DrawingStore.swift */; };
 		B644B497FD07EFA1C899E95D /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287563240408442B1C299030 /* ModelTests.swift */; };
 		B860398E1BA261EE37594B57 /* SuggestionsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F742AB1A0EB1B95CC7A91A9D /* SuggestionsButton.swift */; };
 		BAAD7E05C3F0C47032BF6E88 /* InlinePhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD7A3372E778227A40182354 /* InlinePhoto.swift */; };
@@ -70,6 +71,7 @@
 		CAF77756FD782FF6B9B4F45E /* MarkdownTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5A0D4651E2BDC4D80A6AC9 /* MarkdownTheme.swift */; };
 		CC0328D5AF564B8CA598788A /* MarkdownStylerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E6101F538120C732D4B8695 /* MarkdownStylerTests.swift */; };
 		CC3665D198ED795C87F1101A /* Fraunces.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2E860E46D808FFFA7FE8AA9A /* Fraunces.ttf */; };
+		CC6EA4FDA2F796AE6E0711DC /* InkTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214F3FCD16A11CA83BBE0F49 /* InkTools.swift */; };
 		CE5B49A44B0A8E6713E7FBAC /* Gambetta-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 19AA713ACBE71683079C911D /* Gambetta-Medium.otf */; };
 		CEE905C9E387AE4BFEC37187 /* MarkdownTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D4D39EC866C9EFD80CD9546 /* MarkdownTextView.swift */; };
 		CFA3B0A3A46563E0D74D4ECB /* LockGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69C9FD6E8B7EA7C53554913F /* LockGate.swift */; };
@@ -130,7 +132,9 @@
 		19AA713ACBE71683079C911D /* Gambetta-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Gambetta-Medium.otf"; sourceTree = "<group>"; };
 		1E61F4A394060DA98CFFDC6B /* FernWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = FernWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		1EEABECED98FEE4A7B0EF304 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		214F3FCD16A11CA83BBE0F49 /* InkTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkTools.swift; sourceTree = "<group>"; };
 		22055322740852F3A76C7F93 /* BarnsleyFernTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFernTests.swift; sourceTree = "<group>"; };
+		22A673B3EBE896C5204141A1 /* DrawingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingStore.swift; sourceTree = "<group>"; };
 		232C4DDB499CBDC6E0B73E75 /* SpotlightIndexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotlightIndexer.swift; sourceTree = "<group>"; };
 		280EC49A5562C111FA2CD94C /* PaperCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperCard.swift; sourceTree = "<group>"; };
 		28695B781553568A042DBF4C /* DateGrouping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateGrouping.swift; sourceTree = "<group>"; };
@@ -220,6 +224,7 @@
 			children = (
 				3BE4457DFF57CF5D04E853B5 /* AccessoryBar.swift */,
 				5093FEFE01D3F907485BB252 /* EditorPhotos.swift */,
+				214F3FCD16A11CA83BBE0F49 /* InkTools.swift */,
 				CD7A3372E778227A40182354 /* InlinePhoto.swift */,
 				EB1ED64338FFF646CDCEB947 /* MarkdownEditorController.swift */,
 				372C0EB975F143697FA69E96 /* MarkdownRender.swift */,
@@ -268,6 +273,7 @@
 			isa = PBXGroup;
 			children = (
 				EA4BBB39E7CE32F7D86E79DC /* BiometricLock.swift */,
+				22A673B3EBE896C5204141A1 /* DrawingStore.swift */,
 				F433CA977FF4475744DAE193 /* Fonts.swift */,
 				38E27EF4D706838525532A07 /* LibraryExporter.swift */,
 				CBC7E99A123649E4FFAC4ECD /* LocationProvider.swift */,
@@ -572,6 +578,7 @@
 				62166C608582EFCE76A75612 /* Components.swift in Sources */,
 				BDB9D4177DA66409E04B8B4D /* ComposeButton.swift in Sources */,
 				9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */,
+				B4260379C7DF075F533DC4AB /* DrawingStore.swift in Sources */,
 				BE358E151418F55454E77E3B /* EditorPhotos.swift in Sources */,
 				F349ECAB7A224AE4DBB6C3C5 /* Entry.swift in Sources */,
 				12F6E70FBF359B44046B6B35 /* EntryEditorView.swift in Sources */,
@@ -581,6 +588,7 @@
 				E473E6FD8FFFD9B1D6D51332 /* FernTabBar.swift in Sources */,
 				3D0FB454E38EAC3E80B50E90 /* FiddleheadShape.swift in Sources */,
 				C0291DEC6228E55CC51444BF /* Fonts.swift in Sources */,
+				CC6EA4FDA2F796AE6E0711DC /* InkTools.swift in Sources */,
 				BAAD7E05C3F0C47032BF6E88 /* InlinePhoto.swift in Sources */,
 				7247B5144A9C2346788FEE39 /* LibraryExporter.swift in Sources */,
 				7BCAFCB50A4D4363CC753425 /* LibraryView.swift in Sources */,

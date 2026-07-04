@@ -94,6 +94,7 @@ extension Entry {
             && body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && photoFileNames.isEmpty
             && tagNames.isEmpty
+            && !DrawingStore.exists(id)
     }
 
     /// What to show in lists: the title, else the first non-empty line of the

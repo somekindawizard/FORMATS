@@ -1,12 +1,24 @@
 import UIKit
 import Observation
+import PencilKit
 
 /// Bridges the accessory bar to the live `UITextView` so formatting acts on the
 /// current selection / caret instead of appending at the end. Also surfaces the
-/// word under the caret so the synonym strip can offer alternatives.
+/// word under the caret so the synonym strip can offer alternatives, and hosts
+/// the Apple Pencil ink layer over the page.
 @Observable
 final class MarkdownEditorController {
     @ObservationIgnored weak var textView: UITextView?
+
+    // Ink layer — a PencilKit canvas overlaid on the text (see InkTools.swift).
+    @ObservationIgnored var canvas: PKCanvasView?
+    @ObservationIgnored var drawingEntryID: UUID?
+    @ObservationIgnored var contentSizeObservation: NSKeyValueObservation?
+    @ObservationIgnored var inkCoordinator: InkCoordinator?
+    /// True while the ink layer is capturing Pencil input (drawing mode).
+    var isDrawing = false
+    /// The current pen/color/width selection.
+    var ink = InkSettings()
 
     /// The word the caret currently sits in (empty when between words). Observed
     /// by the synonym strip.
