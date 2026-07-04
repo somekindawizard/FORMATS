@@ -11,11 +11,15 @@ import UIKit
 struct MarkdownTextView: UIViewRepresentable {
     @Binding var text: String
     var controller: MarkdownEditorController? = nil
+    /// Render inline photos in the theme-toned wash.
+    var wash: Bool = false
 
     func makeUIView(context: Context) -> UITextView {
         let tv = UITextView(usingTextLayoutManager: true) // TextKit 2
         tv.delegate = context.coordinator
+        context.coordinator.lastWash = wash
         controller?.textView = tv
+        controller?.photoWash = wash
         tv.backgroundColor = .clear
         tv.textContainerInset = UIEdgeInsets(top: 8, left: 4, bottom: 80, right: 4)
         tv.textContainer.lineFragmentPadding = 0
@@ -26,17 +30,21 @@ struct MarkdownTextView: UIViewRepresentable {
         tv.tintColor = MarkdownTheme.accent
         tv.allowsEditingTextAttributes = false
         tv.typingAttributes = MarkdownStyler.baseAttributes()
-        tv.attributedText = EditorPhotos.attributed(fromMarkdown: text, width: Self.contentWidth(tv))
+        tv.attributedText = EditorPhotos.attributed(fromMarkdown: text, width: Self.contentWidth(tv), wash: wash)
         return tv
     }
 
     func updateUIView(_ uiView: UITextView, context: Context) {
-        // Only when the source changes from outside the view (e.g. loading a
-        // note). Compare the serialized Markdown so inline photo attachments
-        // don't read as a perpetual mismatch. Not hit during normal typing.
-        if EditorPhotos.markdown(from: uiView.attributedText) != text {
+        controller?.photoWash = wash
+        // Rebuild when the source changed from outside the view (e.g. loading a
+        // note) or when the photo wash toggled. Compare serialized Markdown so
+        // inline photo attachments don't read as a perpetual mismatch.
+        let washChanged = context.coordinator.lastWash != wash
+        if washChanged || EditorPhotos.markdown(from: uiView.attributedText) != text {
+            context.coordinator.lastWash = wash
             let selected = uiView.selectedRange
-            uiView.attributedText = EditorPhotos.attributed(fromMarkdown: text, width: Self.contentWidth(uiView))
+            uiView.attributedText = EditorPhotos.attributed(fromMarkdown: text,
+                                                            width: Self.contentWidth(uiView), wash: wash)
             let len = uiView.textStorage.length
             uiView.selectedRange = NSRange(location: min(selected.location, len), length: 0)
         }
@@ -57,6 +65,7 @@ struct MarkdownTextView: UIViewRepresentable {
 
     final class Coordinator: NSObject, UITextViewDelegate {
         var parent: MarkdownTextView
+        var lastWash = false
         init(parent: MarkdownTextView) { self.parent = parent }
 
         func textViewDidChange(_ textView: UITextView) {

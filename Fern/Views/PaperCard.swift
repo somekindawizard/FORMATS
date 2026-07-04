@@ -83,11 +83,10 @@ struct PaperCard: View {
     private var cardPhotos: some View {
         HStack(spacing: 16) {
             ForEach(Array(photos.enumerated()), id: \.offset) { _, img in
-                Image(uiImage: img)
+                Image(uiImage: entry.photoWash ? EditorPhotos.washed(img) : img)
                     .resizable().scaledToFill()
                     .frame(width: photos.count == 1 ? 952 : 300,
                            height: photos.count == 1 ? 560 : 300)
-                    .modifier(Wash(on: entry.photoWash))
                     .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
             }
         }

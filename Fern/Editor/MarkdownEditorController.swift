@@ -12,6 +12,10 @@ final class MarkdownEditorController {
     /// by the synonym strip.
     var currentWord: String = ""
 
+    /// Whether inline photos should render in the theme-toned wash (mirrors the
+    /// entry setting; used when inserting a new photo).
+    @ObservationIgnored var photoWash = false
+
     /// Wrap the selection in a symmetric marker (e.g. ** or *). With no
     /// selection, insert the pair and place the caret between them.
     func wrap(_ marker: String) { wrapPair(marker, marker) }
@@ -136,7 +140,7 @@ final class MarkdownEditorController {
         let len = tv.offset(from: sel.start, to: sel.end)
         let width = MarkdownTextView.contentWidth(tv)
         let piece = NSMutableAttributedString(string: "\n", attributes: MarkdownStyler.baseAttributes())
-        piece.append(NSAttributedString(attachment: EditorPhotos.attachment(name, width: width)))
+        piece.append(NSAttributedString(attachment: EditorPhotos.attachment(name, width: width, wash: photoWash)))
         piece.append(NSAttributedString(string: "\n", attributes: MarkdownStyler.baseAttributes()))
         tv.textStorage.replaceCharacters(in: NSRange(location: loc, length: len), with: piece)
         if let pos = tv.position(from: tv.beginningOfDocument, offset: loc + piece.length) {

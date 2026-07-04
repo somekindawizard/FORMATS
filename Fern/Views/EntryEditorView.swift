@@ -53,7 +53,7 @@ struct EntryEditorView: View {
 
                 WritingRule()
 
-                MarkdownTextView(text: $entry.body, controller: controller)
+                MarkdownTextView(text: $entry.body, controller: controller, wash: entry.photoWash)
                     .focused($bodyFocused)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }

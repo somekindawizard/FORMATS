@@ -42,32 +42,19 @@ struct WashedImage: View {
     var wash: Bool
     var cornerRadius: CGFloat = 16
 
+    private var image: UIImage? {
+        guard let ui = PhotoStore.load(name) else { return nil }
+        return wash ? EditorPhotos.washed(ui) : ui
+    }
+
     var body: some View {
-        if let ui = PhotoStore.load(name) {
-            Image(uiImage: ui)
+        if let image {
+            Image(uiImage: image)
                 .resizable()
                 .scaledToFit()
-                .modifier(Wash(on: wash))
                 .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .stroke(Paper.line, lineWidth: 1))
-        }
-    }
-}
-
-/// Desaturate → tint with the accent hue via a `.color` blend (keeps the
-/// photo's luminance, borrows the theme's hue). Softened so it's not garish.
-struct Wash: ViewModifier {
-    let on: Bool
-    func body(content: Content) -> some View {
-        if on {
-            content
-                .grayscale(1)
-                .overlay(Paper.accent.opacity(0.55).blendMode(.color))
-                .saturation(0.85)
-                .compositingGroup()
-        } else {
-            content
         }
     }
 }

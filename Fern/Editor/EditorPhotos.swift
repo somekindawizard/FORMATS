@@ -1,4 +1,5 @@
 import UIKit
+import CoreImage
 
 /// A text attachment that remembers which stored photo it represents, so the
 /// editor's attributed text can be serialized back to `![](fern://name)`.
@@ -16,14 +17,14 @@ enum EditorPhotos {
 
     /// Markdown → attributed text: photo tokens become inline image attachments,
     /// everything else is styled by `MarkdownStyler`.
-    static func attributed(fromMarkdown md: String, width: CGFloat) -> NSAttributedString {
+    static func attributed(fromMarkdown md: String, width: CGFloat, wash: Bool = false) -> NSAttributedString {
         let result = NSMutableAttributedString()
         for seg in PhotoToken.segments(md) {
             switch seg {
             case .text(let t):
                 result.append(MarkdownStyler.attributed(for: t))
             case .photo(let name):
-                result.append(NSAttributedString(attachment: attachment(name, width: width)))
+                result.append(NSAttributedString(attachment: attachment(name, width: width, wash: wash)))
             }
         }
         return result
@@ -44,9 +45,10 @@ enum EditorPhotos {
     }
 
     /// An image attachment sized to the editor width, with rounded corners.
-    static func attachment(_ name: String, width: CGFloat) -> PhotoAttachment {
+    static func attachment(_ name: String, width: CGFloat, wash: Bool = false) -> PhotoAttachment {
         let att = PhotoAttachment(filename: name)
-        if let img = PhotoStore.load(name) {
+        if let raw = PhotoStore.load(name) {
+            let img = wash ? washed(raw) : raw
             let w = max(1, min(width, img.size.width))
             let h = img.size.height * (w / img.size.width)
             att.image = rounded(img, size: CGSize(width: w, height: h))
@@ -63,5 +65,19 @@ enum EditorPhotos {
             UIBezierPath(roundedRect: rect, cornerRadius: radius).addClip()
             image.draw(in: rect)
         }
+    }
+
+    private static let ciContext = CIContext(options: nil)
+
+    /// A theme-toned black-and-white wash: map the photo to a monochrome in the
+    /// app's accent hue (kept in the muted value space of the theme).
+    static func washed(_ image: UIImage) -> UIImage {
+        guard let ci = CIImage(image: image) else { return image }
+        let a = ThemeStore.shared.accent.light
+        let color = CIColor(red: CGFloat(a.0), green: CGFloat(a.1), blue: CGFloat(a.2))
+        let out = ci.applyingFilter("CIColorMonochrome",
+                                    parameters: ["inputColor": color, "inputIntensity": 1.0])
+        guard let cg = ciContext.createCGImage(out, from: out.extent) else { return image }
+        return UIImage(cgImage: cg, scale: image.scale, orientation: image.imageOrientation)
     }
 }
