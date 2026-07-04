@@ -100,6 +100,7 @@ extension MarkdownEditorController {
         c.addInteraction(interaction)
         pencilCoordinator = pencilCoord
         if let saved = DrawingStore.load(entryID) { c.drawing = saved }
+        c.backgroundColor = PaperTiles.pattern(for: ThemeStore.shared.paperRule) ?? .clear
         textView.addSubview(c)
         canvas = c
         drawingEntryID = entryID
@@ -180,6 +181,41 @@ extension MarkdownEditorController {
     func saveDrawing() {
         guard let id = drawingEntryID, let c = canvas else { return }
         DrawingStore.save(id, c.drawing)
+    }
+}
+
+// MARK: - Paper backdrop
+
+/// Repeating tile patterns for the ruled / dot-grid paper backdrop. Returned as
+/// a pattern `UIColor` set on the canvas background, so it tiles across the full
+/// document and scrolls with the content.
+enum PaperTiles {
+    static let spacing: CGFloat = 30
+
+    static func pattern(for rule: PaperRule) -> UIColor? {
+        switch rule {
+        case .plain: return nil
+        case .ruled: return UIColor(patternImage: ruledTile)
+        case .dots:  return UIColor(patternImage: dotTile)
+        }
+    }
+
+    private static var ruledTile: UIImage {
+        let size = CGSize(width: 24, height: spacing)
+        return UIGraphicsImageRenderer(size: size).image { ctx in
+            MarkdownTheme.faint.withAlphaComponent(0.28).setFill()
+            ctx.fill(CGRect(x: 0, y: size.height - 1, width: size.width, height: 1))
+        }
+    }
+
+    private static var dotTile: UIImage {
+        let size = CGSize(width: spacing, height: spacing)
+        return UIGraphicsImageRenderer(size: size).image { ctx in
+            MarkdownTheme.faint.withAlphaComponent(0.45).setFill()
+            let r: CGFloat = 1.3
+            ctx.cgContext.fillEllipse(in: CGRect(x: size.width / 2 - r, y: size.height / 2 - r,
+                                                 width: 2 * r, height: 2 * r))
+        }
     }
 }
 

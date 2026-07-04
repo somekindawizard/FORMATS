@@ -45,6 +45,19 @@ enum PaperTone: String, CaseIterable, Identifiable {
     }
 }
 
+/// The paper backdrop behind the writing/ink surface.
+enum PaperRule: String, CaseIterable, Identifiable {
+    case plain, ruled, dots
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .plain: return "Plain"
+        case .ruled: return "Ruled"
+        case .dots:  return "Dot grid"
+        }
+    }
+}
+
 /// Display typeface for the mastheads. Body text stays the system serif.
 enum DisplayFont: String, CaseIterable, Identifiable {
     case fraunces, gambetta, redaction, classic

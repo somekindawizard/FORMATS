@@ -32,6 +32,9 @@ struct SettingsView: View {
                     Picker("Paper", selection: $theme.tone) {
                         ForEach(PaperTone.allCases) { Text($0.title).tag($0) }
                     }
+                    Picker("Lines", selection: $theme.paperRule) {
+                        ForEach(PaperRule.allCases) { Text($0.title).tag($0) }
+                    }
                     HStack(spacing: 14) {
                         Text("Accent")
                         Spacer()

@@ -17,12 +17,16 @@ final class ThemeStore {
     var displayFont: DisplayFont {
         didSet { UserDefaults.standard.set(displayFont.rawValue, forKey: "fern.theme.font") }
     }
+    var paperRule: PaperRule {
+        didSet { UserDefaults.standard.set(paperRule.rawValue, forKey: "fern.theme.rule") }
+    }
 
     private init() {
         tone = PaperTone(rawValue: UserDefaults.standard.string(forKey: "fern.theme.tone") ?? "") ?? .mist
         accent = AccentTone(rawValue: UserDefaults.standard.string(forKey: "fern.theme.accent") ?? "") ?? .sienna
         displayFont = DisplayFont(rawValue: UserDefaults.standard.string(forKey: "fern.theme.font") ?? "") ?? .fraunces
+        paperRule = PaperRule(rawValue: UserDefaults.standard.string(forKey: "fern.theme.rule") ?? "") ?? .plain
     }
 
-    var paletteKey: String { "\(tone.rawValue)-\(accent.rawValue)-\(displayFont.rawValue)" }
+    var paletteKey: String { "\(tone.rawValue)-\(accent.rawValue)-\(displayFont.rawValue)-\(paperRule.rawValue)" }
 }
