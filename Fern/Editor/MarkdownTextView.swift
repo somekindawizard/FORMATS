@@ -9,8 +9,11 @@ final class PhotoTextView: UITextView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        let usable = textContainer.size.width
-        guard usable > 1, abs(usable - lastWidth) > 0.5 else { return }
+        // Use the view's frame width (stable while typing), NOT the text
+        // container width (which can fluctuate a point per layout on iPad and
+        // was re-firing the image re-fit on every keystroke → the jitter).
+        let usable = bounds.width - textContainerInset.left - textContainerInset.right
+        guard usable > 1, abs(usable - lastWidth) > 2 else { return }
         lastWidth = usable
         let storage = textStorage
         let whole = NSRange(location: 0, length: storage.length)
@@ -113,9 +116,35 @@ struct MarkdownTextView: UIViewRepresentable {
 
         func textViewDidChange(_ textView: UITextView) {
             parent.text = EditorPhotos.markdown(from: textView.attributedText)
+            let before = textView.contentOffset
             restyle(textView)
             parent.controller?.refreshCurrentWord()
-            if ThemeStore.shared.typewriter { centerCaret(textView) }
+            if ThemeStore.shared.typewriter {
+                centerCaret(textView)
+            } else {
+                // Hold the page still (kills any restyle-induced jump), then
+                // scroll only if the caret is actually off-screen.
+                if textView.contentOffset != before {
+                    textView.setContentOffset(before, animated: false)
+                }
+                revealCaretIfNeeded(textView)
+            }
+        }
+
+        /// Scroll just enough to keep the caret on screen — nothing otherwise.
+        private func revealCaretIfNeeded(_ tv: UITextView) {
+            guard let range = tv.selectedTextRange else { return }
+            let caret = tv.caretRect(for: range.end)
+            guard !caret.isNull, caret.minY.isFinite, caret.maxY.isFinite else { return }
+            let visibleTop = tv.contentOffset.y + tv.adjustedContentInset.top
+            let visibleBottom = tv.contentOffset.y + tv.bounds.height - tv.adjustedContentInset.bottom
+            if caret.maxY > visibleBottom {
+                tv.setContentOffset(CGPoint(x: 0, y: tv.contentOffset.y + (caret.maxY - visibleBottom) + 8),
+                                    animated: false)
+            } else if caret.minY < visibleTop {
+                tv.setContentOffset(CGPoint(x: 0, y: max(0, tv.contentOffset.y - (visibleTop - caret.minY) - 8)),
+                                    animated: false)
+            }
         }
 
         func textViewDidChangeSelection(_ textView: UITextView) {
@@ -162,7 +191,6 @@ struct MarkdownTextView: UIViewRepresentable {
             }
 
             let selected = textView.selectedRange
-            let savedOffset = textView.contentOffset
             let whole = NSRange(location: 0, length: storage.length)
             storage.beginEditing()
             storage.setAttributes(MarkdownStyler.baseAttributes(), range: whole)
@@ -182,11 +210,6 @@ struct MarkdownTextView: UIViewRepresentable {
             }
             storage.endEditing()
             textView.selectedRange = selected
-            // Restyling attributes shouldn't move the page; hold the scroll
-            // position (typewriter mode re-centers afterwards if enabled).
-            if textView.contentOffset != savedOffset {
-                textView.setContentOffset(savedOffset, animated: false)
-            }
             textView.typingAttributes = MarkdownStyler.baseAttributes()
 
             if ThemeStore.shared.focusMode { applyFocus(textView) }
