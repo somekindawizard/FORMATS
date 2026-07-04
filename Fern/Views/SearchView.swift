@@ -11,6 +11,7 @@ struct SearchView: View {
         return entries.filter { e in
             e.title.lowercased().contains(q)
             || e.body.lowercased().contains(q)
+            || e.inkText.lowercased().contains(q)
             || e.tagNames.contains { $0.lowercased().contains(q) }
         }
     }

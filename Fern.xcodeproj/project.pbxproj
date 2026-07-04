@@ -35,6 +35,7 @@
 		669E6EE6DF023A2CC97C609E /* BarnsleyFernTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22055322740852F3A76C7F93 /* BarnsleyFernTests.swift */; };
 		6779D6DD2E41184CA674A8A1 /* Prompts+Genshin.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DB7D4229AB470CADFC0E24 /* Prompts+Genshin.swift */; };
 		683783406844100472B2F940 /* PromptLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE08F5EFD57674CB778E0A8B /* PromptLibrary.swift */; };
+		6B2D584E9754339E0D158320 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A13CB74024BF409BFCE151 /* Haptics.swift */; };
 		6BA4DEAECEFBCFF57B6066B3 /* FernWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC549B1D7037E5DF677DC591 /* FernWidget.swift */; };
 		70EBAECB0734E21D12105353 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E45CA19533DB05C24AC2162D /* SearchView.swift */; };
 		7247B5144A9C2346788FEE39 /* LibraryExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38E27EF4D706838525532A07 /* LibraryExporter.swift */; };
@@ -44,7 +45,9 @@
 		780B69FDC82CB2EE8E998FF3 /* PDFExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB27CCF5E64406E93604C436 /* PDFExporter.swift */; };
 		78EF513543605A8FB978D60C /* WritingStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366CCE747C235C4026B4A7CA /* WritingStats.swift */; };
 		7A68060523CD303E82379DC9 /* Prompts+Nier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6827187FF4941AE39243B9E /* Prompts+Nier.swift */; };
+		7B2A61EE3B29A7332788E868 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5176A8356310FFA7D76E741E /* OnboardingView.swift */; };
 		7BCAFCB50A4D4363CC753425 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55662AF595DC7900135BE0CA /* LibraryView.swift */; };
+		7CC1EE91B315718CFB5A45B2 /* HandwritingOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = A460D16620DAD4DAD40A4768 /* HandwritingOCR.swift */; };
 		80AC7B1ED6DFFBCDA716827D /* EntryRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33B710B62EE4D952BA7B3585 /* EntryRow.swift */; };
 		873B34669B1C80A171A3A83F /* Prompts+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A20EA5F23C21B6ACF018CE /* Prompts+Extras.swift */; };
 		8C55FFD856258A9B5FAD3C30 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A9DEAFC77D976210B3D73F /* SettingsView.swift */; };
@@ -131,6 +134,7 @@
 		08E10046E72A3938832A9FAD /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		0BA4819F5B46F531E5941CEA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		12337FE2289C85966902B783 /* MarkdownExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownExporter.swift; sourceTree = "<group>"; };
+		14A13CB74024BF409BFCE151 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
 		19AA713ACBE71683079C911D /* Gambetta-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Gambetta-Medium.otf"; sourceTree = "<group>"; };
 		1E61F4A394060DA98CFFDC6B /* FernWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = FernWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		1EEABECED98FEE4A7B0EF304 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -157,6 +161,7 @@
 		49BCF6E4EFF1274EEAC43A8B /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		4DE4B4BAA147D79AC4DD0B0E /* Gambetta-Semibold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Gambetta-Semibold.otf"; sourceTree = "<group>"; };
 		5093FEFE01D3F907485BB252 /* EditorPhotos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorPhotos.swift; sourceTree = "<group>"; };
+		5176A8356310FFA7D76E741E /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		55662AF595DC7900135BE0CA /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFern.swift; sourceTree = "<group>"; };
 		6874D40188440206C80B5EE5 /* Fern.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fern.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -178,6 +183,7 @@
 		A2DB7D4229AB470CADFC0E24 /* Prompts+Genshin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Genshin.swift"; sourceTree = "<group>"; };
 		A38E46173966308F74B1857F /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
 		A3E10DFCAB855A14CE7D486A /* ComposeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposeButton.swift; sourceTree = "<group>"; };
+		A460D16620DAD4DAD40A4768 /* HandwritingOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandwritingOCR.swift; sourceTree = "<group>"; };
 		A6827187FF4941AE39243B9E /* Prompts+Nier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Nier.swift"; sourceTree = "<group>"; };
 		AD6943B8927D7DB6D40C3730 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		B28F822C8468BE267C3F3293 /* ThemeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeStore.swift; sourceTree = "<group>"; };
@@ -280,6 +286,8 @@
 				EA4BBB39E7CE32F7D86E79DC /* BiometricLock.swift */,
 				22A673B3EBE896C5204141A1 /* DrawingStore.swift */,
 				F433CA977FF4475744DAE193 /* Fonts.swift */,
+				A460D16620DAD4DAD40A4768 /* HandwritingOCR.swift */,
+				14A13CB74024BF409BFCE151 /* Haptics.swift */,
 				38E27EF4D706838525532A07 /* LibraryExporter.swift */,
 				CBC7E99A123649E4FFAC4ECD /* LocationProvider.swift */,
 				12337FE2289C85966902B783 /* MarkdownExporter.swift */,
@@ -355,6 +363,7 @@
 				D383A32ED71D29BD1C19B13C /* FernTabBar.swift */,
 				55662AF595DC7900135BE0CA /* LibraryView.swift */,
 				69C9FD6E8B7EA7C53554913F /* LockGate.swift */,
+				5176A8356310FFA7D76E741E /* OnboardingView.swift */,
 				280EC49A5562C111FA2CD94C /* PaperCard.swift */,
 				3EB2BB1BE40E5C8BA4A77780 /* PromptCard.swift */,
 				68B6BA6BD6603F605BF65B63 /* ReadingView.swift */,
@@ -595,6 +604,8 @@
 				E473E6FD8FFFD9B1D6D51332 /* FernTabBar.swift in Sources */,
 				3D0FB454E38EAC3E80B50E90 /* FiddleheadShape.swift in Sources */,
 				C0291DEC6228E55CC51444BF /* Fonts.swift in Sources */,
+				7CC1EE91B315718CFB5A45B2 /* HandwritingOCR.swift in Sources */,
+				6B2D584E9754339E0D158320 /* Haptics.swift in Sources */,
 				CC6EA4FDA2F796AE6E0711DC /* InkTools.swift in Sources */,
 				BAAD7E05C3F0C47032BF6E88 /* InlinePhoto.swift in Sources */,
 				7247B5144A9C2346788FEE39 /* LibraryExporter.swift in Sources */,
@@ -608,6 +619,7 @@
 				CEE905C9E387AE4BFEC37187 /* MarkdownTextView.swift in Sources */,
 				CAF77756FD782FF6B9B4F45E /* MarkdownTheme.swift in Sources */,
 				0517271B1D128E80B8942A3F /* OnThisDay.swift in Sources */,
+				7B2A61EE3B29A7332788E868 /* OnboardingView.swift in Sources */,
 				780B69FDC82CB2EE8E998FF3 /* PDFExporter.swift in Sources */,
 				746E38C71A4F2CEF9BEBB03D /* Palette.swift in Sources */,
 				77B294B9149D84DBAF60E3AA /* PaperBackground.swift in Sources */,

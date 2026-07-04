@@ -78,11 +78,13 @@ struct EntryEditorView: View {
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
+                    Haptics.tap()
                     controller.setDrawing(!controller.isDrawing)
                 } label: {
                     Image(systemName: controller.isDrawing ? "pencil.and.scribble" : "pencil.tip.crop.circle")
                         .foregroundStyle(controller.isDrawing ? Paper.accent : Paper.inkSoft)
                 }
+                .accessibilityLabel(controller.isDrawing ? "Stop drawing" : "Draw")
                 NavigationLink {
                     ReadingView(entry: entry)
                 } label: {
@@ -168,9 +170,11 @@ struct EntryEditorView: View {
         .onDisappear {
             // Discard a note that was started but never written in.
             if entry.isBlank {
+                DrawingStore.delete(entry.id)
                 SpotlightIndexer.deindex(id: entry.id)
                 context.delete(entry)
             } else {
+                ocrInkForSearch()
                 SpotlightIndexer.index(entry)
             }
             try? context.save()
@@ -208,6 +212,24 @@ struct EntryEditorView: View {
         if ok {
             withAnimation(.easeOut(duration: 0.3)) { noteUnlocked = true }
             bodyFocused = true
+        }
+    }
+
+    /// Recognize the note's ink (if any) so handwriting is searchable.
+    private func ocrInkForSearch() {
+        guard let d = DrawingStore.load(entry.id), !d.strokes.isEmpty,
+              d.bounds.width > 1, d.bounds.height > 1 else {
+            if !entry.inkText.isEmpty { entry.inkText = "" }
+            return
+        }
+        let image = d.image(from: d.bounds, scale: 2)
+        Task { @MainActor in
+            let text = await HandwritingOCR.recognize(image)
+            if text != entry.inkText {
+                entry.inkText = text
+                SpotlightIndexer.index(entry)
+                try? context.save()
+            }
         }
     }
 

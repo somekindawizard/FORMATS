@@ -50,6 +50,9 @@ final class Entry {
     var photoFileNames: [String] = []
     /// When true, inline photos render in a theme-toned black-and-white wash.
     var photoWash: Bool = false
+    /// Text recognized from the note's Apple Pencil ink (Vision OCR), so
+    /// handwriting is searchable. Empty when there's no ink.
+    var inkText: String = ""
 
     init(
         id: UUID = UUID(),
