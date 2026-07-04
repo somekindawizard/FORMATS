@@ -109,6 +109,11 @@ extension MarkdownEditorController {
 
     func undoInk() { canvas?.undoManager?.undo() }
 
+    func toggleRuler() {
+        showRuler.toggle()
+        canvas?.isRulerActive = showRuler
+    }
+
     func clearInk() {
         canvas?.drawing = PKDrawing()
         saveDrawing()
@@ -127,16 +132,19 @@ extension MarkdownEditorController {
 struct InkToolbar: View {
     @Bindable var controller: MarkdownEditorController
     @State private var showWheel = false
+    @State private var confirmClear = false
 
     /// The five theme accent colours as inks.
     private var themeInks: [(Double, Double, Double)] {
         AccentTone.allCases.map { ($0.light.0, $0.light.1, $0.light.2) }
     }
     private let ink = (0.129, 0.118, 0.102)   // near-black
+    /// Line-weight presets (fine → bold).
+    private let weights: [CGFloat] = [2, 5, 9, 16]
 
     var body: some View {
         VStack(spacing: 10) {
-            HStack(spacing: 22) {
+            HStack(spacing: 20) {
                 ForEach(InkSettings.Pen.allCases) { pen in
                     toolButton(pen.icon, on: !controller.ink.isEraser && controller.ink.pen == pen) {
                         controller.ink.pen = pen; controller.ink.isEraser = false; controller.applyInk()
@@ -145,28 +153,32 @@ struct InkToolbar: View {
                 toolButton("eraser", on: controller.ink.isEraser) {
                     controller.ink.isEraser = true; controller.applyInk()
                 }
+                toolButton("ruler", on: controller.showRuler) { controller.toggleRuler() }
                 Divider().frame(height: 22)
                 toolButton("arrow.uturn.backward") { controller.undoInk() }
-                toolButton("trash") { controller.clearInk() }
+                toolButton("trash") { confirmClear = true }
                 Spacer()
                 Button("Done") { controller.setDrawing(false) }
                     .font(.headlineSerif)
                     .foregroundStyle(Paper.accent)
             }
 
-            HStack(spacing: 12) {
+            HStack(spacing: 14) {
+                // Line weights
+                ForEach(Array(weights.enumerated()), id: \.offset) { _, w in
+                    weightDot(w)
+                }
+                Divider().frame(height: 22)
+                // Colors
                 swatch(ink)
                 ForEach(Array(themeInks.enumerated()), id: \.offset) { _, c in swatch(c) }
                 Button { showWheel.toggle() } label: {
                     Image(systemName: "paintpalette")
-                        .font(.system(size: 17))
+                        .font(.system(size: 18))
                         .foregroundStyle(Paper.inkSoft)
                         .frame(width: 30, height: 30)
                 }
-                Slider(value: $controller.ink.width, in: 1...24)
-                    .tint(Paper.accent)
-                    .onChange(of: controller.ink.width) { _, _ in controller.applyInk() }
-                    .frame(maxWidth: 140)
+                Spacer()
             }
         }
         .padding(.horizontal, 18).padding(.vertical, 10)
@@ -180,6 +192,25 @@ struct InkToolbar: View {
                 .padding(24)
                 .presentationCompactAdaptation(.popover)
         }
+        .confirmationDialog("Clear this drawing?", isPresented: $confirmClear, titleVisibility: .visible) {
+            Button("Clear drawing", role: .destructive) { controller.clearInk() }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This erases all ink on this note. It can't be undone.")
+        }
+    }
+
+    private func weightDot(_ w: CGFloat) -> some View {
+        let selected = !controller.ink.isEraser && abs(controller.ink.width - w) < 0.5
+        let d = 8 + w * 0.7
+        return Circle()
+            .fill(selected ? Paper.accent : Paper.inkSoft)
+            .frame(width: d, height: d)
+            .frame(width: 34, height: 30)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                controller.ink.width = w; controller.ink.isEraser = false; controller.applyInk()
+            }
     }
 
     private func swatch(_ c: (Double, Double, Double)) -> some View {

@@ -17,6 +17,8 @@ final class MarkdownEditorController {
     @ObservationIgnored var inkCoordinator: InkCoordinator?
     /// True while the ink layer is capturing Pencil input (drawing mode).
     var isDrawing = false
+    /// When on, PencilKit's ruler is shown for straight lines.
+    var showRuler = false
     /// The current pen/color/width selection.
     var ink = InkSettings()
 
