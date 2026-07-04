@@ -15,6 +15,31 @@ enum MarkdownRender {
         var accent: Color
     }
 
+    /// All Markdown syntax stripped to readable plain text — for list previews
+    /// and search snippets where styling isn't wanted, just clean words.
+    static func plainText(_ source: String) -> String {
+        var s = source
+        let blockMarkers = [
+            #"(?m)^[ \t]{0,3}#{1,6}[ \t]+"#,   // headings
+            #"(?m)^[ \t]{0,3}>[ \t]?"#,        // block quotes
+            #"(?m)^[ \t]{0,3}[-*+][ \t]+"#,    // bullets
+            #"(?m)^[ \t]{0,3}\d+\.[ \t]+"#     // numbered
+        ]
+        for p in blockMarkers {
+            s = s.replacingOccurrences(of: p, with: "", options: .regularExpression)
+        }
+        let inline = [
+            (#"\*\*(.+?)\*\*"#, "$1"),
+            (#"(?<!\*)\*(?!\*)([^*\n]+)\*(?!\*)"#, "$1"),
+            (#"~~(.+?)~~"#, "$1"),
+            (#"`([^`\n]+)`"#, "$1")
+        ]
+        for (p, r) in inline {
+            s = s.replacingOccurrences(of: p, with: r, options: .regularExpression)
+        }
+        return s.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     /// A styled string for the whole document, blocks separated by newlines.
     static func styled(_ source: String, _ s: Style) -> AttributedString {
         var out = AttributedString("")

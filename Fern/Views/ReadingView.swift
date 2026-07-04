@@ -18,7 +18,10 @@ struct ReadingView: View {
                             .font(.masthead)
                             .foregroundStyle(Paper.ink)
                     }
-                    ReadingText(markdown: entry.body)
+                    Text(MarkdownRender.styled(entry.body, Self.readerStyle))
+                        .lineSpacing(6)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .textSelection(.enabled)
                 }
                 .padding(.horizontal, 26)
                 .padding(.top, 12)
@@ -28,34 +31,20 @@ struct ReadingView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
     }
-}
 
-/// A self-sizing, non-editable UITextView that renders the styled Markdown,
-/// flowing naturally inside a SwiftUI ScrollView.
-private struct ReadingText: UIViewRepresentable {
-    let markdown: String
-
-    func makeUIView(context: Context) -> UITextView {
-        let tv = UITextView(usingTextLayoutManager: false) // TextKit 1 self-sizes reliably
-        tv.isEditable = false
-        tv.isScrollEnabled = false
-        tv.backgroundColor = .clear
-        tv.textContainerInset = .zero
-        tv.textContainer.lineFragmentPadding = 0
-        tv.setContentCompressionResistancePriority(.required, for: .vertical)
-        tv.attributedText = MarkdownStyler.attributed(for: markdown)
-        return tv
-    }
-
-    func updateUIView(_ uiView: UITextView, context: Context) {
-        uiView.attributedText = MarkdownStyler.attributed(for: markdown)
-    }
-
-    /// Wrap to the width SwiftUI offers and report the height it needs — without
-    /// this the text view lays out at its intrinsic width and clips both edges.
-    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UITextView, context: Context) -> CGSize? {
-        let width = proposal.width ?? uiView.bounds.width
-        let fitted = uiView.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
-        return CGSize(width: width, height: fitted.height)
+    /// Reading-mode typography — the same serif scale as the app, syntax removed.
+    /// Computed so a live theme/accent change is reflected.
+    static var readerStyle: MarkdownRender.Style {
+        MarkdownRender.Style(
+        body: .serif(18),
+        heading: { level in
+            switch level {
+            case 1:  return .serif(28, .semibold)
+            case 2:  return .serif(23, .semibold)
+            default: return .serif(20, .semibold)
+            }
+        },
+        mono: .system(size: 16, design: .monospaced),
+        ink: Paper.ink, soft: Paper.inkSoft, accent: Paper.accent)
     }
 }

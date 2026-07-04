@@ -42,7 +42,8 @@ struct EntryRow: View {
                 Text("Locked").font(.calloutSerif).italic().foregroundStyle(Paper.inkFaint)
             } else {
                 if !entry.body.isEmpty {
-                    Text(entry.body).font(.calloutSerif).foregroundStyle(Paper.inkSoft)
+                    Text(MarkdownRender.plainText(entry.body))
+                        .font(.calloutSerif).foregroundStyle(Paper.inkSoft)
                         .lineLimit(2)
                 }
                 if !entry.tagNames.isEmpty {
