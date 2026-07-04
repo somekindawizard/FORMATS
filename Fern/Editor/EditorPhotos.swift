@@ -7,6 +7,21 @@ final class PhotoAttachment: NSTextAttachment {
     let filename: String
     init(filename: String) { self.filename = filename; super.init(data: nil, ofType: nil) }
     required init?(coder: NSCoder) { self.filename = ""; super.init(coder: coder) }
+
+    /// Size to the actual available line width every layout pass, so photos
+    /// never overflow — adapts to the iPad sidebar, Split View, and rotation.
+    override func attachmentBounds(for textContainer: NSTextContainer?,
+                                   proposedLineFragment lineFrag: CGRect,
+                                   glyphPosition position: CGPoint,
+                                   characterIndex charIndex: Int) -> CGRect {
+        guard let image, image.size.width > 0 else {
+            return CGRect(x: 0, y: 0, width: max(0, lineFrag.width), height: 44)
+        }
+        let maxW = lineFrag.width > 1 ? lineFrag.width : image.size.width
+        let w = min(maxW, image.size.width)
+        let h = image.size.height * (w / image.size.width)
+        return CGRect(x: 0, y: 0, width: w, height: h)
+    }
 }
 
 /// Bridges the Markdown body (with `fern://` photo tokens) to the live editor's
@@ -49,17 +64,21 @@ enum EditorPhotos {
         let att = PhotoAttachment(filename: name)
         if let raw = PhotoStore.load(name) {
             let img = wash ? washed(raw) : raw
-            let w = max(1, min(width, img.size.width))
-            let h = img.size.height * (w / img.size.width)
-            att.image = rounded(img, size: CGSize(width: w, height: h))
-            att.bounds = CGRect(x: 0, y: 0, width: w, height: h)
+            // Render at a generous resolution (decoupled from the display width,
+            // which `attachmentBounds` clamps to the live line width) so the
+            // downscaled image stays crisp.
+            let renderW = max(1, min(img.size.width, 1400))
+            let renderH = img.size.height * (renderW / img.size.width)
+            att.image = rounded(img, size: CGSize(width: renderW, height: renderH),
+                                radius: renderW * 0.022)
+            att.bounds = CGRect(x: 0, y: 0, width: renderW, height: renderH)
         } else {
             att.bounds = CGRect(x: 0, y: 0, width: width, height: 44)
         }
         return att
     }
 
-    private static func rounded(_ image: UIImage, size: CGSize, radius: CGFloat = 14) -> UIImage {
+    private static func rounded(_ image: UIImage, size: CGSize, radius: CGFloat) -> UIImage {
         UIGraphicsImageRenderer(size: size).image { _ in
             let rect = CGRect(origin: .zero, size: size)
             UIBezierPath(roundedRect: rect, cornerRadius: radius).addClip()
