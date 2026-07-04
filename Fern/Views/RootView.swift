@@ -96,6 +96,7 @@ struct RootView: View {
         .fullScreenCover(isPresented: .constant(!onboarded || userName.isEmpty)) {
             OnboardingView { name in
                 userName = name
+                NameSync.push(name)
                 onboarded = true
             }
         }

@@ -7,7 +7,10 @@ struct FernApp: App {
     @State private var promptStore = PromptStore()
     @State private var theme = ThemeStore.shared
 
-    init() { Fonts.register() }
+    init() {
+        Fonts.register()
+        NameSync.start()
+    }
 
     var body: some Scene {
         WindowGroup {

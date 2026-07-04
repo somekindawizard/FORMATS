@@ -8,6 +8,7 @@ struct SettingsView: View {
     @State private var promptReminder = PromptNotifier.isEnabled
     @State private var shareItems: ShareItems?
     @State private var exporting = false
+    @AppStorage("fern.userName") private var userName = ""
 
     var body: some View {
         @Bindable var lock = lock
@@ -15,6 +16,21 @@ struct SettingsView: View {
         ZStack {
             PaperBackground()
             Form {
+                Section {
+                    HStack {
+                        Text("Name")
+                        Spacer()
+                        TextField("Your name", text: $userName)
+                            .multilineTextAlignment(.trailing)
+                            .textInputAutocapitalization(.words)
+                            .foregroundStyle(Paper.inkSoft)
+                            .onChange(of: userName) { _, name in NameSync.push(name) }
+                    }
+                } footer: {
+                    Text("What Fern calls you. Syncs across your devices via iCloud.")
+                        .font(.calloutSerif).foregroundStyle(Paper.inkSoft)
+                }
+
                 Section {
                     NavigationLink {
                         SavedPromptsView()

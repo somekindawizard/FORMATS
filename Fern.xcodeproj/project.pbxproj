@@ -65,6 +65,7 @@
 		B860398E1BA261EE37594B57 /* SuggestionsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F742AB1A0EB1B95CC7A91A9D /* SuggestionsButton.swift */; };
 		BAAD7E05C3F0C47032BF6E88 /* InlinePhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD7A3372E778227A40182354 /* InlinePhoto.swift */; };
 		BB8ECF80E64C3F7845CD07C5 /* Redaction-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9BC51BE11191B28C0AA2C34F /* Redaction-Bold.ttf */; };
+		BCD36B9B75C19D47A5B91681 /* NameSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1195D5175BBFD5A209F39E /* NameSync.swift */; };
 		BDB9D4177DA66409E04B8B4D /* ComposeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E10DFCAB855A14CE7D486A /* ComposeButton.swift */; };
 		BE12B4B0AD2AF461EE824738 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D7A67E4C33A31B4DDC79FE4E /* Assets.xcassets */; };
 		BE358E151418F55454E77E3B /* EditorPhotos.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5093FEFE01D3F907485BB252 /* EditorPhotos.swift */; };
@@ -160,6 +161,7 @@
 		44DC35D8BD947984A93C106B /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
 		498E7586F70ECCFA602F6B03 /* Prompts+Reflective.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Reflective.swift"; sourceTree = "<group>"; };
 		49BCF6E4EFF1274EEAC43A8B /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		4C1195D5175BBFD5A209F39E /* NameSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameSync.swift; sourceTree = "<group>"; };
 		4DE4B4BAA147D79AC4DD0B0E /* Gambetta-Semibold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Gambetta-Semibold.otf"; sourceTree = "<group>"; };
 		5093FEFE01D3F907485BB252 /* EditorPhotos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorPhotos.swift; sourceTree = "<group>"; };
 		5176A8356310FFA7D76E741E /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
@@ -167,7 +169,7 @@
 		577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFern.swift; sourceTree = "<group>"; };
 		61EF746BB6AAD23AA2AEFD56 /* WashLabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WashLabView.swift; sourceTree = "<group>"; };
 		655279ADA8C6783C3A2943A0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		6874D40188440206C80B5EE5 /* Fern.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fern.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6874D40188440206C80B5EE5 /* Fern.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fern.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		68B6BA6BD6603F605BF65B63 /* ReadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingView.swift; sourceTree = "<group>"; };
 		69C9FD6E8B7EA7C53554913F /* LockGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockGate.swift; sourceTree = "<group>"; };
 		6A87F893FEEDD086C788AEED /* Prompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prompt.swift; sourceTree = "<group>"; };
@@ -190,7 +192,7 @@
 		A6827187FF4941AE39243B9E /* Prompts+Nier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Nier.swift"; sourceTree = "<group>"; };
 		AD6943B8927D7DB6D40C3730 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		B28F822C8468BE267C3F3293 /* ThemeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeStore.swift; sourceTree = "<group>"; };
-		B572112FB741A611B6732471 /* FernTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FernTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B572112FB741A611B6732471 /* FernTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = FernTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B628B8479289E7CC246E5C5B /* EntryEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryEditorView.swift; sourceTree = "<group>"; };
 		B7ABB577E515BBF1EC0238B8 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		BB27CCF5E64406E93604C436 /* PDFExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExporter.swift; sourceTree = "<group>"; };
@@ -295,6 +297,7 @@
 				38E27EF4D706838525532A07 /* LibraryExporter.swift */,
 				CBC7E99A123649E4FFAC4ECD /* LocationProvider.swift */,
 				12337FE2289C85966902B783 /* MarkdownExporter.swift */,
+				4C1195D5175BBFD5A209F39E /* NameSync.swift */,
 				BB27CCF5E64406E93604C436 /* PDFExporter.swift */,
 				8179EB32444953EE697C2342 /* PhotoStore.swift */,
 				ED830E78A8ED4F64E15ECC2C /* PromptNotifier.swift */,
@@ -511,6 +514,7 @@
 						ProvisioningStyle = Automatic;
 					};
 					A7E908288E69270DC8559670 = {
+						DevelopmentTeam = 775QLS4P2V;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -622,6 +626,7 @@
 				D3988507F66A8D5E8CF88039 /* MarkdownStyler.swift in Sources */,
 				CEE905C9E387AE4BFEC37187 /* MarkdownTextView.swift in Sources */,
 				CAF77756FD782FF6B9B4F45E /* MarkdownTheme.swift in Sources */,
+				BCD36B9B75C19D47A5B91681 /* NameSync.swift in Sources */,
 				0517271B1D128E80B8942A3F /* OnThisDay.swift in Sources */,
 				7B2A61EE3B29A7332788E868 /* OnboardingView.swift in Sources */,
 				780B69FDC82CB2EE8E998FF3 /* PDFExporter.swift in Sources */,
@@ -716,7 +721,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = 775QLS4P2V;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -895,7 +899,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = 775QLS4P2V;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

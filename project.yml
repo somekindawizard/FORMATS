@@ -41,6 +41,9 @@ targets:
         # iCloud+CloudKit and Push Notifications enabled, and the container made.
         com.apple.developer.icloud-services: [CloudKit]
         com.apple.developer.icloud-container-identifiers: [iCloud.garden.fern.Fern]
+        # iCloud key-value store — syncs small prefs (the writer's name) across
+        # devices. Part of the iCloud capability already enabled on the App ID.
+        com.apple.developer.ubiquity-kvstore-identifier: $(TeamIdentifierPrefix)$(CFBundleIdentifier)
         # CloudKit syncs via silent pushes. "development" for Xcode/dev builds;
         # switch to "production" for TestFlight / App Store.
         aps-environment: development
