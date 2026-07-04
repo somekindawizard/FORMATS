@@ -77,6 +77,11 @@ struct RootView: View {
         .task {
             await PromptNotifier.refresh()
             SpotlightIndexer.reindexAll(entries)
+            AssetSync.backfill(context)      // push existing local photos/ink to the store
+            AssetSync.materializeAll(context) // write any synced-in bytes to files
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .NSPersistentStoreRemoteChange)) { _ in
+            AssetSync.materializeAll(context)
         }
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
             if let id = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String,
@@ -88,7 +93,10 @@ struct RootView: View {
             NavigationStack { EntryEditorView(entry: entry) }
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { consumeQuickCompose() }
+            if phase == .active {
+                consumeQuickCompose()
+                AssetSync.materializeAll(context)
+            }
         }
         .onOpenURL { url in
             if url.scheme == "fern" && url.host == "new" { startQuickCompose() }

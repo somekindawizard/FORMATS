@@ -11,7 +11,7 @@ enum Persistence {
     /// devices via their private iCloud — no code change required.
     static let shared: ModelContainer = {
         do {
-            return try ModelContainer(for: Entry.self)
+            return try ModelContainer(for: Entry.self, Asset.self)
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }
@@ -21,7 +21,7 @@ enum Persistence {
     @MainActor
     static func inMemory() -> ModelContainer {
         try! ModelContainer(
-            for: Entry.self,
+            for: Entry.self, Asset.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true)
         )
     }

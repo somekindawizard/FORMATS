@@ -175,6 +175,9 @@ struct EntryEditorView: View {
                 context.delete(entry)
             } else {
                 ocrInkForSearch()
+                if let d = DrawingStore.load(entry.id), !d.strokes.isEmpty {
+                    AssetSync.recordDrawing(context, entryID: entry.id, data: d.dataRepresentation())
+                }
                 SpotlightIndexer.index(entry)
             }
             try? context.save()
@@ -239,6 +242,7 @@ struct EntryEditorView: View {
             if let data = try? await item.loadTransferable(type: Data.self),
                let name = PhotoStore.save(data) {
                 entry.photoFileNames.append(name)
+                AssetSync.recordPhoto(context, name: name, data: data)
                 controller.insertPhoto(name)
             }
         }
@@ -375,6 +379,7 @@ private struct MetadataRow: View {
 
 private struct PhotoStrip: View {
     @Bindable var entry: Entry
+    @Environment(\.modelContext) private var context
     @State private var picks: [PhotosPickerItem] = []
 
     /// Only photos that aren't embedded inline in the body — those show in text.
@@ -427,6 +432,7 @@ private struct PhotoStrip: View {
             if let data = try? await item.loadTransferable(type: Data.self),
                let name = PhotoStore.save(data) {
                 entry.photoFileNames.append(name)
+                AssetSync.recordPhoto(context, name: name, data: data)
             }
         }
         picks = []
