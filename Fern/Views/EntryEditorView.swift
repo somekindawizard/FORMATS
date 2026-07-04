@@ -127,6 +127,9 @@ struct EntryEditorView: View {
                     Button { shareCard() } label: {
                         Label("Share as card", systemImage: "photo")
                     }
+                    Button { exportPDF() } label: {
+                        Label("Export as PDF", systemImage: "doc.richtext")
+                    }
                     ShareLink(item: MarkdownExporter.markdown(for: entry)) {
                         Label("Share as Markdown", systemImage: "square.and.arrow.up")
                     }
@@ -215,6 +218,13 @@ struct EntryEditorView: View {
             }
         }
         inlinePhotoPicks = []
+    }
+
+    @MainActor
+    private func exportPDF() {
+        if let url = PDFExporter.pdf(for: entry) {
+            shareItems = ShareItems(items: [url])
+        }
     }
 
     @MainActor

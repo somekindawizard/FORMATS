@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import PencilKit
 
 /// A shareable paper-and-ink card of an entry. Rendered to an image by
 /// `ImageRenderer`. Uses fixed light colors so the shared image looks the same
@@ -56,6 +57,13 @@ struct PaperCard: View {
                 cardPhotos
             }
 
+            if let drawing {
+                Image(uiImage: drawing)
+                    .resizable().scaledToFit()
+                    .frame(maxWidth: .infinity)
+                    .frame(maxHeight: 700)
+            }
+
             Spacer(minLength: 40)
 
             Rectangle().fill(line).frame(height: 1)
@@ -78,6 +86,14 @@ struct PaperCard: View {
 
     private var photos: [UIImage] {
         entry.photoFileNames.prefix(3).compactMap { PhotoStore.load($0) }
+    }
+
+    /// The note's Apple Pencil ink, rendered to an image for the card.
+    private var drawing: UIImage? {
+        guard let d = DrawingStore.load(entry.id), !d.strokes.isEmpty else { return nil }
+        let bounds = d.bounds
+        guard bounds.width > 1, bounds.height > 1 else { return nil }
+        return d.image(from: bounds, scale: 2)
     }
 
     private var cardPhotos: some View {
