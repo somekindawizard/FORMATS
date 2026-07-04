@@ -33,6 +33,15 @@ final class PhotoAttachment: NSTextAttachment {
 /// Markdown.
 enum EditorPhotos {
 
+    /// Centers a photo on its own line, magazine-style.
+    static var centeredParagraph: NSParagraphStyle {
+        let p = NSMutableParagraphStyle()
+        p.alignment = .center
+        p.paragraphSpacing = 6
+        p.paragraphSpacingBefore = 6
+        return p
+    }
+
     /// Markdown → attributed text: photo tokens become inline image attachments,
     /// everything else is styled by `MarkdownStyler`.
     static func attributed(fromMarkdown md: String, width: CGFloat, wash: Bool = false) -> NSAttributedString {
@@ -42,7 +51,10 @@ enum EditorPhotos {
             case .text(let t):
                 result.append(MarkdownStyler.attributed(for: t))
             case .photo(let name):
-                result.append(NSAttributedString(attachment: attachment(name, width: width, wash: wash)))
+                let a = NSMutableAttributedString(attachment: attachment(name, width: width, wash: wash))
+                a.addAttribute(.paragraphStyle, value: centeredParagraph,
+                               range: NSRange(location: 0, length: a.length))
+                result.append(a)
             }
         }
         return result

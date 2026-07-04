@@ -61,29 +61,95 @@ struct WashedImage: View {
 
 /// The reading-mode body: text runs rendered as clean Markdown with inline
 /// photos placed where they sit in the document.
+/// A block in reading mode: a run of prose, a photo, a section fleuron, or a
+/// centered figure caption.
+enum ReaderBlock {
+    case text(String)
+    case photo(String)
+    case rule
+    case caption(String)
+}
+
 struct RenderedBody: View {
     let markdown: String
     let wash: Bool
     @Environment(\.horizontalSizeClass) private var sizeClass
 
+    private var blocks: [ReaderBlock] { RenderedBody.blocks(markdown) }
+    private var firstTextIndex: Int? {
+        blocks.firstIndex { if case .text = $0 { return true } else { return false } }
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            ForEach(Array(PhotoToken.segments(markdown).enumerated()), id: \.offset) { _, seg in
-                switch seg {
-                case .text(let t):
-                    let trimmed = t.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !trimmed.isEmpty {
-                        Text(MarkdownRender.styled(trimmed, ReadingView.readerStyle))
-                            .lineSpacing(6)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .textSelection(.enabled)
-                    }
+        VStack(alignment: .leading, spacing: 16) {
+            ForEach(Array(blocks.enumerated()), id: \.offset) { i, block in
+                switch block {
+                case .text(let s):
+                    Text(RenderedBody.styled(s, dropCap: i == firstTextIndex))
+                        .lineSpacing(6)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .textSelection(.enabled)
                 case .photo(let name):
                     WashedImage(name: name, wash: wash)
                         .frame(maxWidth: sizeClass == .regular ? 460 : .infinity)
                         .frame(maxWidth: .infinity, alignment: .center)
+                case .caption(let s):
+                    Text(s)
+                        .font(.calloutSerif).italic()
+                        .foregroundStyle(Paper.inkSoft)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.top, -8)
+                case .rule:
+                    Image(systemName: "leaf")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Paper.inkFaint)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 8)
                 }
             }
         }
+    }
+
+    // MARK: block parsing
+
+    static func blocks(_ markdown: String) -> [ReaderBlock] {
+        var out: [ReaderBlock] = []
+        for seg in PhotoToken.segments(markdown) {
+            switch seg {
+            case .photo(let name):
+                out.append(.photo(name))
+            case .text(let text):
+                var buffer: [String] = []
+                func flush() {
+                    let s = buffer.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !s.isEmpty { out.append(.text(s)) }
+                    buffer = []
+                }
+                for line in text.components(separatedBy: "\n") {
+                    let t = line.trimmingCharacters(in: .whitespaces)
+                    if t.count >= 3, Set(t).count == 1, "-*_".contains(t.first!) {
+                        flush(); out.append(.rule)
+                    } else if t.hasPrefix("// ") {
+                        flush(); out.append(.caption(String(t.dropFirst(3))))
+                    } else {
+                        buffer.append(line)
+                    }
+                }
+                flush()
+            }
+        }
+        return out
+    }
+
+    /// Render a prose block; optionally raise a decorative initial (drop cap).
+    static func styled(_ s: String, dropCap: Bool) -> AttributedString {
+        var a = MarkdownRender.styled(s, ReadingView.readerStyle)
+        guard dropCap, !s.hasPrefix("#"),
+              let idx = a.characters.firstIndex(where: { $0.isLetter }) else { return a }
+        let next = a.index(afterCharacter: idx)
+        a[idx..<next].font = .custom("Fraunces", size: 46).weight(.semibold)
+        a[idx..<next].foregroundColor = Paper.accent
+        return a
     }
 }

@@ -50,7 +50,10 @@ struct ReadingView: View {
                 .padding(.horizontal, 26)
                 .padding(.top, 12)
                 .padding(.bottom, 60)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                // Optimal measure — hold the column to a readable line length,
+                // centered on wide screens.
+                .frame(maxWidth: 680)
+                .frame(maxWidth: .infinity, alignment: .center)
             }
         }
         .navigationBarTitleDisplayMode(.inline)

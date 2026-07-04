@@ -131,6 +131,13 @@ enum MarkdownStyler {
             addTrait(.traitItalic, over: m.range)
         }
 
+        // Figure caption line: "// caption" — italic, soft, dimmed marker.
+        eachMatch("^(//[ \\t])(.*)$", [.anchorsMatchLines]) { m in
+            text.addAttribute(.foregroundColor, value: MarkdownTheme.inkSoft, range: m.range)
+            addTrait(.traitItalic, over: m.range)
+            dim(m.range(at: 1))
+        }
+
         return text
     }
 }
