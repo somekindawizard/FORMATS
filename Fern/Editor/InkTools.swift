@@ -122,8 +122,16 @@ extension MarkdownEditorController {
     /// Build the active tool from the current settings.
     func applyInk() {
         guard let c = canvas else { return }
+        isSelecting = false
         c.tool = ink.isEraser ? PKEraserTool(.vector)
                               : PKInkingTool(ink.pen.pk, color: ink.uiColor, width: ink.width)
+    }
+
+    /// Activate the lasso for selecting / moving / cutting strokes.
+    func selectStrokes() {
+        ink.isEraser = false
+        isSelecting = true
+        canvas?.tool = PKLassoTool()
     }
 
     func setDrawing(_ active: Bool) {
@@ -247,6 +255,7 @@ struct InkToolbar: View {
                 toolButton("eraser", on: controller.ink.isEraser) {
                     controller.ink.isEraser = true; controller.applyInk()
                 }
+                toolButton("lasso", on: controller.isSelecting) { controller.selectStrokes() }
                 toolButton("ruler", on: controller.showRuler) { controller.toggleRuler() }
                 Divider().frame(height: 22)
                 toolButton("arrow.uturn.backward") { controller.undoInk() }

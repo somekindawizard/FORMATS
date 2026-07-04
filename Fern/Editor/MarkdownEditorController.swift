@@ -24,6 +24,8 @@ final class MarkdownEditorController {
     var isDrawing = false
     /// When on, PencilKit's ruler is shown for straight lines.
     var showRuler = false
+    /// When on, the lasso tool is active for selecting/moving strokes.
+    var isSelecting = false
     /// The current pen/color/width selection.
     var ink = InkSettings()
 
