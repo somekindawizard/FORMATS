@@ -97,11 +97,11 @@ enum EditorPhotos {
 /// Tunable parameters for the photo wash. Persisted so the Wash Lab dev screen
 /// can dial them in live and the whole app reflects the change.
 struct WashParams: Equatable, Codable {
-    var brightness: Double = 0.16
-    var contrast: Double = 0.72
-    var exposure: Double = 0.40
-    var intensity: Double = 0.55
-    var tintMix: Double = 0.40
+    var brightness: Double = 0.01
+    var contrast: Double = 0.94
+    var exposure: Double = 0.35
+    var intensity: Double = 1.00
+    var tintMix: Double = 0.60
 
     static var current: WashParams {
         guard let data = UserDefaults.standard.data(forKey: "fern.wash"),
