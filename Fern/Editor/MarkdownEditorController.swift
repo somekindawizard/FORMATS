@@ -128,6 +128,23 @@ final class MarkdownEditorController {
 
     func dismissKeyboard() { textView?.resignFirstResponder() }
 
+    /// Insert an inline photo (as an image attachment) at the caret. Serializes
+    /// back to a `![](fern://name)` token via the text view's delegate.
+    func insertPhoto(_ name: String) {
+        guard let tv = textView, let sel = tv.selectedTextRange else { return }
+        let loc = tv.offset(from: tv.beginningOfDocument, to: sel.start)
+        let len = tv.offset(from: sel.start, to: sel.end)
+        let width = MarkdownTextView.contentWidth(tv)
+        let piece = NSMutableAttributedString(string: "\n", attributes: MarkdownStyler.baseAttributes())
+        piece.append(NSAttributedString(attachment: EditorPhotos.attachment(name, width: width)))
+        piece.append(NSAttributedString(string: "\n", attributes: MarkdownStyler.baseAttributes()))
+        tv.textStorage.replaceCharacters(in: NSRange(location: loc, length: len), with: piece)
+        if let pos = tv.position(from: tv.beginningOfDocument, offset: loc + piece.length) {
+            tv.selectedTextRange = tv.textRange(from: pos, to: pos)
+        }
+        notifyChange(tv)
+    }
+
     // MARK: - Synonyms
 
     /// Recompute `currentWord` from the caret. Called on selection/text changes.

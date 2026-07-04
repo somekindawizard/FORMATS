@@ -61,6 +61,7 @@
 		BB8ECF80E64C3F7845CD07C5 /* Redaction-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9BC51BE11191B28C0AA2C34F /* Redaction-Bold.ttf */; };
 		BDB9D4177DA66409E04B8B4D /* ComposeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E10DFCAB855A14CE7D486A /* ComposeButton.swift */; };
 		BE12B4B0AD2AF461EE824738 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D7A67E4C33A31B4DDC79FE4E /* Assets.xcassets */; };
+		BE358E151418F55454E77E3B /* EditorPhotos.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5093FEFE01D3F907485BB252 /* EditorPhotos.swift */; };
 		C0291DEC6228E55CC51444BF /* Fonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = F433CA977FF4475744DAE193 /* Fonts.swift */; };
 		C0E4621C3F0203251652A3FE /* ThemeOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FED160A738BC3DE663C28045 /* ThemeOptions.swift */; };
 		C4066C9745B5F006C924AE4C /* WeatherProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70573A969736F0D4419D6DA6 /* WeatherProvider.swift */; };
@@ -149,6 +150,7 @@
 		498E7586F70ECCFA602F6B03 /* Prompts+Reflective.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Reflective.swift"; sourceTree = "<group>"; };
 		49BCF6E4EFF1274EEAC43A8B /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		4DE4B4BAA147D79AC4DD0B0E /* Gambetta-Semibold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Gambetta-Semibold.otf"; sourceTree = "<group>"; };
+		5093FEFE01D3F907485BB252 /* EditorPhotos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorPhotos.swift; sourceTree = "<group>"; };
 		55662AF595DC7900135BE0CA /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFern.swift; sourceTree = "<group>"; };
 		6874D40188440206C80B5EE5 /* Fern.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fern.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -217,6 +219,7 @@
 			isa = PBXGroup;
 			children = (
 				3BE4457DFF57CF5D04E853B5 /* AccessoryBar.swift */,
+				5093FEFE01D3F907485BB252 /* EditorPhotos.swift */,
 				CD7A3372E778227A40182354 /* InlinePhoto.swift */,
 				EB1ED64338FFF646CDCEB947 /* MarkdownEditorController.swift */,
 				372C0EB975F143697FA69E96 /* MarkdownRender.swift */,
@@ -569,6 +572,7 @@
 				62166C608582EFCE76A75612 /* Components.swift in Sources */,
 				BDB9D4177DA66409E04B8B4D /* ComposeButton.swift in Sources */,
 				9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */,
+				BE358E151418F55454E77E3B /* EditorPhotos.swift in Sources */,
 				F349ECAB7A224AE4DBB6C3C5 /* Entry.swift in Sources */,
 				12F6E70FBF359B44046B6B35 /* EntryEditorView.swift in Sources */,
 				80AC7B1ED6DFFBCDA716827D /* EntryRow.swift in Sources */,

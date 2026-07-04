@@ -194,7 +194,7 @@ struct EntryEditorView: View {
             if let data = try? await item.loadTransferable(type: Data.self),
                let name = PhotoStore.save(data) {
                 entry.photoFileNames.append(name)
-                controller.insert(PhotoToken.make(name))
+                controller.insertPhoto(name)
             }
         }
         inlinePhotoPicks = []

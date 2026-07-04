@@ -26,18 +26,31 @@ struct MarkdownTextView: UIViewRepresentable {
         tv.tintColor = MarkdownTheme.accent
         tv.allowsEditingTextAttributes = false
         tv.typingAttributes = MarkdownStyler.baseAttributes()
-        tv.attributedText = MarkdownStyler.attributed(for: text)
+        tv.attributedText = EditorPhotos.attributed(fromMarkdown: text, width: Self.contentWidth(tv))
         return tv
     }
 
     func updateUIView(_ uiView: UITextView, context: Context) {
-        // Only when the source string changes from outside the view (e.g. the
-        // accessory bar inserting Markdown). Not during normal typing.
-        if uiView.text != text {
+        // Only when the source changes from outside the view (e.g. loading a
+        // note). Compare the serialized Markdown so inline photo attachments
+        // don't read as a perpetual mismatch. Not hit during normal typing.
+        if EditorPhotos.markdown(from: uiView.attributedText) != text {
             let selected = uiView.selectedRange
-            uiView.attributedText = MarkdownStyler.attributed(for: text)
-            uiView.selectedRange = selected
+            uiView.attributedText = EditorPhotos.attributed(fromMarkdown: text, width: Self.contentWidth(uiView))
+            let len = uiView.textStorage.length
+            uiView.selectedRange = NSRange(location: min(selected.location, len), length: 0)
         }
+    }
+
+    /// Usable text width, for sizing inline image attachments. Falls back to the
+    /// screen width (minus the editor's padding) before the view has laid out,
+    /// so photos in a freshly-opened note aren't sized tiny.
+    static func contentWidth(_ tv: UITextView) -> CGFloat {
+        let container = tv.textContainer.size.width
+        if container > 0 {
+            return max(80, container - tv.textContainerInset.left - tv.textContainerInset.right)
+        }
+        return max(80, UIScreen.main.bounds.width - 52)
     }
 
     func makeCoordinator() -> Coordinator { Coordinator(parent: self) }
@@ -47,7 +60,7 @@ struct MarkdownTextView: UIViewRepresentable {
         init(parent: MarkdownTextView) { self.parent = parent }
 
         func textViewDidChange(_ textView: UITextView) {
-            parent.text = textView.text ?? ""
+            parent.text = EditorPhotos.markdown(from: textView.attributedText)
             restyle(textView)
             parent.controller?.refreshCurrentWord()
         }
@@ -74,12 +87,22 @@ struct MarkdownTextView: UIViewRepresentable {
                 return
             }
 
+            // Snapshot inline photo attachments — the base-attribute reset below
+            // would otherwise strip them off their U+FFFC characters.
+            var attachments: [(Int, PhotoAttachment)] = []
+            storage.enumerateAttribute(.attachment, in: NSRange(location: 0, length: storage.length)) { v, r, _ in
+                if let a = v as? PhotoAttachment { attachments.append((r.location, a)) }
+            }
+
             let selected = textView.selectedRange
             let whole = NSRange(location: 0, length: storage.length)
             storage.beginEditing()
             storage.setAttributes(MarkdownStyler.baseAttributes(), range: whole)
             styled.enumerateAttributes(in: whole, options: []) { attrs, range, _ in
                 storage.addAttributes(attrs, range: range)
+            }
+            for (loc, a) in attachments where loc < storage.length {
+                storage.addAttribute(.attachment, value: a, range: NSRange(location: loc, length: 1))
             }
             storage.endEditing()
             textView.selectedRange = selected
