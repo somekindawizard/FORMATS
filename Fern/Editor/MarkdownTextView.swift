@@ -1,6 +1,32 @@
 import SwiftUI
 import UIKit
 
+/// A UITextView that re-fits inline photo attachments to the column **only when
+/// its usable width actually changes** (rotation, iPad sidebar, Split View) —
+/// not on every layout pass, which would feed back into typing jitter.
+final class PhotoTextView: UITextView {
+    private var lastWidth: CGFloat = 0
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let usable = textContainer.size.width
+        guard usable > 1, abs(usable - lastWidth) > 0.5 else { return }
+        lastWidth = usable
+        let storage = textStorage
+        let whole = NSRange(location: 0, length: storage.length)
+        var changed = false
+        storage.enumerateAttribute(.attachment, in: whole) { value, _, _ in
+            if let a = value as? PhotoAttachment { a.fit(toWidth: usable); changed = true }
+        }
+        if changed {
+            // Re-lay-out with the new sizes on the next runloop (avoid re-entrancy).
+            DispatchQueue.main.async { [weak self] in
+                self?.layoutManager.invalidateLayout(forCharacterRange: whole, actualCharacterRange: nil)
+            }
+        }
+    }
+}
+
 /// SwiftUI wrapper around UITextView that styles Markdown inline as it's typed.
 ///
 /// Critically, styling is applied **in place** — we only change attributes on
@@ -20,7 +46,13 @@ struct MarkdownTextView: UIViewRepresentable {
         // TextKit 1: the in-place textStorage styling + editable image
         // attachments behave predictably here. TextKit 2 caused scroll jumps on
         // every keystroke and taps grabbing the attachment instead of the caret.
-        let tv = UITextView(usingTextLayoutManager: false)
+        let layoutManager = NSLayoutManager()
+        let textStorage = NSTextStorage()
+        textStorage.addLayoutManager(layoutManager)
+        let container = NSTextContainer()
+        container.widthTracksTextView = true
+        layoutManager.addTextContainer(container)
+        let tv = PhotoTextView(frame: .zero, textContainer: container)
         tv.delegate = context.coordinator
         context.coordinator.lastWash = wash
         controller?.textView = tv

@@ -8,28 +8,17 @@ final class PhotoAttachment: NSTextAttachment {
     init(filename: String) { self.filename = filename; super.init(data: nil, ofType: nil) }
     required init?(coder: NSCoder) { self.filename = ""; super.init(coder: coder) }
 
-    /// Size to the actual available line width every layout pass, so photos
-    /// never overflow — adapts to the iPad sidebar, Split View, and rotation.
-    override func attachmentBounds(for textContainer: NSTextContainer?,
-                                   proposedLineFragment lineFrag: CGRect,
-                                   glyphPosition position: CGPoint,
-                                   characterIndex charIndex: Int) -> CGRect {
-        guard let image, image.size.width > 0 else {
-            return CGRect(x: 0, y: 0, width: max(0, lineFrag.width), height: 44)
-        }
-        // Size from the STABLE text-container width, not the proposed line
-        // fragment — the fragment width shifts pass-to-pass, and combined with
-        // the size threshold that made the image (and the page) jitter on every
-        // keystroke.
-        let containerW = textContainer?.size.width ?? 0
-        let avail = containerW > 1 ? containerW
-                  : (lineFrag.width > 1 ? lineFrag.width : image.size.width)
-        // Magazine sizing: on wide (iPad) layouts, hold images to ~60% of the
-        // column so they sit centered with margins; full-bleed on iPhone.
+    /// Set a **fixed** display size for the given available width — magazine
+    /// sizing on wide layouts, full-bleed on iPhone. Called once when built and
+    /// again only when the editor's width actually changes (rotation / sidebar /
+    /// Split View), never per layout pass — computing it per pass created a
+    /// feedback loop that made the page jitter while typing.
+    func fit(toWidth avail: CGFloat) {
+        guard let image, image.size.width > 0, avail > 1 else { return }
         let scale: CGFloat = avail > 500 ? 0.6 : 1.0
         let w = min(avail * scale, image.size.width)
         let h = image.size.height * (w / image.size.width)
-        return CGRect(x: 0, y: 0, width: w, height: h)
+        bounds = CGRect(x: 0, y: 0, width: w, height: h)
     }
 }
 
@@ -85,14 +74,13 @@ enum EditorPhotos {
         let att = PhotoAttachment(filename: name)
         if let raw = PhotoStore.load(name) {
             let img = wash ? washed(raw) : raw
-            // Render at a generous resolution (decoupled from the display width,
-            // which `attachmentBounds` clamps to the live line width) so the
-            // downscaled image stays crisp.
+            // Render at a generous resolution (decoupled from the display size,
+            // which `fit(toWidth:)` sets) so the downscaled image stays crisp.
             let renderW = max(1, min(img.size.width, 1400))
             let renderH = img.size.height * (renderW / img.size.width)
             att.image = rounded(img, size: CGSize(width: renderW, height: renderH),
                                 radius: renderW * 0.022)
-            att.bounds = CGRect(x: 0, y: 0, width: renderW, height: renderH)
+            att.fit(toWidth: width)   // fixed display bounds
         } else {
             att.bounds = CGRect(x: 0, y: 0, width: width, height: 44)
         }
