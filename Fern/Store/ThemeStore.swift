@@ -28,6 +28,10 @@ final class ThemeStore {
     var typewriter: Bool {
         didSet { UserDefaults.standard.set(typewriter, forKey: "fern.write.typewriter") }
     }
+    /// Hide Markdown marks except on the line you're editing (live preview).
+    var foldMarkers: Bool {
+        didSet { UserDefaults.standard.set(foldMarkers, forKey: "fern.write.fold") }
+    }
 
     private init() {
         tone = PaperTone(rawValue: UserDefaults.standard.string(forKey: "fern.theme.tone") ?? "") ?? .mist
@@ -36,6 +40,7 @@ final class ThemeStore {
         paperRule = PaperRule(rawValue: UserDefaults.standard.string(forKey: "fern.theme.rule") ?? "") ?? .plain
         focusMode = UserDefaults.standard.bool(forKey: "fern.write.focus")
         typewriter = UserDefaults.standard.bool(forKey: "fern.write.typewriter")
+        foldMarkers = UserDefaults.standard.object(forKey: "fern.write.fold") as? Bool ?? true
     }
 
     var paletteKey: String { "\(tone.rawValue)-\(accent.rawValue)-\(displayFont.rawValue)-\(paperRule.rawValue)" }

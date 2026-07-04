@@ -1,5 +1,11 @@
 import UIKit
 
+extension NSAttributedString.Key {
+    /// Marks Markdown syntax characters that the folding layout manager can hide
+    /// when the caret isn't on their line.
+    static let fernFold = NSAttributedString.Key("fern.fold")
+}
+
 /// Styles Markdown **in place**: returns an attributed string whose characters
 /// are byte-for-byte the source (so the editor never rewrites what you typed —
 /// spaces and line breaks are preserved). It only assigns fonts/colors over
@@ -24,6 +30,7 @@ enum MarkdownStyler {
         func dim(_ range: NSRange) {
             guard range.location >= 0, NSMaxRange(range) <= ns.length else { return }
             text.addAttribute(.foregroundColor, value: MarkdownTheme.faint, range: range)
+            text.addAttribute(.fernFold, value: true, range: range)   // hideable when off-line
         }
 
         func eachMatch(_ pattern: String, _ options: NSRegularExpression.Options = [],

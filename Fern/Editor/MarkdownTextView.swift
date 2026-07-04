@@ -30,6 +30,43 @@ final class PhotoTextView: UITextView {
     }
 }
 
+/// Hides Markdown syntax glyphs (marked `.fernFold`) unless the caret is on
+/// their line — Bear-style live preview. Works at the glyph layer, so it never
+/// touches the text or attachment sizes.
+final class FoldingLayoutDelegate: NSObject, NSLayoutManagerDelegate {
+    weak var textView: UITextView?
+
+    func layoutManager(_ layoutManager: NSLayoutManager,
+                       shouldGenerateGlyphs glyphs: UnsafePointer<CGGlyph>,
+                       properties props: UnsafePointer<NSLayoutManager.GlyphProperty>,
+                       characterIndexes: UnsafePointer<Int>,
+                       font: UIFont,
+                       forGlyphRange glyphRange: NSRange) -> Int {
+        var newProps = Array(UnsafeBufferPointer(start: props, count: glyphRange.length))
+        if ThemeStore.shared.foldMarkers, let storage = layoutManager.textStorage {
+            let ns = storage.string as NSString
+            var caretPara = NSRange(location: NSNotFound, length: 0)
+            if let sel = textView?.selectedRange, sel.location <= ns.length {
+                caretPara = ns.paragraphRange(for: sel)
+            }
+            for i in 0..<glyphRange.length {
+                let ci = characterIndexes[i]
+                guard ci < storage.length else { continue }
+                let onCaretLine = caretPara.location != NSNotFound && NSLocationInRange(ci, caretPara)
+                if !onCaretLine, storage.attribute(.fernFold, at: ci, effectiveRange: nil) != nil {
+                    newProps[i].insert(.null)   // hide glyph, zero advancement
+                }
+            }
+        }
+        newProps.withUnsafeBufferPointer { buf in
+            layoutManager.setGlyphs(glyphs, properties: buf.baseAddress!,
+                                    characterIndexes: characterIndexes, font: font,
+                                    forGlyphRange: glyphRange)
+        }
+        return glyphRange.length
+    }
+}
+
 /// SwiftUI wrapper around UITextView that styles Markdown inline as it's typed.
 ///
 /// Critically, styling is applied **in place** — we only change attributes on
@@ -50,12 +87,14 @@ struct MarkdownTextView: UIViewRepresentable {
         // attachments behave predictably here. TextKit 2 caused scroll jumps on
         // every keystroke and taps grabbing the attachment instead of the caret.
         let layoutManager = NSLayoutManager()
+        layoutManager.delegate = context.coordinator.foldDelegate
         let textStorage = NSTextStorage()
         textStorage.addLayoutManager(layoutManager)
         let container = NSTextContainer()
         container.widthTracksTextView = true
         layoutManager.addTextContainer(container)
         let tv = PhotoTextView(frame: .zero, textContainer: container)
+        context.coordinator.foldDelegate.textView = tv
         tv.delegate = context.coordinator
         context.coordinator.lastWash = wash
         controller?.textView = tv
@@ -112,6 +151,8 @@ struct MarkdownTextView: UIViewRepresentable {
     final class Coordinator: NSObject, UITextViewDelegate {
         var parent: MarkdownTextView
         var lastWash = false
+        let foldDelegate = FoldingLayoutDelegate()
+        private var lastParagraph = NSRange(location: NSNotFound, length: 0)
         init(parent: MarkdownTextView) { self.parent = parent }
 
         func textViewDidChange(_ textView: UITextView) {
@@ -152,6 +193,26 @@ struct MarkdownTextView: UIViewRepresentable {
             // Focus mode re-dims around the paragraph the caret moved into.
             if ThemeStore.shared.focusMode { restyle(textView) }
             if ThemeStore.shared.typewriter { centerCaret(textView) }
+            refoldOnParagraphChange(textView)
+        }
+
+        /// When the caret moves to a new line, re-generate glyphs for the old and
+        /// new lines so folding reveals/hides their marks.
+        private func refoldOnParagraphChange(_ tv: UITextView) {
+            guard ThemeStore.shared.foldMarkers else { return }
+            let ns = (tv.text ?? "") as NSString
+            guard tv.selectedRange.location <= ns.length else { return }
+            let para = ns.paragraphRange(for: tv.selectedRange)
+            guard para.location != lastParagraph.location || para.length != lastParagraph.length else { return }
+            let old = lastParagraph
+            lastParagraph = para
+            let lm = tv.layoutManager
+            if old.location != NSNotFound, NSMaxRange(old) <= ns.length {
+                lm.invalidateGlyphs(forCharacterRange: old, changeInLength: 0, actualCharacterRange: nil)
+                lm.invalidateDisplay(forCharacterRange: old)
+            }
+            lm.invalidateGlyphs(forCharacterRange: para, changeInLength: 0, actualCharacterRange: nil)
+            lm.invalidateDisplay(forCharacterRange: para)
         }
 
         /// Keep the caret line vertically centered (typewriter scrolling).

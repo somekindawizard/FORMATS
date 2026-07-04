@@ -70,12 +70,13 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    Toggle("Hide Markdown marks", isOn: $theme.foldMarkers).tint(Paper.accent)
                     Toggle("Focus mode", isOn: $theme.focusMode).tint(Paper.accent)
                     Toggle("Typewriter scrolling", isOn: $theme.typewriter).tint(Paper.accent)
                 } header: {
                     Text("Writing")
                 } footer: {
-                    Text("Focus dims all but the line you're writing. Typewriter keeps that line centered.")
+                    Text("Hiding marks shows **bold** clean, revealing the marks only on the line you're editing. Focus dims all but the current line. Typewriter keeps it centered.")
                         .font(.calloutSerif).foregroundStyle(Paper.inkSoft)
                 }
 
