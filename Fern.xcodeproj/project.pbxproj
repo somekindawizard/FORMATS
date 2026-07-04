@@ -83,6 +83,7 @@
 		E46E487B2EB249A714915481 /* Prompts+Reflective.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498E7586F70ECCFA602F6B03 /* Prompts+Reflective.swift */; };
 		E473E6FD8FFFD9B1D6D51332 /* FernTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = D383A32ED71D29BD1C19B13C /* FernTabBar.swift */; };
 		E5B87471D24573544FF784FD /* PromptNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED830E78A8ED4F64E15ECC2C /* PromptNotifier.swift */; };
+		E5C0CCDE6CAC9613894A2100 /* AppIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8119C721CD1304B059C77 /* AppIntents.swift */; };
 		EFB45A7993691F8811C3B8D5 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DC35D8BD947984A93C106B /* TodayView.swift */; };
 		F00296BCD3F84428E90C9F8D /* Prompts+Reflective.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498E7586F70ECCFA602F6B03 /* Prompts+Reflective.swift */; };
 		F349ECAB7A224AE4DBB6C3C5 /* Entry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A7151C81AE2B364DEA4C780 /* Entry.swift */; };
@@ -168,6 +169,7 @@
 		70573A969736F0D4419D6DA6 /* WeatherProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherProvider.swift; sourceTree = "<group>"; };
 		74089F72177AC086B585AD67 /* SavedPromptsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPromptsView.swift; sourceTree = "<group>"; };
 		8179EB32444953EE697C2342 /* PhotoStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoStore.swift; sourceTree = "<group>"; };
+		8EF8119C721CD1304B059C77 /* AppIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntents.swift; sourceTree = "<group>"; };
 		970190D4D04CBD9FA602D885 /* FiddleheadShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiddleheadShape.swift; sourceTree = "<group>"; };
 		9A7151C81AE2B364DEA4C780 /* Entry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entry.swift; sourceTree = "<group>"; };
 		9BC51BE11191B28C0AA2C34F /* Redaction-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Redaction-Bold.ttf"; sourceTree = "<group>"; };
@@ -253,6 +255,7 @@
 		50B77B92874C83A911247AB7 /* Fern */ = {
 			isa = PBXGroup;
 			children = (
+				8EF8119C721CD1304B059C77 /* AppIntents.swift */,
 				D7A67E4C33A31B4DDC79FE4E /* Assets.xcassets */,
 				DDDBBE40B1B0CA3FFA37EB3D /* Fern.entitlements */,
 				C576F242B37F60F2186C68E4 /* FernApp.swift */,
@@ -575,6 +578,7 @@
 			files = (
 				46D0ADB747D5436625E20C0C /* AccessoryBar.swift in Sources */,
 				9A64942EF4BF90D9AA61656A /* ActivityView.swift in Sources */,
+				E5C0CCDE6CAC9613894A2100 /* AppIntents.swift in Sources */,
 				D1F83BB5944806CC63145AAB /* BarnsleyFern.swift in Sources */,
 				400A3569506D5FCD81502BBF /* BarnsleyFernView.swift in Sources */,
 				533F6945C4B9BFA4D02EEE09 /* BiometricLock.swift in Sources */,

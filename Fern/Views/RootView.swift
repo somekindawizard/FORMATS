@@ -42,6 +42,7 @@ struct RootView: View {
     @AppStorage("fern.tab") private var tabSelection: Destination = .today
     @State private var spotlightEntry: Entry?
     @State private var hideTabBar = false
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         Group {
@@ -84,10 +85,29 @@ struct RootView: View {
         .sheet(item: $spotlightEntry) { entry in
             NavigationStack { EntryEditorView(entry: entry) }
         }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { consumeQuickCompose() }
+        }
+        .onOpenURL { url in
+            if url.scheme == "fern" && url.host == "new" { startQuickCompose() }
+        }
     }
 
     private func openEntry(_ uuid: UUID) {
         let descriptor = FetchDescriptor<Entry>(predicate: #Predicate { $0.id == uuid })
         spotlightEntry = try? context.fetch(descriptor).first
+    }
+
+    /// Honor a "New Fern entry" App Intent that ran while the app was backgrounded.
+    private func consumeQuickCompose() {
+        guard UserDefaults.standard.bool(forKey: "fern.quickCompose") else { return }
+        UserDefaults.standard.set(false, forKey: "fern.quickCompose")
+        startQuickCompose()
+    }
+
+    private func startQuickCompose() {
+        let entry = Entry(title: "", body: "", collection: .piece)
+        context.insert(entry)
+        spotlightEntry = entry
     }
 }

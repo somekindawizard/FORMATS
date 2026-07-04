@@ -42,28 +42,55 @@ struct FernWidgetView: View {
     @Environment(\.widgetFamily) private var family
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 4) {
-                Image(systemName: "leaf.fill").font(.system(size: 11)).foregroundStyle(accent)
+        content.widgetURL(URL(string: "fern://new"))
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch family {
+        case .accessoryInline:
+            Text("✎ \(entry.prompt)")
+
+        case .accessoryCircular:
+            ZStack {
+                AccessoryWidgetBackground()
+                Image(systemName: "leaf.fill").font(.system(size: 18))
+            }
+
+        case .accessoryRectangular:
+            VStack(alignment: .leading, spacing: 2) {
                 Text("TODAY'S PROMPT")
-                    .font(.system(size: 10, weight: .semibold, design: .serif))
-                    .tracking(1.2)
-                    .foregroundStyle(inkSoft)
-            }
-            Text(entry.prompt)
-                .font(.system(size: family == .systemSmall ? 15 : 20, design: .serif))
-                .foregroundStyle(ink)
-                .lineLimit(family == .systemSmall ? 4 : 5)
-                .minimumScaleFactor(0.8)
-            Spacer(minLength: 0)
-            if family != .systemSmall {
-                Text("Fern")
+                    .font(.system(size: 10, weight: .semibold)).tracking(1)
+                Text(entry.prompt)
                     .font(.system(size: 13, design: .serif))
-                    .foregroundStyle(inkSoft)
+                    .lineLimit(2).minimumScaleFactor(0.85)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+
+        default:
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 4) {
+                    Image(systemName: "leaf.fill").font(.system(size: 11)).foregroundStyle(accent)
+                    Text("TODAY'S PROMPT")
+                        .font(.system(size: 10, weight: .semibold, design: .serif))
+                        .tracking(1.2)
+                        .foregroundStyle(inkSoft)
+                }
+                Text(entry.prompt)
+                    .font(.system(size: family == .systemSmall ? 15 : 20, design: .serif))
+                    .foregroundStyle(ink)
+                    .lineLimit(family == .systemSmall ? 4 : 5)
+                    .minimumScaleFactor(0.8)
+                Spacer(minLength: 0)
+                if family != .systemSmall {
+                    Text("Fern")
+                        .font(.system(size: 13, design: .serif))
+                        .foregroundStyle(inkSoft)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .containerBackground(paper, for: .widget)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .containerBackground(paper, for: .widget)
     }
 }
 
@@ -74,7 +101,8 @@ struct FernPromptWidget: Widget {
         }
         .configurationDisplayName("Today's Prompt")
         .description("A gentle writing prompt, refreshed daily.")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.systemSmall, .systemMedium,
+                            .accessoryRectangular, .accessoryInline, .accessoryCircular])
     }
 }
 
