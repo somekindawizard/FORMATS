@@ -14,12 +14,16 @@ import Foundation
 /// treating them as persistent (which can crash `insert` at runtime).
 @Model
 final class Entry {
-    var id: UUID
-    var title: String
-    var body: String                 // Markdown
-    var collectionRaw: String
-    var createdAt: Date
-    var updatedAt: Date
+    // NOTE: every stored property has a default value (and no `.unique`
+    // constraints, no stored relationships) so SwiftData can mirror the schema
+    // to CloudKit. `init` still sets real values; the defaults just satisfy the
+    // CloudKit requirement.
+    var id: UUID = UUID()
+    var title: String = ""
+    var body: String = ""            // Markdown
+    var collectionRaw: String = Collection.journal.rawValue
+    var createdAt: Date = Date.now
+    var updatedAt: Date = Date.now
     var moodRaw: String?
     var placeName: String?
     var latitude: Double?
@@ -30,7 +34,7 @@ final class Entry {
     /// The prompt this entry was started from, if any — shown as a quiet
     /// reminder in the editor.
     var prompt: String?
-    var isPinned: Bool
+    var isPinned: Bool = false
     /// When true, the entry's contents are hidden until Face ID unlocks them.
     var isLocked: Bool = false
     /// Optional named notebook (a custom collection) this entry belongs to.
