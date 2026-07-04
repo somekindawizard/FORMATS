@@ -15,6 +15,11 @@ final class MarkdownEditorController {
     @ObservationIgnored var drawingEntryID: UUID?
     @ObservationIgnored var contentSizeObservation: NSKeyValueObservation?
     @ObservationIgnored var inkCoordinator: InkCoordinator?
+    @ObservationIgnored var pencilCoordinator: PencilInteractionCoordinator?
+    /// The last pen used before switching to the eraser (for double-tap toggle).
+    @ObservationIgnored var previousPen: InkSettings.Pen = .pen
+    /// Set by a Pencil squeeze / palette action to present the color wheel.
+    var showColorWheel = false
     /// True while the ink layer is capturing Pencil input (drawing mode).
     var isDrawing = false
     /// When on, PencilKit's ruler is shown for straight lines.

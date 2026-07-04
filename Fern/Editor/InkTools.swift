@@ -6,20 +6,26 @@ import PencilKit
 /// The current Pencil selection: pen type, color, width, eraser.
 struct InkSettings {
     enum Pen: String, CaseIterable, Identifiable {
-        case pen, pencil, marker
+        case pen, fountainPen, pencil, monoline, marker, crayon
         var id: String { rawValue }
         var pk: PKInkingTool.InkType {
             switch self {
             case .pen: return .pen
+            case .fountainPen: return .fountainPen
             case .pencil: return .pencil
+            case .monoline: return .monoline
             case .marker: return .marker
+            case .crayon: return .crayon
             }
         }
         var icon: String {
             switch self {
             case .pen: return "pencil.tip"
+            case .fountainPen: return "paintbrush.pointed"
             case .pencil: return "pencil"
+            case .monoline: return "scribble.variable"
             case .marker: return "highlighter"
+            case .crayon: return "pencil.and.outline"
             }
         }
     }
@@ -55,6 +61,23 @@ final class InkCoordinator: NSObject, PKCanvasViewDelegate {
     }
 }
 
+/// Forwards Apple Pencil double-tap (Pencil 2) and squeeze (Pencil Pro) to the
+/// controller, honoring the user's system-preferred double-tap action.
+final class PencilInteractionCoordinator: NSObject, UIPencilInteractionDelegate {
+    weak var controller: MarkdownEditorController?
+    init(_ controller: MarkdownEditorController) { self.controller = controller }
+
+    func pencilInteraction(_ interaction: UIPencilInteraction,
+                           didReceiveTap tap: UIPencilInteraction.Tap) {
+        controller?.handlePencilDoubleTap()
+    }
+
+    func pencilInteraction(_ interaction: UIPencilInteraction,
+                           didReceiveSqueeze squeeze: UIPencilInteraction.Squeeze) {
+        if squeeze.phase == .ended { controller?.showColorWheel = true }
+    }
+}
+
 extension MarkdownEditorController {
 
     /// Attach a transparent PencilKit canvas over the text, sized to (and
@@ -70,6 +93,12 @@ extension MarkdownEditorController {
         let coord = InkCoordinator(self)
         c.delegate = coord
         inkCoordinator = coord
+        // Apple Pencil double-tap / squeeze.
+        let pencilCoord = PencilInteractionCoordinator(self)
+        let interaction = UIPencilInteraction()
+        interaction.delegate = pencilCoord
+        c.addInteraction(interaction)
+        pencilCoordinator = pencilCoord
         if let saved = DrawingStore.load(entryID) { c.drawing = saved }
         textView.addSubview(c)
         canvas = c
@@ -112,6 +141,35 @@ extension MarkdownEditorController {
     func toggleRuler() {
         showRuler.toggle()
         canvas?.isRulerActive = showRuler
+    }
+
+    /// Respond to an Apple Pencil double-tap, honoring the user's Settings
+    /// choice. Off the page, a double-tap simply enters drawing mode.
+    func handlePencilDoubleTap() {
+        guard isDrawing else { setDrawing(true); return }
+        switch UIPencilInteraction.preferredTapAction {
+        case .switchEraser:
+            toggleEraser()
+        case .switchPrevious:
+            toggleEraser()
+        case .showColorPalette, .showInkAttributes:
+            showColorWheel = true
+        case .ignore:
+            break
+        @unknown default:
+            toggleEraser()
+        }
+    }
+
+    private func toggleEraser() {
+        if ink.isEraser {
+            ink.isEraser = false
+            ink.pen = previousPen
+        } else {
+            previousPen = ink.pen
+            ink.isEraser = true
+        }
+        applyInk()
     }
 
     func clearInk() {

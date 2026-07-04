@@ -23,7 +23,8 @@ struct EntryEditorView: View {
     }
 
     var body: some View {
-        ZStack {
+        @Bindable var controller = controller
+        return ZStack {
             PaperBackground()
             VStack(alignment: .leading, spacing: 8) {
                 TextField("Untitled", text: $entry.title, axis: .vertical)
@@ -135,6 +136,13 @@ struct EntryEditorView: View {
             }
         }
         .sheet(item: $shareItems) { ActivityView(items: $0.items) }
+        .sheet(isPresented: $controller.showColorWheel) {
+            MutedWheel { rgb in controller.ink.setColor(rgb); controller.applyInk() }
+                .frame(maxWidth: 280, maxHeight: 280)
+                .padding(28)
+                .presentationDetents([.height(360)])
+                .presentationBackground(Paper.bg)
+        }
         .photosPicker(isPresented: $showInlinePhotoPicker, selection: $inlinePhotoPicks,
                       maxSelectionCount: 1, matching: .images)
         .onChange(of: inlinePhotoPicks) { _, items in
