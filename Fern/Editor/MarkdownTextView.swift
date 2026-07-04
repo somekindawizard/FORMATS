@@ -17,7 +17,10 @@ struct MarkdownTextView: UIViewRepresentable {
     var entryID: UUID? = nil
 
     func makeUIView(context: Context) -> UITextView {
-        let tv = UITextView(usingTextLayoutManager: true) // TextKit 2
+        // TextKit 1: the in-place textStorage styling + editable image
+        // attachments behave predictably here. TextKit 2 caused scroll jumps on
+        // every keystroke and taps grabbing the attachment instead of the caret.
+        let tv = UITextView(usingTextLayoutManager: false)
         tv.delegate = context.coordinator
         context.coordinator.lastWash = wash
         controller?.textView = tv
@@ -44,7 +47,11 @@ struct MarkdownTextView: UIViewRepresentable {
         // note) or when the photo wash toggled. Compare serialized Markdown so
         // inline photo attachments don't read as a perpetual mismatch.
         let washChanged = context.coordinator.lastWash != wash
-        if washChanged || EditorPhotos.markdown(from: uiView.attributedText) != text {
+        // Never rebuild attributedText while the user is actively editing — that
+        // resets the scroll position. Only on wash toggle or an external change.
+        let externalChange = !uiView.isFirstResponder
+            && EditorPhotos.markdown(from: uiView.attributedText) != text
+        if washChanged || externalChange {
             context.coordinator.lastWash = wash
             let selected = uiView.selectedRange
             uiView.attributedText = EditorPhotos.attributed(fromMarkdown: text,
@@ -123,6 +130,7 @@ struct MarkdownTextView: UIViewRepresentable {
             }
 
             let selected = textView.selectedRange
+            let savedOffset = textView.contentOffset
             let whole = NSRange(location: 0, length: storage.length)
             storage.beginEditing()
             storage.setAttributes(MarkdownStyler.baseAttributes(), range: whole)
@@ -142,6 +150,11 @@ struct MarkdownTextView: UIViewRepresentable {
             }
             storage.endEditing()
             textView.selectedRange = selected
+            // Restyling attributes shouldn't move the page; hold the scroll
+            // position (typewriter mode re-centers afterwards if enabled).
+            if textView.contentOffset != savedOffset {
+                textView.setContentOffset(savedOffset, animated: false)
+            }
             textView.typingAttributes = MarkdownStyler.baseAttributes()
 
             if ThemeStore.shared.focusMode { applyFocus(textView) }
