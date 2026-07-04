@@ -17,11 +17,17 @@ final class PhotoAttachment: NSTextAttachment {
         guard let image, image.size.width > 0 else {
             return CGRect(x: 0, y: 0, width: max(0, lineFrag.width), height: 44)
         }
-        let lineW = lineFrag.width > 1 ? lineFrag.width : image.size.width
+        // Size from the STABLE text-container width, not the proposed line
+        // fragment — the fragment width shifts pass-to-pass, and combined with
+        // the size threshold that made the image (and the page) jitter on every
+        // keystroke.
+        let containerW = textContainer?.size.width ?? 0
+        let avail = containerW > 1 ? containerW
+                  : (lineFrag.width > 1 ? lineFrag.width : image.size.width)
         // Magazine sizing: on wide (iPad) layouts, hold images to ~60% of the
         // column so they sit centered with margins; full-bleed on iPhone.
-        let scale: CGFloat = lineW > 500 ? 0.6 : 1.0
-        let w = min(lineW * scale, image.size.width)
+        let scale: CGFloat = avail > 500 ? 0.6 : 1.0
+        let w = min(avail * scale, image.size.width)
         let h = image.size.height * (w / image.size.width)
         return CGRect(x: 0, y: 0, width: w, height: h)
     }
