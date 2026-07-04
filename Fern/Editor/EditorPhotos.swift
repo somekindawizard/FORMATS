@@ -17,8 +17,11 @@ final class PhotoAttachment: NSTextAttachment {
         guard let image, image.size.width > 0 else {
             return CGRect(x: 0, y: 0, width: max(0, lineFrag.width), height: 44)
         }
-        let maxW = lineFrag.width > 1 ? lineFrag.width : image.size.width
-        let w = min(maxW, image.size.width)
+        let lineW = lineFrag.width > 1 ? lineFrag.width : image.size.width
+        // Magazine sizing: on wide (iPad) layouts, hold images to ~60% of the
+        // column so they sit centered with margins; full-bleed on iPhone.
+        let scale: CGFloat = lineW > 500 ? 0.6 : 1.0
+        let w = min(lineW * scale, image.size.width)
         let h = image.size.height * (w / image.size.width)
         return CGRect(x: 0, y: 0, width: w, height: h)
     }

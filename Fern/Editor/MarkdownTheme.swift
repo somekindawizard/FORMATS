@@ -68,9 +68,8 @@ enum MarkdownTheme {
         return p
     }
     static func blockquoteParagraphStyle() -> NSParagraphStyle {
+        // No left indent — quotes read as flush italic, editorial style.
         let p = NSMutableParagraphStyle()
-        p.firstLineHeadIndent = 18
-        p.headIndent = 18
         p.paragraphSpacing = 10
         p.lineSpacing = 4
         return p

@@ -6,6 +6,7 @@ import PencilKit
 /// typeset, no editing chrome.
 struct ReadingView: View {
     let entry: Entry
+    @Environment(\.horizontalSizeClass) private var sizeClass
 
     private var wordCount: Int {
         MarkdownRender.plainText(entry.body)
@@ -41,7 +42,8 @@ struct ReadingView: View {
                     if let ink {
                         Image(uiImage: ink)
                             .resizable().scaledToFit()
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .frame(maxWidth: sizeClass == .regular ? 460 : .infinity)
+                            .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.top, 8)
                     }
                 }

@@ -81,13 +81,9 @@ enum MarkdownRender {
             if done { rest.strikethroughStyle = .single }
             return box + rest
         }
-        // Block quote
+        // Block quote — flush italic, no bar or indent.
         if let m = raw.range(of: #"^>[ \t]?"#, options: .regularExpression) {
-            let q = inline(String(raw[m.upperBound...]), font: s.body.italic(), s, color: s.soft)
-            var bar = AttributedString("\u{2503} ")   // heavy vertical bar
-            bar.foregroundColor = s.accent
-            bar.font = s.body
-            return bar + q
+            return inline(String(raw[m.upperBound...]), font: s.body.italic(), s, color: s.soft)
         }
         // Bulleted list
         if let m = raw.range(of: #"^[ \t]{0,3}[-*+][ \t]+"#, options: .regularExpression) {

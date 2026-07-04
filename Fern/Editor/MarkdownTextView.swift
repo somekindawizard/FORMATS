@@ -129,8 +129,16 @@ struct MarkdownTextView: UIViewRepresentable {
             styled.enumerateAttributes(in: whole, options: []) { attrs, range, _ in
                 storage.addAttributes(attrs, range: range)
             }
+            let centered = NSMutableParagraphStyle()
+            centered.alignment = .center
+            centered.paragraphSpacing = 6
+            centered.paragraphSpacingBefore = 6
+            let nsString = storage.string as NSString
             for (loc, a) in attachments where loc < storage.length {
                 storage.addAttribute(.attachment, value: a, range: NSRange(location: loc, length: 1))
+                // Center the photo on its own line, magazine-style.
+                let para = nsString.paragraphRange(for: NSRange(location: loc, length: 0))
+                storage.addAttribute(.paragraphStyle, value: centered, range: para)
             }
             storage.endEditing()
             textView.selectedRange = selected

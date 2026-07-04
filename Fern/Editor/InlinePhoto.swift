@@ -64,6 +64,7 @@ struct WashedImage: View {
 struct RenderedBody: View {
     let markdown: String
     let wash: Bool
+    @Environment(\.horizontalSizeClass) private var sizeClass
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -79,6 +80,7 @@ struct RenderedBody: View {
                     }
                 case .photo(let name):
                     WashedImage(name: name, wash: wash)
+                        .frame(maxWidth: sizeClass == .regular ? 460 : .infinity)
                         .frame(maxWidth: .infinity, alignment: .center)
                 }
             }
