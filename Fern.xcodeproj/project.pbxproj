@@ -166,6 +166,7 @@
 		55662AF595DC7900135BE0CA /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFern.swift; sourceTree = "<group>"; };
 		61EF746BB6AAD23AA2AEFD56 /* WashLabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WashLabView.swift; sourceTree = "<group>"; };
+		655279ADA8C6783C3A2943A0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6874D40188440206C80B5EE5 /* Fern.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fern.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		68B6BA6BD6603F605BF65B63 /* ReadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingView.swift; sourceTree = "<group>"; };
 		69C9FD6E8B7EA7C53554913F /* LockGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockGate.swift; sourceTree = "<group>"; };
@@ -267,6 +268,7 @@
 				D7A67E4C33A31B4DDC79FE4E /* Assets.xcassets */,
 				DDDBBE40B1B0CA3FFA37EB3D /* Fern.entitlements */,
 				C576F242B37F60F2186C68E4 /* FernApp.swift */,
+				655279ADA8C6783C3A2943A0 /* Info.plist */,
 				08E10046E72A3938832A9FAD /* Persistence.swift */,
 				CE35430BC9A01FE8982D34A1 /* Botanical */,
 				2060FE215DAD0AA0271D22E4 /* Content */,
@@ -682,6 +684,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 775QLS4P2V;
+				INFOPLIST_FILE = Fern/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -734,6 +737,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 775QLS4P2V;
+				INFOPLIST_FILE = Fern/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

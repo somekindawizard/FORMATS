@@ -36,24 +36,25 @@ targets:
       path: Fern/Fern.entitlements
       properties:
         com.apple.developer.weatherkit: true
-        # Journaling Suggestions (com.apple.developer.journal.allow) is a MANAGED
-        # capability: it needs an Apple Capability Request approval on the App ID
-        # before it can be provisioned, even for development. Submit the request
-        # at developer.apple.com (App ID garden.fern.Fern → Capability Requests),
-        # and once approved, re-add the line above + the SuggestionsButton usage
-        # in TodayView. The SuggestionsButton.swift code is ready and guarded.
-        #
-        # CloudKit does NOT auto-provision via -allowProvisioningUpdates. To
-        # enable sync: Xcode → target Fern → Signing & Capabilities → + iCloud →
-        # check CloudKit → add container "iCloud.garden.fern.Fern", then re-add
-        # the two icloud-* entitlements here. Persistence uses .automatic, so
-        # sync turns on with no code change.
+        # iCloud / CloudKit sync. SwiftData's .automatic mode picks up this
+        # container. Needs the portal side: App ID garden.fern.Fern with
+        # iCloud+CloudKit and Push Notifications enabled, and the container made.
+        com.apple.developer.icloud-services: [CloudKit]
+        com.apple.developer.icloud-container-identifiers: [iCloud.garden.fern.Fern]
+        # CloudKit syncs via silent pushes. "development" for Xcode/dev builds;
+        # switch to "production" for TestFlight / App Store.
+        aps-environment: development
+        # Journaling Suggestions (com.apple.developer.journal.allow) stays
+        # deferred — a MANAGED capability needing an Apple Capability Request.
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: garden.fern.Fern
         TARGETED_DEVICE_FAMILY: "1,2"
         DEVELOPMENT_TEAM: 775QLS4P2V
         CODE_SIGN_STYLE: Automatic
+        # Partial Info.plist (UIBackgroundModes: remote-notification for background
+        # CloudKit sync) merged with the generated INFOPLIST_KEY_* values above.
+        INFOPLIST_FILE: Fern/Info.plist
   FernTests:
     type: bundle.unit-test
     platform: iOS
