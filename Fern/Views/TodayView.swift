@@ -12,14 +12,20 @@ struct TodayView: View {
     @State private var journalPrompt: Prompt?
     @State private var creativePrompt: Prompt?
 
+    @AppStorage("fern.userName") private var userName = ""
+
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: .now)
         switch h {
-        case 5..<12:  return "Good morning,"
-        case 12..<17: return "Good afternoon,"
-        case 17..<22: return "Good evening,"
-        default:      return "Hello,"
+        case 5..<12:  return "Good morning"
+        case 12..<17: return "Good afternoon"
+        case 17..<22: return "Good evening"
+        default:      return "Hello"
         }
+    }
+
+    private var greetingLine: String {
+        userName.isEmpty ? "\(greeting)." : "\(greeting), \(userName)."
     }
 
     private var onThisDay: [Entry] { OnThisDay.entries(from: entries) }
@@ -41,7 +47,7 @@ struct TodayView: View {
                             Spacer()
                             ComposeButton(action: freeWrite)
                         }
-                        Text("\(greeting) Austin.")
+                        Text(greetingLine)
                             .font(.serif(17))
                             .foregroundStyle(Paper.inkSoft)
                     }

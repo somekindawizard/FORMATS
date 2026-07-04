@@ -44,6 +44,7 @@ struct RootView: View {
     @State private var hideTabBar = false
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("fern.onboarded") private var onboarded = false
+    @AppStorage("fern.userName") private var userName = ""
 
     var body: some View {
         Group {
@@ -92,8 +93,11 @@ struct RootView: View {
         .onOpenURL { url in
             if url.scheme == "fern" && url.host == "new" { startQuickCompose() }
         }
-        .fullScreenCover(isPresented: .constant(!onboarded)) {
-            OnboardingView { onboarded = true }
+        .fullScreenCover(isPresented: .constant(!onboarded || userName.isEmpty)) {
+            OnboardingView { name in
+                userName = name
+                onboarded = true
+            }
         }
     }
 

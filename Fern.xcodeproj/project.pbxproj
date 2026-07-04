@@ -167,7 +167,7 @@
 		577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFern.swift; sourceTree = "<group>"; };
 		61EF746BB6AAD23AA2AEFD56 /* WashLabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WashLabView.swift; sourceTree = "<group>"; };
 		655279ADA8C6783C3A2943A0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		6874D40188440206C80B5EE5 /* Fern.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fern.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6874D40188440206C80B5EE5 /* Fern.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fern.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		68B6BA6BD6603F605BF65B63 /* ReadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingView.swift; sourceTree = "<group>"; };
 		69C9FD6E8B7EA7C53554913F /* LockGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockGate.swift; sourceTree = "<group>"; };
 		6A87F893FEEDD086C788AEED /* Prompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prompt.swift; sourceTree = "<group>"; };
@@ -190,7 +190,7 @@
 		A6827187FF4941AE39243B9E /* Prompts+Nier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Nier.swift"; sourceTree = "<group>"; };
 		AD6943B8927D7DB6D40C3730 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		B28F822C8468BE267C3F3293 /* ThemeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeStore.swift; sourceTree = "<group>"; };
-		B572112FB741A611B6732471 /* FernTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = FernTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B572112FB741A611B6732471 /* FernTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FernTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B628B8479289E7CC246E5C5B /* EntryEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryEditorView.swift; sourceTree = "<group>"; };
 		B7ABB577E515BBF1EC0238B8 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		BB27CCF5E64406E93604C436 /* PDFExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExporter.swift; sourceTree = "<group>"; };
@@ -511,7 +511,6 @@
 						ProvisioningStyle = Automatic;
 					};
 					A7E908288E69270DC8559670 = {
-						DevelopmentTeam = 775QLS4P2V;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -717,6 +716,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 775QLS4P2V;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -895,6 +895,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 775QLS4P2V;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
