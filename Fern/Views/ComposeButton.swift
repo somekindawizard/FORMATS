@@ -5,25 +5,43 @@ import SwiftUI
 /// stock compose glyph.
 struct ComposeButton: View {
     let action: () -> Void
-    @GestureState private var pressed = false
+    /// Optional templates — when present, a long-press opens a template menu
+    /// while a tap still starts a blank page.
+    var templates: [WritingTemplate] = []
+    var onTemplate: (WritingTemplate) -> Void = { _ in }
 
     var body: some View {
-        Button(action: action) {
-            PencilGlyph()
-                .stroke(Paper.accent, style: StrokeStyle(lineWidth: 1.6, lineCap: .round, lineJoin: .round))
-                .frame(width: 21, height: 21)
-                .frame(width: 44, height: 44)
-                .background(
-                    Circle().fill(Paper.raised)
-                        .overlay(Circle().stroke(Paper.line, lineWidth: 1))
-                        .shadow(color: Paper.ink.opacity(0.06), radius: 7, x: 0, y: 3)
-                )
-                .scaleEffect(pressed ? 0.92 : 1)
-                .animation(.easeOut(duration: 0.16), value: pressed)
+        Group {
+            if templates.isEmpty {
+                Button(action: action) { glyph }.buttonStyle(.plain)
+            } else {
+                Menu {
+                    Button { action() } label: { Label("Blank page", systemImage: "pencil") }
+                    Section("Start from a template") {
+                        ForEach(templates) { t in
+                            Button { onTemplate(t) } label: { Label(t.title, systemImage: t.icon) }
+                        }
+                    }
+                } label: {
+                    glyph
+                } primaryAction: {
+                    action()
+                }
+            }
         }
-        .buttonStyle(.plain)
-        .simultaneousGesture(DragGesture(minimumDistance: 0).updating($pressed) { _, s, _ in s = true })
-        .accessibilityLabel("New free write")
+        .accessibilityLabel("New entry")
+    }
+
+    private var glyph: some View {
+        PencilGlyph()
+            .stroke(Paper.accent, style: StrokeStyle(lineWidth: 1.6, lineCap: .round, lineJoin: .round))
+            .frame(width: 21, height: 21)
+            .frame(width: 44, height: 44)
+            .background(
+                Circle().fill(Paper.raised)
+                    .overlay(Circle().stroke(Paper.line, lineWidth: 1))
+                    .shadow(color: Paper.ink.opacity(0.06), radius: 7, x: 0, y: 3)
+            )
     }
 }
 

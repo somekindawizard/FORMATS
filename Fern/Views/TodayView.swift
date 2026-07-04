@@ -45,7 +45,9 @@ struct TodayView: View {
                                 .font(.display(30))
                                 .foregroundStyle(Paper.ink)
                             Spacer()
-                            ComposeButton(action: freeWrite)
+                            ComposeButton(action: freeWrite,
+                                          templates: Templates.all,
+                                          onTemplate: startFromTemplate)
                         }
                         Text(greetingLine)
                             .font(.serif(17))
@@ -135,7 +137,16 @@ struct TodayView: View {
 
     /// A blank piece with no prompt — pure free writing.
     private func freeWrite() {
+        Haptics.tap()
         let entry = Entry(title: "", body: "", collection: .piece)
+        context.insert(entry)
+        draft = entry
+    }
+
+    /// Start a new entry pre-filled from a template.
+    private func startFromTemplate(_ template: WritingTemplate) {
+        Haptics.tap()
+        let entry = Entry(title: "", body: template.body, collection: template.collection)
         context.insert(entry)
         draft = entry
     }
