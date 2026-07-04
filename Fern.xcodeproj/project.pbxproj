@@ -14,6 +14,7 @@
 		121EC7706CC6B8DD6B0B1CDE /* PromptLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE08F5EFD57674CB778E0A8B /* PromptLibrary.swift */; };
 		12F6E70FBF359B44046B6B35 /* EntryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B628B8479289E7CC246E5C5B /* EntryEditorView.swift */; };
 		1A6A86D78DFB6879B49C1D36 /* MarkdownExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12337FE2289C85966902B783 /* MarkdownExporter.swift */; };
+		2E423D4EA3FD10D32F3F3260 /* MarkdownRender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372C0EB975F143697FA69E96 /* MarkdownRender.swift */; };
 		30B54EE715B224CE938A6A97 /* JournalingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA4F12FB548A792178852EC /* JournalingTests.swift */; };
 		3291FF5A77AE8F8B2D893CCE /* PromptCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB2BB1BE40E5C8BA4A77780 /* PromptCard.swift */; };
 		37DBA60E213431CDD95E2D8F /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ABB577E515BBF1EC0238B8 /* Enums.swift */; };
@@ -135,6 +136,7 @@
 		2E860E46D808FFFA7FE8AA9A /* Fraunces.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Fraunces.ttf; sourceTree = "<group>"; };
 		33B710B62EE4D952BA7B3585 /* EntryRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryRow.swift; sourceTree = "<group>"; };
 		366CCE747C235C4026B4A7CA /* WritingStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingStats.swift; sourceTree = "<group>"; };
+		372C0EB975F143697FA69E96 /* MarkdownRender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownRender.swift; sourceTree = "<group>"; };
 		38E27EF4D706838525532A07 /* LibraryExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryExporter.swift; sourceTree = "<group>"; };
 		3BE4457DFF57CF5D04E853B5 /* AccessoryBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessoryBar.swift; sourceTree = "<group>"; };
 		3D4D39EC866C9EFD80CD9546 /* MarkdownTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownTextView.swift; sourceTree = "<group>"; };
@@ -214,6 +216,7 @@
 			children = (
 				3BE4457DFF57CF5D04E853B5 /* AccessoryBar.swift */,
 				EB1ED64338FFF646CDCEB947 /* MarkdownEditorController.swift */,
+				372C0EB975F143697FA69E96 /* MarkdownRender.swift */,
 				E7826A6B5EB47145BAAF378E /* MarkdownStyler.swift */,
 				3D4D39EC866C9EFD80CD9546 /* MarkdownTextView.swift */,
 				EC5A0D4651E2BDC4D80A6AC9 /* MarkdownTheme.swift */,
@@ -577,6 +580,7 @@
 				CFA3B0A3A46563E0D74D4ECB /* LockGate.swift in Sources */,
 				4622A209A674C3218FD029E6 /* MarkdownEditorController.swift in Sources */,
 				1A6A86D78DFB6879B49C1D36 /* MarkdownExporter.swift in Sources */,
+				2E423D4EA3FD10D32F3F3260 /* MarkdownRender.swift in Sources */,
 				D3988507F66A8D5E8CF88039 /* MarkdownStyler.swift in Sources */,
 				CEE905C9E387AE4BFEC37187 /* MarkdownTextView.swift in Sources */,
 				CAF77756FD782FF6B9B4F45E /* MarkdownTheme.swift in Sources */,

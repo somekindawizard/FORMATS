@@ -50,6 +50,8 @@ final class MarkdownEditorController {
         }
     }
 
+    func dismissKeyboard() { textView?.resignFirstResponder() }
+
     // MARK: - Synonyms
 
     /// Recompute `currentWord` from the caret. Called on selection/text changes.
@@ -59,20 +61,32 @@ final class MarkdownEditorController {
 
     /// Replace the caret's word, matching the original's capitalization.
     func replaceCurrentWord(with replacement: String) {
-        guard let tv = textView, let found = wordRange() else { return }
-        tv.replace(found.range, withText: matchCase(of: found.text, to: replacement))
+        guard let tv = textView, let found = wordRange(),
+              let start = tv.position(from: tv.beginningOfDocument, offset: found.nsRange.location),
+              let end = tv.position(from: start, offset: found.nsRange.length),
+              let textRange = tv.textRange(from: start, to: end) else { return }
+        tv.replace(textRange, withText: matchCase(of: found.text, to: replacement))
         notifyChange(tv)
         refreshCurrentWord()
     }
 
-    /// The word range enclosing (or just behind) the caret, with its text.
-    private func wordRange() -> (range: UITextRange, text: String)? {
-        guard let tv = textView, let sel = tv.selectedTextRange,
-              let range = tv.tokenizer.rangeEnclosingPosition(
-                sel.end, with: .word, inDirection: .storage(.backward)),
-              let text = tv.text(in: range), !text.isEmpty
-        else { return nil }
-        return (range, text)
+    /// The word straddling the caret, found by scanning outward over letters —
+    /// deterministic where `tokenizer.rangeEnclosingPosition` returns nil at a
+    /// word boundary (which quietly broke the synonym strip).
+    private func wordRange() -> (nsRange: NSRange, text: String)? {
+        guard let tv = textView, let sel = tv.selectedTextRange else { return nil }
+        let caret = tv.offset(from: tv.beginningOfDocument, to: sel.end)
+        let ns = (tv.text ?? "") as NSString
+        func isWordChar(_ i: Int) -> Bool {
+            guard i >= 0, i < ns.length, let u = Unicode.Scalar(ns.character(at: i)) else { return false }
+            return CharacterSet.letters.contains(u) || u == "'" || u == "\u{2019}"
+        }
+        var lo = min(caret, ns.length), hi = min(caret, ns.length)
+        while lo > 0 && isWordChar(lo - 1) { lo -= 1 }
+        while hi < ns.length && isWordChar(hi) { hi += 1 }
+        guard hi > lo else { return nil }
+        let range = NSRange(location: lo, length: hi - lo)
+        return (range, ns.substring(with: range))
     }
 
     /// Carry the original word's case onto the replacement (Title → Title, ALL → ALL).

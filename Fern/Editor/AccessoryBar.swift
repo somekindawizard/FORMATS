@@ -25,6 +25,12 @@ struct AccessoryBar: View {
                 Text("\(wordCount) words")
                     .font(.system(size: 12, design: .monospaced))
                     .foregroundStyle(Paper.inkFaint)
+                Button { controller.dismissKeyboard() } label: {
+                    Image(systemName: "keyboard.chevron.compact.down")
+                        .font(.system(size: 16))
+                        .foregroundStyle(Paper.inkSoft)
+                }
+                .buttonStyle(.plain)
             }
             .padding(.horizontal, 20)
             .frame(height: 42)

@@ -50,4 +50,12 @@ private struct ReadingText: UIViewRepresentable {
     func updateUIView(_ uiView: UITextView, context: Context) {
         uiView.attributedText = MarkdownStyler.attributed(for: markdown)
     }
+
+    /// Wrap to the width SwiftUI offers and report the height it needs — without
+    /// this the text view lays out at its intrinsic width and clips both edges.
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UITextView, context: Context) -> CGSize? {
+        let width = proposal.width ?? uiView.bounds.width
+        let fitted = uiView.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
+        return CGSize(width: width, height: fitted.height)
+    }
 }
