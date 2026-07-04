@@ -151,6 +151,11 @@ final class MarkdownEditorController {
 
     func dismissKeyboard() { textView?.resignFirstResponder() }
 
+    /// Present the system find & replace bar over the editor.
+    func presentFind() {
+        textView?.findInteraction?.presentFindNavigator(showingReplace: true)
+    }
+
     /// Insert an inline photo (as an image attachment) at the caret. Serializes
     /// back to a `![](fern://name)` token via the text view's delegate.
     func insertPhoto(_ name: String) {

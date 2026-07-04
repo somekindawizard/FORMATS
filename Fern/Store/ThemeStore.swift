@@ -20,12 +20,22 @@ final class ThemeStore {
     var paperRule: PaperRule {
         didSet { UserDefaults.standard.set(paperRule.rawValue, forKey: "fern.theme.rule") }
     }
+    /// Dim everything but the paragraph you're writing.
+    var focusMode: Bool {
+        didSet { UserDefaults.standard.set(focusMode, forKey: "fern.write.focus") }
+    }
+    /// Keep the caret line vertically centered as you type.
+    var typewriter: Bool {
+        didSet { UserDefaults.standard.set(typewriter, forKey: "fern.write.typewriter") }
+    }
 
     private init() {
         tone = PaperTone(rawValue: UserDefaults.standard.string(forKey: "fern.theme.tone") ?? "") ?? .mist
         accent = AccentTone(rawValue: UserDefaults.standard.string(forKey: "fern.theme.accent") ?? "") ?? .sienna
         displayFont = DisplayFont(rawValue: UserDefaults.standard.string(forKey: "fern.theme.font") ?? "") ?? .fraunces
         paperRule = PaperRule(rawValue: UserDefaults.standard.string(forKey: "fern.theme.rule") ?? "") ?? .plain
+        focusMode = UserDefaults.standard.bool(forKey: "fern.write.focus")
+        typewriter = UserDefaults.standard.bool(forKey: "fern.write.typewriter")
     }
 
     var paletteKey: String { "\(tone.rawValue)-\(accent.rawValue)-\(displayFont.rawValue)-\(paperRule.rawValue)" }

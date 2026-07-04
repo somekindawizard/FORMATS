@@ -127,6 +127,9 @@ struct EntryEditorView: View {
                     Button { shareCard() } label: {
                         Label("Share as card", systemImage: "photo")
                     }
+                    Button { controller.presentFind() } label: {
+                        Label("Find & Replace", systemImage: "magnifyingglass")
+                    }
                     Button { exportPDF() } label: {
                         Label("Export as PDF", systemImage: "doc.richtext")
                     }

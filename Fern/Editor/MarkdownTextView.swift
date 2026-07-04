@@ -31,6 +31,7 @@ struct MarkdownTextView: UIViewRepresentable {
         tv.smartDashesType = .yes
         tv.tintColor = MarkdownTheme.accent
         tv.allowsEditingTextAttributes = false
+        tv.isFindInteractionEnabled = true   // native find & replace
         tv.typingAttributes = MarkdownStyler.baseAttributes()
         tv.attributedText = EditorPhotos.attributed(fromMarkdown: text, width: Self.contentWidth(tv), wash: wash)
         if let entryID { controller?.setupCanvas(on: tv, entryID: entryID) }
@@ -75,10 +76,25 @@ struct MarkdownTextView: UIViewRepresentable {
             parent.text = EditorPhotos.markdown(from: textView.attributedText)
             restyle(textView)
             parent.controller?.refreshCurrentWord()
+            if ThemeStore.shared.typewriter { centerCaret(textView) }
         }
 
         func textViewDidChangeSelection(_ textView: UITextView) {
             parent.controller?.refreshCurrentWord()
+            // Focus mode re-dims around the paragraph the caret moved into.
+            if ThemeStore.shared.focusMode { restyle(textView) }
+            if ThemeStore.shared.typewriter { centerCaret(textView) }
+        }
+
+        /// Keep the caret line vertically centered (typewriter scrolling).
+        private func centerCaret(_ tv: UITextView) {
+            guard let range = tv.selectedTextRange else { return }
+            let caret = tv.caretRect(for: range.end)
+            guard caret.midY.isFinite else { return }
+            let target = caret.midY - tv.bounds.height / 2
+            let maxY = max(0, tv.contentSize.height - tv.bounds.height + tv.contentInset.bottom)
+            let y = min(max(target, -tv.contentInset.top), maxY)
+            tv.setContentOffset(CGPoint(x: 0, y: y), animated: false)
         }
 
         /// Re-apply Markdown attributes over the existing characters.
@@ -119,6 +135,25 @@ struct MarkdownTextView: UIViewRepresentable {
             storage.endEditing()
             textView.selectedRange = selected
             textView.typingAttributes = MarkdownStyler.baseAttributes()
+
+            if ThemeStore.shared.focusMode { applyFocus(textView) }
+        }
+
+        /// Dim everything but the caret's paragraph.
+        private func applyFocus(_ textView: UITextView) {
+            let storage = textView.textStorage
+            let ns = storage.string as NSString
+            let para = ns.paragraphRange(for: textView.selectedRange)
+            let dim = MarkdownTheme.ink.withAlphaComponent(0.22)
+            if para.location > 0 {
+                storage.addAttribute(.foregroundColor, value: dim,
+                                     range: NSRange(location: 0, length: para.location))
+            }
+            let after = NSMaxRange(para)
+            if after < storage.length {
+                storage.addAttribute(.foregroundColor, value: dim,
+                                     range: NSRange(location: after, length: storage.length - after))
+            }
         }
     }
 }

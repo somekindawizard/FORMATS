@@ -49,6 +49,16 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    Toggle("Focus mode", isOn: $theme.focusMode).tint(Paper.accent)
+                    Toggle("Typewriter scrolling", isOn: $theme.typewriter).tint(Paper.accent)
+                } header: {
+                    Text("Writing")
+                } footer: {
+                    Text("Focus dims all but the line you're writing. Typewriter keeps that line centered.")
+                        .font(.calloutSerif).foregroundStyle(Paper.inkSoft)
+                }
+
+                Section {
                     Toggle("Evening prompt reminder", isOn: $promptReminder)
                         .tint(Paper.accent)
                 } footer: {
