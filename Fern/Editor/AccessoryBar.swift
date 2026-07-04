@@ -6,6 +6,8 @@ import SwiftUI
 struct AccessoryBar: View {
     @Bindable var controller: MarkdownEditorController
     let text: String
+    /// Insert an inline photo at the caret (wired by the editor).
+    var onInsertPhoto: (() -> Void)? = nil
 
     private var wordCount: Int {
         text.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count
@@ -15,25 +17,44 @@ struct AccessoryBar: View {
         VStack(spacing: 0) {
             SynonymStrip(controller: controller)
 
-            HStack(spacing: 22) {
-                glyph("B", weight: .bold)  { controller.wrap("**") }
-                glyph("I", italic: true)    { controller.wrap("*") }
-                glyph("\u{201C} \u{201D}")  { controller.wrapPair("\u{201C}", "\u{201D}") }
-                glyph("#")                  { controller.prefixLine("# ") }
-                glyph("\u{2014}")           { controller.insert("\u{2014}") }
-                Spacer()
-                Text("\(wordCount) words")
+            HStack(spacing: 0) {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 20) {
+                        icon("textformat.size")       { controller.cycleHeading() }
+                        icon("bold")                  { controller.wrap("**") }
+                        icon("italic")                { controller.wrap("*") }
+                        icon("strikethrough")         { controller.wrap("~~") }
+                        icon("highlighter")           { controller.wrap("==") }
+                        icon("chevron.left.forwardslash.chevron.right") { controller.wrap("`") }
+                        divider
+                        icon("list.bullet")           { controller.setLinePrefix("- ") }
+                        icon("list.number")           { controller.setLinePrefix("1. ") }
+                        icon("checklist")             { controller.toggleTask() }
+                        icon("text.quote")            { controller.setLinePrefix("> ") }
+                        divider
+                        icon("link")                  { controller.insertLink() }
+                        icon("minus")                 { controller.insertRule() }
+                        if onInsertPhoto != nil {
+                            icon("photo") { onInsertPhoto?() }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                }
+
+                Divider().frame(height: 22)
+                Text("\(wordCount)")
                     .font(.system(size: 12, design: .monospaced))
                     .foregroundStyle(Paper.inkFaint)
+                    .padding(.leading, 12)
                 Button { controller.dismissKeyboard() } label: {
                     Image(systemName: "keyboard.chevron.compact.down")
                         .font(.system(size: 16))
                         .foregroundStyle(Paper.inkSoft)
                 }
                 .buttonStyle(.plain)
+                .padding(.horizontal, 14)
             }
-            .padding(.horizontal, 20)
-            .frame(height: 42)
+            .frame(height: 44)
         }
         .background(
             Rectangle().fill(Paper.raised.opacity(0.96))
@@ -41,17 +62,18 @@ struct AccessoryBar: View {
         )
     }
 
+    private var divider: some View {
+        Rectangle().fill(Paper.line).frame(width: 1, height: 20)
+    }
+
     @ViewBuilder
-    private func glyph(_ s: String,
-                       weight: Font.Weight = .regular,
-                       italic: Bool = false,
-                       _ action: @escaping () -> Void) -> some View {
+    private func icon(_ system: String, _ action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(s)
-                .font(.system(size: 17, weight: weight, design: .serif))
-                .italic(italic)
+            Image(systemName: system)
+                .font(.system(size: 16))
                 .foregroundStyle(Paper.inkSoft)
-                .frame(minWidth: 24)
+                .frame(minWidth: 26, minHeight: 30)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }

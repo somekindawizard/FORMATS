@@ -20,10 +20,12 @@ enum MarkdownRender {
     static func plainText(_ source: String) -> String {
         var s = source
         let blockMarkers = [
-            #"(?m)^[ \t]{0,3}#{1,6}[ \t]+"#,   // headings
-            #"(?m)^[ \t]{0,3}>[ \t]?"#,        // block quotes
-            #"(?m)^[ \t]{0,3}[-*+][ \t]+"#,    // bullets
-            #"(?m)^[ \t]{0,3}\d+\.[ \t]+"#     // numbered
+            #"(?m)^[ \t]{0,3}#{1,6}[ \t]+"#,        // headings
+            #"(?m)^[ \t]{0,3}>[ \t]?"#,             // block quotes
+            #"(?m)^[ \t]{0,3}- \[[ xX]\][ \t]+"#,   // task boxes
+            #"(?m)^[ \t]{0,3}[-*+][ \t]+"#,         // bullets
+            #"(?m)^[ \t]{0,3}\d+\.[ \t]+"#,         // numbered
+            #"(?m)^\s*(-{3,}|\*{3,}|_{3,})\s*$"#     // rules
         ]
         for p in blockMarkers {
             s = s.replacingOccurrences(of: p, with: "", options: .regularExpression)
@@ -32,6 +34,7 @@ enum MarkdownRender {
             (#"\*\*(.+?)\*\*"#, "$1"),
             (#"(?<!\*)\*(?!\*)([^*\n]+)\*(?!\*)"#, "$1"),
             (#"~~(.+?)~~"#, "$1"),
+            (#"==(.+?)=="#, "$1"),
             (#"`([^`\n]+)`"#, "$1")
         ]
         for (p, r) in inline {
@@ -53,28 +56,46 @@ enum MarkdownRender {
 
     /// One line: strip a leading block marker, then render inline emphasis.
     private static func line(_ raw: String, _ s: Style) -> AttributedString {
+        // Horizontal rule (--- *** ___)
+        let trimmed = raw.trimmingCharacters(in: .whitespaces)
+        if trimmed.count >= 3, Set(trimmed).count == 1, "-*_".contains(trimmed.first!) {
+            var rule = AttributedString(String(repeating: "\u{2500}", count: 28))
+            rule.foregroundColor = s.soft.opacity(0.45)
+            rule.font = s.body
+            return rule
+        }
         // Heading
         if let m = raw.range(of: #"^#{1,6}[ \t]+"#, options: .regularExpression) {
             let level = raw[raw.startIndex..<m.upperBound].prefix { $0 == "#" }.count
             return inline(String(raw[m.upperBound...]), font: s.heading(level), s, color: s.ink)
         }
+        // Task list  - [ ] / - [x]
+        if let m = raw.range(of: #"^[ \t]{0,3}- \[[ xX]\][ \t]+"#, options: .regularExpression) {
+            let done = raw.range(of: #"\[[xX]\]"#, options: .regularExpression) != nil
+            var box = AttributedString(done ? "\u{2611}  " : "\u{2610}  ")   // ☑ / ☐
+            box.foregroundColor = done ? s.accent : s.soft
+            box.font = s.body
+            var rest = inline(String(raw[m.upperBound...]), font: s.body, s, color: done ? s.soft : s.ink)
+            if done { rest.strikethroughStyle = .single }
+            return box + rest
+        }
         // Block quote
         if let m = raw.range(of: #"^>[ \t]?"#, options: .regularExpression) {
-            var q = inline(String(raw[m.upperBound...]), font: s.body.italic(), s, color: s.soft)
+            let q = inline(String(raw[m.upperBound...]), font: s.body.italic(), s, color: s.soft)
             var bar = AttributedString("\u{2503} ")   // heavy vertical bar
             bar.foregroundColor = s.accent
             bar.font = s.body
             return bar + q
         }
         // Bulleted list
-        if let m = raw.range(of: #"^[-*+][ \t]+"#, options: .regularExpression) {
+        if let m = raw.range(of: #"^[ \t]{0,3}[-*+][ \t]+"#, options: .regularExpression) {
             var dot = AttributedString("\u{2022}  ")
             dot.foregroundColor = s.accent
             dot.font = s.body
             return dot + inline(String(raw[m.upperBound...]), font: s.body, s, color: s.ink)
         }
         // Numbered list — keep the author's number
-        if let m = raw.range(of: #"^(\d+)\.[ \t]+"#, options: .regularExpression) {
+        if let m = raw.range(of: #"^[ \t]{0,3}(\d+)\.[ \t]+"#, options: .regularExpression) {
             var num = AttributedString(String(raw[raw.startIndex..<m.upperBound]).trimmingCharacters(in: .whitespaces) + "  ")
             num.foregroundColor = s.accent
             num.font = s.body
@@ -83,35 +104,50 @@ enum MarkdownRender {
         return inline(raw, font: s.body, s, color: s.ink)
     }
 
-    /// Inline emphasis via Foundation's parser (removes `**`, `*`, `` ` ``, `~~`),
-    /// then map the presentation intents onto Fern's fonts.
+    /// Inline emphasis, scanned by hand so `==highlight==` works alongside the
+    /// standard `**bold**`, `*italic*`, `~~strike~~`, `` `code` ``.
     private static func inline(_ text: String, font: Font, _ s: Style, color: Color) -> AttributedString {
-        var a: AttributedString
-        if let parsed = try? AttributedString(
-            markdown: text,
-            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace,
-                           failurePolicy: .returnPartiallyParsedIfPossible)) {
-            a = parsed
-        } else {
-            a = AttributedString(text)
+        let delimiters = ["**", "~~", "==", "`", "*"]   // longest first
+        var out = AttributedString()
+        let chars = Array(text)
+        var i = 0
+        var plain = ""
+        func flush() {
+            guard !plain.isEmpty else { return }
+            var a = AttributedString(plain); a.font = font; a.foregroundColor = color
+            out += a; plain = ""
         }
-        a.font = font
-        a.foregroundColor = color
-        for run in a.runs {
-            guard let intent = run.inlinePresentationIntent else { continue }
-            if intent.contains(.code) {
-                a[run.range].font = s.mono
-            } else if intent.contains(.stronglyEmphasized) && intent.contains(.emphasized) {
-                a[run.range].font = font.bold().italic()
-            } else if intent.contains(.stronglyEmphasized) {
-                a[run.range].font = font.bold()
-            } else if intent.contains(.emphasized) {
-                a[run.range].font = font.italic()
-            }
-            if intent.contains(.strikethrough) {
-                a[run.range].strikethroughStyle = .single
-            }
+        func starts(_ d: String, at idx: Int) -> Bool {
+            let dc = Array(d)
+            guard idx + dc.count <= chars.count else { return false }
+            return Array(chars[idx..<idx + dc.count]) == dc
         }
-        return a
+        while i < chars.count {
+            if let d = delimiters.first(where: { starts($0, at: i) }) {
+                let open = i + d.count
+                var j = open
+                var close = -1
+                while j < chars.count { if starts(d, at: j) { close = j; break }; j += 1 }
+                if close >= 0 {
+                    flush()
+                    var inner = AttributedString(String(chars[open..<close]))
+                    inner.font = font; inner.foregroundColor = color
+                    switch d {
+                    case "**": inner.font = font.bold()
+                    case "*":  inner.font = font.italic()
+                    case "~~": inner.strikethroughStyle = .single
+                    case "==": inner.backgroundColor = s.accent.opacity(0.18)
+                    case "`":  inner.font = s.mono
+                    default: break
+                    }
+                    out += inner
+                    i = close + d.count
+                    continue
+                }
+            }
+            plain.append(chars[i]); i += 1
+        }
+        flush()
+        return out
     }
 }

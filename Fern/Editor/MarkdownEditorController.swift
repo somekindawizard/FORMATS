@@ -36,18 +36,94 @@ final class MarkdownEditorController {
         notifyChange(tv)
     }
 
-    /// Insert a prefix at the start of the caret's current line (for headings/quotes).
-    func prefixLine(_ s: String) {
-        guard let tv = textView, let sel = tv.selectedTextRange else { return }
-        let caretOffset = tv.offset(from: tv.beginningOfDocument, to: sel.start)
+    // MARK: - Line-level formatting
+
+    /// Any leading block marker we recognize, so toggling one replaces another.
+    private static let markerPattern = "^(#{1,6} |> |- \\[[ xX]\\] |[-*+] |\\d+\\. )"
+
+    /// Toggle a block prefix on the caret's line. If the line already starts
+    /// with `prefix`, strip it; otherwise replace whatever marker is there.
+    func setLinePrefix(_ prefix: String) {
+        guard let tv = textView, let lineRange = currentLineRange(tv) else { return }
         let ns = (tv.text ?? "") as NSString
-        var lineStart = caretOffset
-        while lineStart > 0 && ns.character(at: lineStart - 1) != 10 { lineStart -= 1 }
-        if let pos = tv.position(from: tv.beginningOfDocument, offset: lineStart),
-           let r = tv.textRange(from: pos, to: pos) {
-            tv.replace(r, withText: s)
-            notifyChange(tv)
+        let full = ns.substring(with: lineRange)
+        let hadNewline = full.hasSuffix("\n")
+        let core = hadNewline ? String(full.dropLast()) : full
+
+        var existing = "", body = core
+        if let r = core.range(of: Self.markerPattern, options: .regularExpression) {
+            existing = String(core[r]); body = String(core[r.upperBound...])
         }
+        let newCore = (existing == prefix) ? body : prefix + body
+        replaceRange(lineRange, with: newCore + (hadNewline ? "\n" : ""), tv)
+    }
+
+    /// Cycle the caret line through no-heading → # → ## → ### → none.
+    func cycleHeading() {
+        guard let tv = textView, let lineRange = currentLineRange(tv) else { return }
+        let core = ((tv.text ?? "") as NSString).substring(with: lineRange)
+            .trimmingCharacters(in: .newlines)
+        let hashes = core.prefix { $0 == "#" }.count
+        let next = ["# ", "## ", "### ", ""][min(hashes, 3)]
+        // Strip existing heading then apply next.
+        setLinePrefixExact(heading: next)
+    }
+
+    /// Toggle a to-do line between unchecked and checked (or add one).
+    func toggleTask() {
+        guard let tv = textView, let lineRange = currentLineRange(tv) else { return }
+        let core = ((tv.text ?? "") as NSString).substring(with: lineRange)
+        if core.contains("- [ ] ") { replaceMarker("- [ ] ", "- [x] ", lineRange, tv) }
+        else if core.localizedCaseInsensitiveContains("- [x] ") { replaceMarker("- [x] ", "- [ ] ", lineRange, tv) }
+        else { setLinePrefix("- [ ] ") }
+    }
+
+    /// A thematic break on its own line.
+    func insertRule() { insert("\n---\n") }
+
+    /// Wrap the selection as a Markdown link, or drop a placeholder.
+    func insertLink() {
+        guard let tv = textView, let range = tv.selectedTextRange else { return }
+        let text = tv.text(in: range) ?? ""
+        let label = text.isEmpty ? "text" : text
+        tv.replace(range, withText: "[\(label)](url)")
+        notifyChange(tv)
+    }
+
+    // MARK: line helpers
+
+    private func setLinePrefixExact(heading: String) {
+        guard let tv = textView, let lineRange = currentLineRange(tv) else { return }
+        let ns = (tv.text ?? "") as NSString
+        let full = ns.substring(with: lineRange)
+        let hadNewline = full.hasSuffix("\n")
+        var core = hadNewline ? String(full.dropLast()) : full
+        if let r = core.range(of: "^#{1,6} ", options: .regularExpression) {
+            core = String(core[r.upperBound...])
+        }
+        replaceRange(lineRange, with: heading + core + (hadNewline ? "\n" : ""), tv)
+    }
+
+    private func replaceMarker(_ from: String, _ to: String, _ lineRange: NSRange, _ tv: UITextView) {
+        let ns = (tv.text ?? "") as NSString
+        let full = ns.substring(with: lineRange)
+        replaceRange(lineRange, with: full.replacingOccurrences(of: from, with: to,
+                                                                options: .caseInsensitive), tv)
+    }
+
+    private func currentLineRange(_ tv: UITextView) -> NSRange? {
+        guard let sel = tv.selectedTextRange else { return nil }
+        let caret = tv.offset(from: tv.beginningOfDocument, to: sel.start)
+        let ns = (tv.text ?? "") as NSString
+        return ns.lineRange(for: NSRange(location: min(caret, ns.length), length: 0))
+    }
+
+    private func replaceRange(_ nsRange: NSRange, with text: String, _ tv: UITextView) {
+        guard let start = tv.position(from: tv.beginningOfDocument, offset: nsRange.location),
+              let end = tv.position(from: start, offset: nsRange.length),
+              let r = tv.textRange(from: start, to: end) else { return }
+        tv.replace(r, withText: text)
+        notifyChange(tv)
     }
 
     func dismissKeyboard() { textView?.resignFirstResponder() }

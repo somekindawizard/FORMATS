@@ -85,6 +85,46 @@ enum MarkdownStyler {
             dim(NSRange(location: NSMaxRange(m.range) - 1, length: 1))
         }
 
+        // Strikethrough ~~…~~
+        eachMatch("~~(.+?)~~") { m in
+            text.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: m.range)
+            dim(NSRange(location: m.range.location, length: 2))
+            dim(NSRange(location: NSMaxRange(m.range) - 2, length: 2))
+        }
+
+        // Highlight ==…==
+        eachMatch("==(.+?)==") { m in
+            text.addAttribute(.backgroundColor,
+                              value: MarkdownTheme.accent.withAlphaComponent(0.18), range: m.range)
+            dim(NSRange(location: m.range.location, length: 2))
+            dim(NSRange(location: NSMaxRange(m.range) - 2, length: 2))
+        }
+
+        // Task list: - [ ] / - [x]  (dim the marker; tint a done box)
+        eachMatch("^[ \\t]{0,3}- \\[[ xX]\\] ", [.anchorsMatchLines]) { m in
+            dim(m.range)
+            if let box = source.range(of: "\\[[xX]\\]", options: .regularExpression,
+                                      range: Range(m.range, in: source)) {
+                text.addAttribute(.foregroundColor, value: MarkdownTheme.accent,
+                                  range: NSRange(box, in: source))
+            }
+        }
+
+        // Bullet markers (not tasks) — accent the bullet glyph.
+        eachMatch("^([ \\t]{0,3})([-*+]) (?!\\[[ xX]\\] )", [.anchorsMatchLines]) { m in
+            text.addAttribute(.foregroundColor, value: MarkdownTheme.accent, range: m.range(at: 2))
+        }
+
+        // Numbered markers — accent the number.
+        eachMatch("^([ \\t]{0,3})(\\d+\\.) ", [.anchorsMatchLines]) { m in
+            text.addAttribute(.foregroundColor, value: MarkdownTheme.accent, range: m.range(at: 2))
+        }
+
+        // Horizontal rule --- *** ___
+        eachMatch("^(-{3,}|\\*{3,}|_{3,})[ \\t]*$", [.anchorsMatchLines]) { m in
+            dim(m.range)
+        }
+
         return text
     }
 }
