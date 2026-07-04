@@ -7,6 +7,7 @@ import PencilKit
 struct ReadingView: View {
     let entry: Entry
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.modelContext) private var context
 
     private var wordCount: Int {
         MarkdownRender.plainText(entry.body)
@@ -42,7 +43,8 @@ struct ReadingView: View {
                             .foregroundStyle(Paper.ink)
                             .padding(.bottom, 2)
                     }
-                    RenderedBody(markdown: entry.body, wash: entry.photoWash)
+                    RenderedBody(markdown: entry.body, wash: entry.photoWash,
+                                 onToggleTask: toggleTask)
 
                     if let ink {
                         Image(uiImage: ink)
@@ -63,6 +65,21 @@ struct ReadingView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .tint(Paper.accent)
+    }
+
+    /// Flip the index-th checkbox in the body and save.
+    private func toggleTask(_ index: Int) {
+        guard let regex = try? NSRegularExpression(pattern: #"- \[[ xX]\]"#) else { return }
+        let ns = entry.body as NSString
+        let matches = regex.matches(in: entry.body, range: NSRange(location: 0, length: ns.length))
+        guard index < matches.count else { return }
+        let range = matches[index].range
+        let current = ns.substring(with: range)
+        let flipped = current.contains("[ ]") ? "- [x]" : "- [ ]"
+        Haptics.tap()
+        entry.body = ns.replacingCharacters(in: range, with: flipped)
+        entry.updatedAt = .now
+        try? context.save()
     }
 
     /// Reading-mode typography — the same serif scale as the app, syntax removed.

@@ -69,6 +69,7 @@ enum ReaderBlock {
     case rule
     case caption(String)
     case quote(String)   // raw "> …" lines, rendered centered italic
+    case task(index: Int, checked: Bool, text: String)
 }
 
 struct RenderedBody: View {
@@ -83,6 +84,8 @@ struct RenderedBody: View {
     var captionFont: Font = .calloutSerif
     var ruleSize: CGFloat = 13
     var spacing: CGFloat = 16
+    /// Tap a checkbox to toggle it (by task index). Nil = non-interactive (card/PDF).
+    var onToggleTask: ((Int) -> Void)? = nil
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     private var blocks: [ReaderBlock] { RenderedBody.blocks(markdown) }
@@ -116,6 +119,19 @@ struct RenderedBody: View {
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.vertical, 4)
+                case .task(let index, let checked, let text):
+                    Button { onToggleTask?(index) } label: {
+                        HStack(alignment: .firstTextBaseline, spacing: 10) {
+                            Image(systemName: checked ? "checkmark.circle.fill" : "circle")
+                                .foregroundStyle(checked ? style.accent : style.soft)
+                            Text(MarkdownRender.styled(text, style))
+                                .strikethrough(checked, color: style.soft)
+                                .foregroundStyle(checked ? style.soft : style.ink)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(onToggleTask == nil)
                 case .caption(let s):
                     Text(s)
                         .font(captionFont).italic()
@@ -138,6 +154,7 @@ struct RenderedBody: View {
 
     static func blocks(_ markdown: String) -> [ReaderBlock] {
         var out: [ReaderBlock] = []
+        var taskIndex = 0
         for seg in PhotoToken.segments(markdown) {
             switch seg {
             case .photo(let name):
@@ -156,7 +173,12 @@ struct RenderedBody: View {
                 }
                 for line in text.components(separatedBy: "\n") {
                     let t = line.trimmingCharacters(in: .whitespaces)
-                    if t.hasPrefix(">") {
+                    if let m = t.range(of: #"^- \[[ xX]\][ \t]*"#, options: .regularExpression) {
+                        flushText(); flushQuote()
+                        let checked = t.range(of: #"\[[xX]\]"#, options: .regularExpression) != nil
+                        out.append(.task(index: taskIndex, checked: checked, text: String(t[m.upperBound...])))
+                        taskIndex += 1
+                    } else if t.hasPrefix(">") {
                         flushText(); quoteBuffer.append(t)
                     } else if t.count >= 3, Set(t).count == 1, "-*_".contains(t.first!) {
                         flushText(); flushQuote(); out.append(.rule)
