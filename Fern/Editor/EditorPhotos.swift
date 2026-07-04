@@ -69,14 +69,24 @@ enum EditorPhotos {
 
     private static let ciContext = CIContext(options: nil)
 
-    /// A theme-toned black-and-white wash: map the photo to a monochrome in the
-    /// app's accent hue (kept in the muted value space of the theme).
+    /// A theme-toned, **airy** black-and-white wash: desaturate, lift the
+    /// exposure and drop contrast for a faded high-key look, then tint with a
+    /// pastel (lightened) version of the accent so it stays soft, not heavy.
     static func washed(_ image: UIImage) -> UIImage {
         guard let ci = CIImage(image: image) else { return image }
         let a = ThemeStore.shared.accent.light
-        let color = CIColor(red: CGFloat(a.0), green: CGFloat(a.1), blue: CGFloat(a.2))
-        let out = ci.applyingFilter("CIColorMonochrome",
-                                    parameters: ["inputColor": color, "inputIntensity": 1.0])
+        // Accent mixed strongly toward cream → a pale, washed tint.
+        let tint = CIColor(red: 0.60 + 0.40 * CGFloat(a.0),
+                           green: 0.60 + 0.40 * CGFloat(a.1),
+                           blue: 0.60 + 0.40 * CGFloat(a.2))
+        let out = ci
+            .applyingFilter("CIColorControls", parameters: [
+                kCIInputSaturationKey: 0.0,
+                kCIInputBrightnessKey: 0.16,
+                kCIInputContrastKey: 0.72])
+            .applyingFilter("CIColorMonochrome", parameters: [
+                "inputColor": tint, "inputIntensity": 0.55])
+            .applyingFilter("CIExposureAdjust", parameters: [kCIInputEVKey: 0.40])
         guard let cg = ciContext.createCGImage(out, from: out.extent) else { return image }
         return UIImage(cgImage: cg, scale: image.scale, orientation: image.imageOrientation)
     }
