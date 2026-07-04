@@ -83,6 +83,6 @@ enum MarkdownTheme {
         if italic {
             desc = desc.withSymbolicTraits(.traitItalic) ?? desc
         }
-        return desc
+        return desc.withEditorialFeatures()
     }
 }

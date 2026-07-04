@@ -14,6 +14,12 @@ struct ReadingView: View {
     }
     private var readMinutes: Int { max(1, Int((Double(wordCount) / 220).rounded(.up))) }
 
+    /// Dateline · read-time, natural case (the small-caps font does the styling).
+    private var kicker: String {
+        let date = entry.createdAt.formatted(.dateTime.weekday(.wide).month(.wide).day().year())
+        return wordCount > 0 ? "\(date) · \(readMinutes) min read" : date
+    }
+
     private var ink: UIImage? {
         guard let d = DrawingStore.load(entry.id), !d.strokes.isEmpty,
               d.bounds.width > 1, d.bounds.height > 1 else { return nil }
@@ -24,18 +30,17 @@ struct ReadingView: View {
         ZStack {
             PaperBackground()
             ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
-                    Text(entry.createdAt.formatted(.dateTime.weekday(.wide).month(.wide).day().year()))
-                        .sectionLabel()
+                VStack(alignment: .leading, spacing: 12) {
+                    // Small-caps dateline kicker above the title.
+                    Text(kicker)
+                        .font(EditorialType.font(13, smallCaps: true))
+                        .tracking(1.6)
+                        .foregroundStyle(Paper.inkSoft)
                     if !entry.title.trimmingCharacters(in: .whitespaces).isEmpty {
                         Text(entry.title)
                             .font(.masthead)
                             .foregroundStyle(Paper.ink)
-                    }
-                    if wordCount > 0 {
-                        Text("\(wordCount) words · \(readMinutes) min read")
-                            .font(.calloutSerif)
-                            .foregroundStyle(Paper.inkFaint)
+                            .padding(.bottom, 2)
                     }
                     RenderedBody(markdown: entry.body, wash: entry.photoWash)
 
@@ -64,12 +69,12 @@ struct ReadingView: View {
     /// Computed so a live theme/accent change is reflected.
     static var readerStyle: MarkdownRender.Style {
         MarkdownRender.Style(
-        body: .serif(18),
+        body: EditorialType.font(18),
         heading: { level in
             switch level {
-            case 1:  return .serif(28, .semibold)
-            case 2:  return .serif(23, .semibold)
-            default: return .serif(20, .semibold)
+            case 1:  return EditorialType.font(28, weight: .semibold)
+            case 2:  return EditorialType.font(23, weight: .semibold)
+            default: return EditorialType.font(20, weight: .semibold)
             }
         },
         mono: .system(size: 16, design: .monospaced),
