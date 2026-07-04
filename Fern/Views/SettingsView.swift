@@ -21,6 +21,11 @@ struct SettingsView: View {
                     } label: {
                         Label("Saved prompts", systemImage: "heart.text.square")
                     }
+                    NavigationLink {
+                        WashLabView()
+                    } label: {
+                        Label("Wash Lab (dev)", systemImage: "slider.horizontal.3")
+                    }
                 }
 
                 Section {

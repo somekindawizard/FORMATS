@@ -71,23 +71,51 @@ enum EditorPhotos {
 
     /// A theme-toned, **airy** black-and-white wash: desaturate, lift the
     /// exposure and drop contrast for a faded high-key look, then tint with a
-    /// pastel (lightened) version of the accent so it stays soft, not heavy.
-    static func washed(_ image: UIImage) -> UIImage {
+    /// pastel (lightened) version of the accent. Parameters are tunable live via
+    /// the Wash Lab dev screen.
+    static func washed(_ image: UIImage, params: WashParams = .current) -> UIImage {
         guard let ci = CIImage(image: image) else { return image }
         let a = ThemeStore.shared.accent.light
-        // Accent mixed strongly toward cream → a pale, washed tint.
-        let tint = CIColor(red: 0.60 + 0.40 * CGFloat(a.0),
-                           green: 0.60 + 0.40 * CGFloat(a.1),
-                           blue: 0.60 + 0.40 * CGFloat(a.2))
+        // tintMix 0 → cream/white, 1 → full accent.
+        let m = CGFloat(params.tintMix)
+        let tint = CIColor(red: (1 - m) + m * CGFloat(a.0),
+                           green: (1 - m) + m * CGFloat(a.1),
+                           blue: (1 - m) + m * CGFloat(a.2))
         let out = ci
             .applyingFilter("CIColorControls", parameters: [
                 kCIInputSaturationKey: 0.0,
-                kCIInputBrightnessKey: 0.16,
-                kCIInputContrastKey: 0.72])
+                kCIInputBrightnessKey: params.brightness,
+                kCIInputContrastKey: params.contrast])
             .applyingFilter("CIColorMonochrome", parameters: [
-                "inputColor": tint, "inputIntensity": 0.55])
-            .applyingFilter("CIExposureAdjust", parameters: [kCIInputEVKey: 0.40])
+                "inputColor": tint, "inputIntensity": params.intensity])
+            .applyingFilter("CIExposureAdjust", parameters: [kCIInputEVKey: params.exposure])
         guard let cg = ciContext.createCGImage(out, from: out.extent) else { return image }
         return UIImage(cgImage: cg, scale: image.scale, orientation: image.imageOrientation)
+    }
+}
+
+/// Tunable parameters for the photo wash. Persisted so the Wash Lab dev screen
+/// can dial them in live and the whole app reflects the change.
+struct WashParams: Equatable, Codable {
+    var brightness: Double = 0.16
+    var contrast: Double = 0.72
+    var exposure: Double = 0.40
+    var intensity: Double = 0.55
+    var tintMix: Double = 0.40
+
+    static var current: WashParams {
+        guard let data = UserDefaults.standard.data(forKey: "fern.wash"),
+              let p = try? JSONDecoder().decode(WashParams.self, from: data) else { return WashParams() }
+        return p
+    }
+    func save() {
+        if let data = try? JSONEncoder().encode(self) {
+            UserDefaults.standard.set(data, forKey: "fern.wash")
+        }
+    }
+    /// A one-line, paste-friendly summary of the current values.
+    var summary: String {
+        String(format: "brightness %.2f · contrast %.2f · exposure %.2f · intensity %.2f · tintMix %.2f",
+               brightness, contrast, exposure, intensity, tintMix)
     }
 }
