@@ -83,6 +83,7 @@
 		91A8A5EED212BF5FD985826A /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4414F13CC04DFCD17197E71 /* Palette.swift */; };
 		91B3BE71F2F3C574BA6BDE26 /* SharedNotebookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132EE1FF896A92DFB10E075E /* SharedNotebookView.swift */; };
 		91D3B0870053AE6264E7441B /* PromptStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FDEB25A3B8570A4FFF61024 /* PromptStore.swift */; };
+		92D0C4DFE196536BC0FF6509 /* RedwoodSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C43EDE9E41EC16B56C3CA6E /* RedwoodSettings.swift */; };
 		92ED5F2A942664849205A3E5 /* ThemeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B28F822C8468BE267C3F3293 /* ThemeStore.swift */; };
 		9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28695B781553568A042DBF4C /* DateGrouping.swift */; };
 		9865957DD7F35828DE4FD1C3 /* SnapshotsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34493D1DC6741FEE0795EF1 /* SnapshotsView.swift */; };
@@ -206,6 +207,7 @@
 		28695B781553568A042DBF4C /* DateGrouping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateGrouping.swift; sourceTree = "<group>"; };
 		287563240408442B1C299030 /* ModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTests.swift; sourceTree = "<group>"; };
 		2929CFE651CFFB180DB1F615 /* ProjectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectView.swift; sourceTree = "<group>"; };
+		2C43EDE9E41EC16B56C3CA6E /* RedwoodSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedwoodSettings.swift; sourceTree = "<group>"; };
 		2E860E46D808FFFA7FE8AA9A /* Fraunces.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Fraunces.ttf; sourceTree = "<group>"; };
 		33B710B62EE4D952BA7B3585 /* EntryRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryRow.swift; sourceTree = "<group>"; };
 		366CCE747C235C4026B4A7CA /* WritingStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingStats.swift; sourceTree = "<group>"; };
@@ -334,6 +336,7 @@
 				A829AD2F0398005602C71A4B /* CompileView.swift */,
 				D44942E279BD335540316414 /* DocumentEditorView.swift */,
 				2929CFE651CFFB180DB1F615 /* ProjectView.swift */,
+				2C43EDE9E41EC16B56C3CA6E /* RedwoodSettings.swift */,
 				D34493D1DC6741FEE0795EF1 /* SnapshotsView.swift */,
 			);
 			path = Views;
@@ -781,6 +784,7 @@
 				08DEA1E14E3440DC001945AA /* RWModels.swift in Sources */,
 				98B6A141FF7B1252AA3901E6 /* RedwoodApp.swift in Sources */,
 				DA56CD73E1A8222DE842310B /* RedwoodCompiler.swift in Sources */,
+				92D0C4DFE196536BC0FF6509 /* RedwoodSettings.swift in Sources */,
 				9865957DD7F35828DE4FD1C3 /* SnapshotsView.swift in Sources */,
 				39F5FEA6808CFCC33C58C418 /* ThemeOptions.swift in Sources */,
 				4241502C06180F2738B93F1F /* ThemeStore.swift in Sources */,
@@ -963,7 +967,9 @@
 		49279C1D1CCF3A82E9BD6CE9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIcon-Sage AppIcon-Indigo AppIcon-Plum AppIcon-Ochre";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 775QLS4P2V;
@@ -1142,7 +1148,9 @@
 		A80DED7989E348812214AC4A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIcon-Sage AppIcon-Indigo AppIcon-Plum AppIcon-Ochre";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 775QLS4P2V;

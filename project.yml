@@ -82,6 +82,10 @@ targets:
         TARGETED_DEVICE_FAMILY: "1,2"
         DEVELOPMENT_TEAM: 775QLS4P2V
         CODE_SIGN_STYLE: Automatic
+        # Theme-colored alternate app icons — one per accent. The picker in
+        # Settings swaps between them (primary AppIcon = sienna).
+        ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES
+        ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: AppIcon-Sage AppIcon-Indigo AppIcon-Plum AppIcon-Ochre
   FernTests:
     type: bundle.unit-test
     platform: iOS

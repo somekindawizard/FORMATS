@@ -7,6 +7,7 @@ struct BinderView: View {
     @Query(sort: [SortDescriptor(\RWProject.updatedAt, order: .reverse)]) private var projects: [RWProject]
     @State private var newProjectTitle = ""
     @State private var showingNew = false
+    @State private var showingSettings = false
 
     var body: some View {
         NavigationStack {
@@ -33,12 +34,18 @@ struct BinderView: View {
             .navigationDestination(for: RWProject.self) { ProjectView(project: $0) }
             .navigationDestination(for: RWDocument.self) { DocumentEditorView(doc: $0) }
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button { showingSettings = true } label: {
+                        Image(systemName: "gearshape").foregroundStyle(Paper.accent)
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showingNew = true } label: {
                         Image(systemName: "plus.circle").foregroundStyle(Paper.accent)
                     }
                 }
             }
+            .sheet(isPresented: $showingSettings) { RedwoodSettings() }
             .alert("New project", isPresented: $showingNew) {
                 TextField("Title", text: $newProjectTitle)
                 Button("Create", action: createProject)
@@ -49,8 +56,11 @@ struct BinderView: View {
 
     private var emptyState: some View {
         VStack(spacing: 16) {
-            Image(systemName: "tree")
-                .font(.system(size: 44)).foregroundStyle(Paper.accent.opacity(0.7))
+            Image("RedwoodTree")
+                .renderingMode(.template)
+                .resizable().scaledToFit()
+                .frame(height: 180)
+                .foregroundStyle(Paper.accent.opacity(0.85))
             Text("Plant a project")
                 .font(.display(24)).foregroundStyle(Paper.ink)
             Text("A novel, an essay, a thesis — a home for the long work.")

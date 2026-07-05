@@ -7,12 +7,17 @@ import SwiftData
 /// documents.
 @main
 struct RedwoodApp: App {
+    @State private var theme = ThemeStore.shared
+
     init() { Fonts.register() }
 
     var body: some Scene {
         WindowGroup {
             BinderView()
                 .tint(Paper.accent)
+                .environment(theme)
+                // Re-render when the accent (paletteKey) changes so Paper.* colors refresh.
+                .id(theme.paletteKey)
         }
         .modelContainer(for: [RWProject.self, RWDocument.self, RWSnapshot.self])
     }
