@@ -32,6 +32,7 @@ enum MarkdownRender {
         }
         let inline = [
             (#"!\[[^\]]*\]\(fern://[^)]+\)"#, ""),   // inline photo tokens
+            (#"\[\[([^\]]+)\]\]"#, "$1"),            // wiki-links → title
             (#"\[([^\]]+)\]\([^)]+\)"#, "$1"),       // links → label
             (#"\*\*(.+?)\*\*"#, "$1"),
             (#"(?<!\*)\*(?!\*)([^*\n]+)\*(?!\*)"#, "$1"),
@@ -125,7 +126,27 @@ enum MarkdownRender {
             while k < chars.count { if chars[k] == ch { return k }; k += 1 }
             return nil
         }
+        func indexOfString(_ s: String, from: Int) -> Int? {
+            var k = from
+            while k < chars.count { if starts(s, at: k) { return k }; k += 1 }
+            return nil
+        }
         while i < chars.count {
+            // Wiki-link: [[Note title]] → tappable link to that note.
+            if starts("[[", at: i), let close = indexOfString("]]", from: i + 2) {
+                flush()
+                let title = String(chars[(i + 2)..<close])
+                var link = AttributedString(title)
+                link.font = font
+                link.foregroundColor = s.accent
+                if let encoded = title.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+                   let url = URL(string: "fern://note/\(encoded)") {
+                    link.link = url
+                }
+                out += link
+                i = close + 2
+                continue
+            }
             // Link: [label](url) — but not an image ![..](..)
             if chars[i] == "[", !(i > 0 && chars[i - 1] == "!"),
                let bracket = indexOf("]", from: i + 1),

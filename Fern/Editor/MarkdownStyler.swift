@@ -138,6 +138,13 @@ enum MarkdownStyler {
             addTrait(.traitItalic, over: m.range)
         }
 
+        // Wiki-link [[Note]] — accent the title, fold the brackets.
+        eachMatch("\\[\\[(.+?)\\]\\]") { m in
+            text.addAttribute(.foregroundColor, value: MarkdownTheme.accent, range: m.range(at: 1))
+            dim(NSRange(location: m.range.location, length: 2))
+            dim(NSRange(location: NSMaxRange(m.range) - 2, length: 2))
+        }
+
         // Figure caption line: "// caption" — italic, soft, dimmed marker.
         eachMatch("^(//[ \\t])(.*)$", [.anchorsMatchLines]) { m in
             text.addAttribute(.foregroundColor, value: MarkdownTheme.inkSoft, range: m.range)

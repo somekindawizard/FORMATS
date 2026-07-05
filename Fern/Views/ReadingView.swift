@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 import UIKit
 import PencilKit
 
@@ -8,6 +9,16 @@ struct ReadingView: View {
     let entry: Entry
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.modelContext) private var context
+    @Query private var allEntries: [Entry]
+    @State private var linkedEntry: Entry?
+
+    /// Notes that link to this one via [[title]].
+    private var backlinks: [Entry] {
+        let title = entry.displayTitle
+        guard !title.isEmpty else { return [] }
+        let needle = "[[\(title)]]".lowercased()
+        return allEntries.filter { $0.id != entry.id && $0.body.lowercased().contains(needle) }
+    }
 
     private var wordCount: Int {
         MarkdownRender.plainText(entry.body)
@@ -53,6 +64,28 @@ struct ReadingView: View {
                             .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.top, 8)
                     }
+
+                    if !backlinks.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Image(systemName: "leaf")
+                                .font(.system(size: 12)).foregroundStyle(Paper.inkFaint)
+                                .frame(maxWidth: .infinity).padding(.vertical, 10)
+                            Text("Mentioned in").sectionLabel()
+                            ForEach(backlinks) { note in
+                                Button { linkedEntry = note } label: {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "arrow.turn.up.left")
+                                            .font(.system(size: 11)).foregroundStyle(Paper.accent)
+                                        Text(note.displayTitle)
+                                            .font(.bodySerif).foregroundStyle(Paper.ink)
+                                        Spacer()
+                                    }
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.top, 20)
+                    }
                 }
                 .padding(.horizontal, 26)
                 .padding(.top, 12)
@@ -65,6 +98,22 @@ struct ReadingView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .tint(Paper.accent)
+        .environment(\.openURL, OpenURLAction { url in
+            if url.scheme == "fern", url.host == "note" {
+                let title = url.lastPathComponent.removingPercentEncoding ?? url.lastPathComponent
+                if let match = allEntries.first(where: {
+                    $0.displayTitle.caseInsensitiveCompare(title) == .orderedSame
+                        || $0.title.caseInsensitiveCompare(title) == .orderedSame
+                }) {
+                    linkedEntry = match
+                }
+                return .handled
+            }
+            return .systemAction
+        })
+        .sheet(item: $linkedEntry) { note in
+            NavigationStack { ReadingView(entry: note) }
+        }
     }
 
     /// Flip the index-th checkbox in the body and save.
