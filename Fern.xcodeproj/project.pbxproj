@@ -29,6 +29,7 @@
 		4622A209A674C3218FD029E6 /* MarkdownEditorController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB1ED64338FFF646CDCEB947 /* MarkdownEditorController.swift */; };
 		46D0ADB747D5436625E20C0C /* AccessoryBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE4457DFF57CF5D04E853B5 /* AccessoryBar.swift */; };
 		4B409622B1DBAB1DB8FA90C9 /* FernApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C576F242B37F60F2186C68E4 /* FernApp.swift */; };
+		4E28455A850EEDE950C9EA81 /* SharedNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19142412D553EEF8C50BE21 /* SharedNote.swift */; };
 		51010732818FD074595FF242 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49BCF6E4EFF1274EEAC43A8B /* Typography.swift */; };
 		533F6945C4B9BFA4D02EEE09 /* BiometricLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA4BBB39E7CE32F7D86E79DC /* BiometricLock.swift */; };
 		5FF5CDEE5C4F0D31194A4C7C /* Templates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F1E54D7BCC116EF041B9F49 /* Templates.swift */; };
@@ -55,6 +56,7 @@
 		80AC7B1ED6DFFBCDA716827D /* EntryRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33B710B62EE4D952BA7B3585 /* EntryRow.swift */; };
 		873B34669B1C80A171A3A83F /* Prompts+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A20EA5F23C21B6ACF018CE /* Prompts+Extras.swift */; };
 		8C55FFD856258A9B5FAD3C30 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A9DEAFC77D976210B3D73F /* SettingsView.swift */; };
+		91B3BE71F2F3C574BA6BDE26 /* SharedNotebookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132EE1FF896A92DFB10E075E /* SharedNotebookView.swift */; };
 		91D3B0870053AE6264E7441B /* PromptStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FDEB25A3B8570A4FFF61024 /* PromptStore.swift */; };
 		92ED5F2A942664849205A3E5 /* ThemeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B28F822C8468BE267C3F3293 /* ThemeStore.swift */; };
 		9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28695B781553568A042DBF4C /* DateGrouping.swift */; };
@@ -63,6 +65,7 @@
 		9B5B8E807FC24E81E98A7BCD /* Prompts+Nature.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AD8AFAC01175AC14737031 /* Prompts+Nature.swift */; };
 		A1608D2E62B4B1917A46A610 /* Prompts+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A20EA5F23C21B6ACF018CE /* Prompts+Extras.swift */; };
 		A3371C8D281AECF7E2AD4D6E /* AssetSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C7BF305C70EF6B5198FA801 /* AssetSync.swift */; };
+		A5337A96A39EF50CFE51E4C5 /* SharedNotebookStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 186A14AE8DEDDA5B874B66BD /* SharedNotebookStore.swift */; };
 		AAC0A0E5917AA096F46B77A2 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 229223438BC567429C3E5B74 /* Markdown */; };
 		B4260379C7DF075F533DC4AB /* DrawingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22A673B3EBE896C5204141A1 /* DrawingStore.swift */; };
 		B644B497FD07EFA1C899E95D /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287563240408442B1C299030 /* ModelTests.swift */; };
@@ -142,7 +145,9 @@
 		08E10046E72A3938832A9FAD /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		0BA4819F5B46F531E5941CEA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		12337FE2289C85966902B783 /* MarkdownExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownExporter.swift; sourceTree = "<group>"; };
+		132EE1FF896A92DFB10E075E /* SharedNotebookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedNotebookView.swift; sourceTree = "<group>"; };
 		14A13CB74024BF409BFCE151 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
+		186A14AE8DEDDA5B874B66BD /* SharedNotebookStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedNotebookStore.swift; sourceTree = "<group>"; };
 		19AA713ACBE71683079C911D /* Gambetta-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Gambetta-Medium.otf"; sourceTree = "<group>"; };
 		1E61F4A394060DA98CFFDC6B /* FernWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = FernWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		1EEABECED98FEE4A7B0EF304 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -227,6 +232,7 @@
 		EC5A0D4651E2BDC4D80A6AC9 /* MarkdownTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownTheme.swift; sourceTree = "<group>"; };
 		ED830E78A8ED4F64E15ECC2C /* PromptNotifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptNotifier.swift; sourceTree = "<group>"; };
 		EE08F5EFD57674CB778E0A8B /* PromptLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptLibrary.swift; sourceTree = "<group>"; };
+		F19142412D553EEF8C50BE21 /* SharedNote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedNote.swift; sourceTree = "<group>"; };
 		F433CA977FF4475744DAE193 /* Fonts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fonts.swift; sourceTree = "<group>"; };
 		F742AB1A0EB1B95CC7A91A9D /* SuggestionsButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionsButton.swift; sourceTree = "<group>"; };
 		FED160A738BC3DE663C28045 /* ThemeOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeOptions.swift; sourceTree = "<group>"; };
@@ -289,6 +295,7 @@
 				A6DBF89D855ED8E1267BBEB9 /* Fonts */,
 				CDF57EE06DD3F000AE26E7F4 /* Models */,
 				6EEE2E73B5155373BF1D2496 /* Services */,
+				EEC5557C625874186CA22199 /* Sharing */,
 				79295EE49F434C1181779944 /* Store */,
 				8B9907BC5B64DFAFC4DB41A9 /* Support */,
 				D52DB763515C2DBBEA2436F4 /* Theme */,
@@ -443,6 +450,16 @@
 				49BCF6E4EFF1274EEAC43A8B /* Typography.swift */,
 			);
 			path = Theme;
+			sourceTree = "<group>";
+		};
+		EEC5557C625874186CA22199 /* Sharing */ = {
+			isa = PBXGroup;
+			children = (
+				F19142412D553EEF8C50BE21 /* SharedNote.swift */,
+				186A14AE8DEDDA5B874B66BD /* SharedNotebookStore.swift */,
+				132EE1FF896A92DFB10E075E /* SharedNotebookView.swift */,
+			);
+			path = Sharing;
 			sourceTree = "<group>";
 		};
 		FCC22838342F85043D78ACE0 = {
@@ -670,6 +687,9 @@
 				F949628E768A92B2247D0559 /* SavedPromptsView.swift in Sources */,
 				70EBAECB0734E21D12105353 /* SearchView.swift in Sources */,
 				8C55FFD856258A9B5FAD3C30 /* SettingsView.swift in Sources */,
+				4E28455A850EEDE950C9EA81 /* SharedNote.swift in Sources */,
+				A5337A96A39EF50CFE51E4C5 /* SharedNotebookStore.swift in Sources */,
+				91B3BE71F2F3C574BA6BDE26 /* SharedNotebookView.swift in Sources */,
 				D85467988DD2C1B7C6F01832 /* SpotlightIndexer.swift in Sources */,
 				B860398E1BA261EE37594B57 /* SuggestionsButton.swift in Sources */,
 				5FF5CDEE5C4F0D31194A4C7C /* Templates.swift in Sources */,

@@ -38,6 +38,11 @@ struct SettingsView: View {
                         Label("Saved prompts", systemImage: "heart.text.square")
                     }
                     NavigationLink {
+                        SharedNotebookView()
+                    } label: {
+                        Label("Shared with Austin", systemImage: "person.2")
+                    }
+                    NavigationLink {
                         WashLabView()
                     } label: {
                         Label("Wash Lab (dev)", systemImage: "slider.horizontal.3")
