@@ -100,7 +100,8 @@ extension MarkdownEditorController {
         c.addInteraction(interaction)
         pencilCoordinator = pencilCoord
         if let saved = DrawingStore.load(entryID) { c.drawing = saved }
-        c.backgroundColor = PaperTiles.pattern(for: ThemeStore.shared.paperRule) ?? .clear
+        c.backgroundColor = PaperTiles.pattern(for: ThemeStore.shared.paperRule,
+                                               spacing: CGFloat(ThemeStore.shared.ruleSpacing)) ?? .clear
         textView.addSubview(c)
         canvas = c
         drawingEntryID = entryID
@@ -143,6 +144,12 @@ extension MarkdownEditorController {
         } else {
             saveDrawing()
         }
+    }
+
+    /// Re-apply the ruled / dot paper pattern live (rule or spacing changed).
+    func refreshPaperPattern() {
+        canvas?.backgroundColor = PaperTiles.pattern(for: ThemeStore.shared.paperRule,
+                                                     spacing: CGFloat(ThemeStore.shared.ruleSpacing)) ?? .clear
     }
 
     func undoInk() { canvas?.undoManager?.undo() }
@@ -198,17 +205,18 @@ extension MarkdownEditorController {
 /// a pattern `UIColor` set on the canvas background, so it tiles across the full
 /// document and scrolls with the content.
 enum PaperTiles {
-    static let spacing: CGFloat = 30
+    static let defaultSpacing: CGFloat = 30
 
-    static func pattern(for rule: PaperRule) -> UIColor? {
+    static func pattern(for rule: PaperRule, spacing: CGFloat = defaultSpacing) -> UIColor? {
+        let s = max(14, spacing)
         switch rule {
         case .plain: return nil
-        case .ruled: return UIColor(patternImage: ruledTile)
-        case .dots:  return UIColor(patternImage: dotTile)
+        case .ruled: return UIColor(patternImage: ruledTile(s))
+        case .dots:  return UIColor(patternImage: dotTile(s))
         }
     }
 
-    private static var ruledTile: UIImage {
+    private static func ruledTile(_ spacing: CGFloat) -> UIImage {
         let size = CGSize(width: 24, height: spacing)
         return UIGraphicsImageRenderer(size: size).image { ctx in
             MarkdownTheme.faint.withAlphaComponent(0.28).setFill()
@@ -216,7 +224,7 @@ enum PaperTiles {
         }
     }
 
-    private static var dotTile: UIImage {
+    private static func dotTile(_ spacing: CGFloat) -> UIImage {
         let size = CGSize(width: spacing, height: spacing)
         return UIGraphicsImageRenderer(size: size).image { ctx in
             MarkdownTheme.faint.withAlphaComponent(0.45).setFill()
@@ -235,6 +243,7 @@ struct InkToolbar: View {
     @Bindable var controller: MarkdownEditorController
     @State private var showWheel = false
     @State private var confirmClear = false
+    @State private var collapsed = false
 
     /// The five theme accent colours as inks.
     private var themeInks: [(Double, Double, Double)] {
@@ -249,9 +258,35 @@ struct InkToolbar: View {
     private var trailing: Bool { ThemeStore.shared.handedness.controlsTrailing }
 
     var body: some View {
+        Group {
+            if collapsed { collapsedBar } else { fullBar }
+        }
+        .padding(.horizontal, 18).padding(.vertical, 10)
+        .background(
+            Rectangle().fill(Paper.raised.opacity(0.98))
+                .overlay(Rectangle().frame(height: 1).foregroundStyle(Paper.line), alignment: .top)
+        )
+        .popover(isPresented: $showWheel) {
+            MutedWheel(current: controller.ink.isEraser ? nil
+                       : (controller.ink.r, controller.ink.g, controller.ink.b)) { rgb in
+                controller.ink.setColor(rgb); controller.applyInk()
+            }
+            .frame(width: 240, height: 240)
+            .padding(24)
+            .presentationCompactAdaptation(.popover)
+        }
+        .confirmationDialog("Clear this drawing?", isPresented: $confirmClear, titleVisibility: .visible) {
+            Button("Clear drawing", role: .destructive) { controller.clearInk() }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This erases all ink on this note. It can't be undone.")
+        }
+    }
+
+    private var fullBar: some View {
         VStack(spacing: 10) {
             HStack(spacing: 20) {
-                if trailing { doneButton; Spacer() }
+                if trailing { doneButton; hideButton; Spacer() }
                 ForEach(InkSettings.Pen.allCases) { pen in
                     toolButton(pen.icon, on: !controller.ink.isEraser && controller.ink.pen == pen) {
                         controller.ink.pen = pen; controller.ink.isEraser = false; controller.applyInk()
@@ -265,45 +300,73 @@ struct InkToolbar: View {
                 Divider().frame(height: 22)
                 toolButton("arrow.uturn.backward") { controller.undoInk() }
                 toolButton("trash") { confirmClear = true }
-                if !trailing { Spacer(); doneButton }
+                if !trailing { Spacer(); hideButton; doneButton }
             }
 
             HStack(spacing: 14) {
                 if trailing { Spacer() }
-                // Line weights
-                ForEach(Array(weights.enumerated()), id: \.offset) { _, w in
-                    weightDot(w)
-                }
+                ForEach(Array(weights.enumerated()), id: \.offset) { _, w in weightDot(w) }
                 Divider().frame(height: 22)
-                // Colors
                 swatch(ink)
                 ForEach(Array(themeInks.enumerated()), id: \.offset) { _, c in swatch(c) }
-                Button { showWheel.toggle() } label: {
-                    Image(systemName: "paintpalette")
-                        .font(.system(size: 18))
-                        .foregroundStyle(Paper.inkSoft)
-                        .frame(width: 30, height: 30)
-                }
+                paletteButton
                 if !trailing { Spacer() }
             }
         }
-        .padding(.horizontal, 18).padding(.vertical, 10)
-        .background(
-            Rectangle().fill(Paper.raised.opacity(0.98))
-                .overlay(Rectangle().frame(height: 1).foregroundStyle(Paper.line), alignment: .top)
-        )
-        .popover(isPresented: $showWheel) {
-            MutedWheel { rgb in controller.ink.setColor(rgb); controller.applyInk() }
-                .frame(width: 240, height: 240)
-                .padding(24)
-                .presentationCompactAdaptation(.popover)
+    }
+
+    /// Slim bar when the tools are hidden — a fresh, unobstructed canvas.
+    private var collapsedBar: some View {
+        HStack(spacing: 16) {
+            if trailing { doneButton; Spacer() }
+            Button { withAnimation(.easeOut(duration: 0.2)) { collapsed = false } } label: {
+                Label("Tools", systemImage: "chevron.up")
+                    .font(.calloutSerif).foregroundStyle(Paper.inkSoft)
+            }
+            .buttonStyle(.plain)
+            // The live ink color, so you know what you're drawing with while hidden.
+            currentColorChip
+            if !trailing { Spacer(); doneButton }
         }
-        .confirmationDialog("Clear this drawing?", isPresented: $confirmClear, titleVisibility: .visible) {
-            Button("Clear drawing", role: .destructive) { controller.clearInk() }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("This erases all ink on this note. It can't be undone.")
+        .frame(height: 30)
+    }
+
+    /// Shows the color currently in use (or the eraser) — also opens the wheel.
+    private var currentColorChip: some View {
+        Button { showWheel.toggle() } label: {
+            ZStack {
+                Circle().fill(controller.ink.isEraser ? Paper.raised : controller.ink.color)
+                    .frame(width: 26, height: 26)
+                    .overlay(Circle().strokeBorder(Paper.inkSoft.opacity(0.4), lineWidth: 1))
+                if controller.ink.isEraser {
+                    Image(systemName: "eraser").font(.system(size: 12)).foregroundStyle(Paper.inkSoft)
+                }
+            }
         }
+        .buttonStyle(.plain)
+    }
+
+    private var paletteButton: some View {
+        HStack(spacing: 8) {
+            currentColorChip
+            Button { showWheel.toggle() } label: {
+                Image(systemName: "paintpalette")
+                    .font(.system(size: 18))
+                    .foregroundStyle(Paper.inkSoft)
+                    .frame(width: 30, height: 30)
+            }
+        }
+    }
+
+    private var hideButton: some View {
+        Button { withAnimation(.easeOut(duration: 0.2)) { collapsed = true } } label: {
+            Image(systemName: "chevron.down")
+                .font(.system(size: 16))
+                .foregroundStyle(Paper.inkSoft)
+                .frame(width: 30, height: 30)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Hide tools")
     }
 
     private var doneButton: some View {
@@ -326,11 +389,15 @@ struct InkToolbar: View {
     }
 
     private func swatch(_ c: (Double, Double, Double)) -> some View {
-        Circle()
+        let selected = controller.ink.matches(c)
+        return Circle()
             .fill(Color(red: c.0, green: c.1, blue: c.2))
             .frame(width: 28, height: 28)
-            .overlay(Circle().stroke(Paper.ink, lineWidth: controller.ink.matches(c) ? 2 : 0).padding(1))
-            .overlay(Circle().stroke(Paper.line, lineWidth: 0.5))
+            // Always-visible hairline (so dark swatches read against the bar)…
+            .overlay(Circle().strokeBorder(Paper.inkSoft.opacity(0.4), lineWidth: 1))
+            // …and a selection ring drawn *outside* the fill, in the accent, so it
+            // shows on any color including near-black.
+            .overlay(Circle().stroke(Paper.accent, lineWidth: selected ? 2.5 : 0).padding(-3))
             .onTapGesture { controller.ink.setColor(c); controller.applyInk() }
     }
 
@@ -346,10 +413,54 @@ struct InkToolbar: View {
     }
 }
 
+/// Adjusts the gap between ruled / dot-grid lines, live. Shared by both apps.
+struct LineSpacingSheet: View {
+    let controller: MarkdownEditorController
+    @Environment(\.dismiss) private var dismiss
+    @State private var spacing: Double = ThemeStore.shared.ruleSpacing
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                PaperBackground()
+                VStack(alignment: .leading, spacing: 18) {
+                    Text("The gap between ruled or dot-grid lines. Turn lines on from the Lines menu.")
+                        .font(.calloutSerif).foregroundStyle(Paper.inkSoft)
+                    HStack(spacing: 14) {
+                        Image(systemName: "arrow.down.and.line.horizontal.and.arrow.up")
+                            .foregroundStyle(Paper.inkSoft)
+                        Slider(value: $spacing, in: 18...64, step: 1)
+                            .tint(Paper.accent)
+                        Text("\(Int(spacing))")
+                            .font(.figure(15)).foregroundStyle(Paper.accent)
+                            .frame(width: 34, alignment: .trailing)
+                    }
+                }
+                .padding(24)
+            }
+            .navigationTitle("Line spacing")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }.tint(Paper.accent)
+                }
+            }
+        }
+        .presentationDetents([.height(200)])
+        .onChange(of: spacing) { _, v in
+            ThemeStore.shared.ruleSpacing = v
+            controller.refreshPaperPattern()
+        }
+    }
+}
+
 /// A hue wheel confined to the theme's muted value space (low saturation and
 /// brightness), so picked inks never look garish next to the paper.
 struct MutedWheel: View {
+    var current: (Double, Double, Double)? = nil
     var onPick: ((Double, Double, Double)) -> Void
+
+    @State private var hue: Double?     // the live/selected hue, for the indicator
 
     private static let saturation = 0.5
     private static let brightness = 0.62
@@ -363,20 +474,46 @@ struct MutedWheel: View {
     var body: some View {
         GeometryReader { geo in
             let side = min(geo.size.width, geo.size.height)
-            Circle()
-                .fill(AngularGradient(gradient: Gradient(colors: hues + [hues[0]]), center: .center))
-                .overlay(Circle().fill(Paper.raised).scaleEffect(0.32))
-                .frame(width: side, height: side)
-                .contentShape(Circle())
-                .gesture(
-                    DragGesture(minimumDistance: 0).onChanged { v in
-                        let cx = side / 2, cy = side / 2
-                        var a = atan2(v.location.y - cy, v.location.x - cx)
-                        if a < 0 { a += 2 * .pi }
-                        onPick(Self.rgb(from: a / (2 * .pi)))
-                    }
-                )
+            ZStack {
+                Circle()
+                    .fill(AngularGradient(gradient: Gradient(colors: hues + [hues[0]]), center: .center))
+                    .overlay(Circle().fill(Paper.raised).scaleEffect(0.32))
+                // A ring marking the selected hue on the wheel.
+                if let hue {
+                    let angle = hue * 2 * .pi
+                    let radius = side * 0.375
+                    Circle()
+                        .fill(Color(hue: hue, saturation: Self.saturation, brightness: Self.brightness))
+                        .frame(width: 22, height: 22)
+                        .overlay(Circle().stroke(.white, lineWidth: 2))
+                        .overlay(Circle().stroke(Paper.ink.opacity(0.35), lineWidth: 0.5).padding(-1))
+                        .position(x: side / 2 + cos(angle) * radius,
+                                  y: side / 2 + sin(angle) * radius)
+                        .allowsHitTesting(false)
+                }
+            }
+            .frame(width: side, height: side)
+            .contentShape(Circle())
+            .gesture(
+                DragGesture(minimumDistance: 0).onChanged { v in
+                    let cx = side / 2, cy = side / 2
+                    var a = atan2(v.location.y - cy, v.location.x - cx)
+                    if a < 0 { a += 2 * .pi }
+                    let h = a / (2 * .pi)
+                    hue = h
+                    onPick(Self.rgb(from: h))
+                }
+            )
         }
+        .onAppear { if hue == nil { hue = Self.hue(of: current) } }
+    }
+
+    /// The wheel hue for a color (nil when there's no current color).
+    private static func hue(of rgb: (Double, Double, Double)?) -> Double? {
+        guard let rgb else { return nil }
+        var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        UIColor(red: rgb.0, green: rgb.1, blue: rgb.2, alpha: 1).getHue(&h, saturation: &s, brightness: &b, alpha: &a)
+        return Double(h)
     }
 
     static func rgb(from hue: Double) -> (Double, Double, Double) {

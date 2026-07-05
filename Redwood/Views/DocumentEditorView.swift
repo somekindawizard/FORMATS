@@ -13,6 +13,7 @@ struct DocumentEditorView: View {
     @State private var showingReader = false
     @State private var showingSnapshots = false
     @State private var snapshotTaken = false
+    @State private var showLineSpacing = false
 
     var body: some View {
         @Bindable var controller = controller
@@ -77,6 +78,20 @@ struct DocumentEditorView: View {
                         Label(ThemeStore.shared.handedness == .right ? "Left-handed layout" : "Right-handed layout",
                               systemImage: "hand.point.up.left")
                     }
+                    Menu {
+                        ForEach(PaperRule.allCases) { rule in
+                            Button { ThemeStore.shared.paperRule = rule } label: {
+                                if ThemeStore.shared.paperRule == rule { Label(rule.title, systemImage: "checkmark") }
+                                else { Text(rule.title) }
+                            }
+                        }
+                        Divider()
+                        Button { showLineSpacing = true } label: {
+                            Label("Line spacing…", systemImage: "arrow.up.and.down.text.horizontal")
+                        }
+                    } label: {
+                        Label("Lines", systemImage: "line.3.horizontal")
+                    }
                 } label: {
                     Image(systemName: "ellipsis.circle").foregroundStyle(Paper.accent)
                 }
@@ -88,6 +103,7 @@ struct DocumentEditorView: View {
         .sheet(isPresented: $showingSnapshots) {
             SnapshotsView(doc: doc)
         }
+        .sheet(isPresented: $showLineSpacing) { LineSpacingSheet(controller: controller) }
         .overlay(alignment: .top) {
             if snapshotTaken {
                 Text("Snapshot saved")
@@ -99,7 +115,10 @@ struct DocumentEditorView: View {
             }
         }
         .sheet(isPresented: $controller.showColorWheel) {
-            MutedWheel { rgb in controller.ink.setColor(rgb); controller.applyInk() }
+            MutedWheel(current: controller.ink.isEraser ? nil
+                       : (controller.ink.r, controller.ink.g, controller.ink.b)) { rgb in
+                controller.ink.setColor(rgb); controller.applyInk()
+            }
                 .frame(maxWidth: 280, maxHeight: 280)
                 .padding(28)
                 .presentationDetents([.height(360)])

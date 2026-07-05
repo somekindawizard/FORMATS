@@ -37,6 +37,10 @@ final class ThemeStore {
     var handedness: Handedness {
         didSet { UserDefaults.standard.set(handedness.rawValue, forKey: "fern.hand") }
     }
+    /// Gap between ruled / dot-grid lines, in points.
+    var ruleSpacing: Double {
+        didSet { UserDefaults.standard.set(ruleSpacing, forKey: "fern.rule.spacing") }
+    }
 
     private init() {
         tone = PaperTone(rawValue: UserDefaults.standard.string(forKey: "fern.theme.tone") ?? "") ?? .mist
@@ -47,6 +51,8 @@ final class ThemeStore {
         typewriter = UserDefaults.standard.bool(forKey: "fern.write.typewriter")
         foldMarkers = UserDefaults.standard.object(forKey: "fern.write.fold") as? Bool ?? true
         handedness = Handedness(rawValue: UserDefaults.standard.string(forKey: "fern.hand") ?? "") ?? .right
+        let savedSpacing = UserDefaults.standard.double(forKey: "fern.rule.spacing")
+        ruleSpacing = savedSpacing > 0 ? savedSpacing : 30
     }
 
     var paletteKey: String { "\(tone.rawValue)-\(accent.rawValue)-\(displayFont.rawValue)-\(paperRule.rawValue)-\(handedness.rawValue)" }
