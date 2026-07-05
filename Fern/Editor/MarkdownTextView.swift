@@ -81,6 +81,10 @@ struct MarkdownTextView: UIViewRepresentable {
     var wash: Bool = false
     /// Entry id, so the Pencil ink layer can persist per note.
     var entryID: UUID? = nil
+    /// Fires with the text view's real editing (first-responder) state, so the
+    /// accessory bar always tracks the keyboard — even after returning from the
+    /// reader, where SwiftUI's @FocusState desyncs.
+    var onEditingChange: ((Bool) -> Void)? = nil
 
     func makeUIView(context: Context) -> UITextView {
         // TextKit 1: the in-place textStorage styling + editable image
@@ -186,6 +190,14 @@ struct MarkdownTextView: UIViewRepresentable {
                 tv.setContentOffset(CGPoint(x: 0, y: max(0, tv.contentOffset.y - (visibleTop - caret.minY) - 8)),
                                     animated: false)
             }
+        }
+
+        func textViewDidBeginEditing(_ textView: UITextView) {
+            parent.onEditingChange?(true)
+        }
+
+        func textViewDidEndEditing(_ textView: UITextView) {
+            parent.onEditingChange?(false)
         }
 
         func textViewDidChangeSelection(_ textView: UITextView) {
