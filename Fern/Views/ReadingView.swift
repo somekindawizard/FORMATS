@@ -11,6 +11,7 @@ struct ReadingView: View {
     @Environment(\.modelContext) private var context
     @Query private var allEntries: [Entry]
     @State private var linkedEntry: Entry?
+    @State private var speech = ReadAloud.shared
 
     /// Notes that link to this one via [[title]].
     private var backlinks: [Entry] {
@@ -98,6 +99,19 @@ struct ReadingView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .tint(Paper.accent)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    Haptics.tap()
+                    speech.toggle(MarkdownRender.plainText(entry.body))
+                } label: {
+                    Image(systemName: speech.isSpeaking ? "stop.circle" : "speaker.wave.2")
+                        .foregroundStyle(Paper.accent)
+                }
+                .accessibilityLabel(speech.isSpeaking ? "Stop reading" : "Read aloud")
+            }
+        }
+        .onDisappear { speech.stop() }
         .environment(\.openURL, OpenURLAction { url in
             if url.scheme == "fern", url.host == "note" {
                 let title = url.lastPathComponent.removingPercentEncoding ?? url.lastPathComponent
