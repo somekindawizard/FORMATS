@@ -50,6 +50,9 @@ final class Entry {
     var photoFileNames: [String] = []
     /// When true, inline photos render in a theme-toned black-and-white wash.
     var photoWash: Bool = false
+    /// Optional cover photo filename (in Documents/Photos) — shown as a hero
+    /// image atop the note in reading mode and as a thumbnail in the library.
+    var coverPhotoName: String = ""
     /// Text recognized from the note's Apple Pencil ink (Vision OCR), so
     /// handwriting is searchable. Empty when there's no ink.
     var inkText: String = ""

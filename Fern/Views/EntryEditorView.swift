@@ -396,11 +396,30 @@ private struct PhotoStrip: View {
                             .resizable().scaledToFill()
                             .frame(width: 76, height: 76)
                             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .overlay(alignment: .bottomLeading) {
+                                if entry.coverPhotoName == name {
+                                    Image(systemName: "star.fill")
+                                        .font(.system(size: 10))
+                                        .foregroundStyle(.white)
+                                        .padding(4)
+                                        .background(Circle().fill(Paper.accent))
+                                        .padding(4)
+                                }
+                            }
                             .overlay(alignment: .topTrailing) {
                                 Button { remove(name) } label: {
                                     Image(systemName: "xmark.circle.fill")
                                         .foregroundStyle(.white, Paper.ink.opacity(0.5))
                                         .padding(3)
+                                }
+                            }
+                            .contextMenu {
+                                Button {
+                                    entry.coverPhotoName = (entry.coverPhotoName == name) ? "" : name
+                                    Haptics.tap()
+                                } label: {
+                                    Label(entry.coverPhotoName == name ? "Remove cover" : "Set as cover",
+                                          systemImage: entry.coverPhotoName == name ? "star.slash" : "star")
                                 }
                             }
                     }
@@ -440,6 +459,7 @@ private struct PhotoStrip: View {
 
     private func remove(_ name: String) {
         entry.photoFileNames.removeAll { $0 == name }
+        if entry.coverPhotoName == name { entry.coverPhotoName = "" }
         PhotoStore.delete(name)
     }
 }

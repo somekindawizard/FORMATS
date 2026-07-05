@@ -39,6 +39,11 @@ struct ReadingView: View {
         return wordCount > 0 ? "\(date) · \(readMinutes) min read" : date
     }
 
+    private var cover: UIImage? {
+        guard !entry.coverPhotoName.isEmpty else { return nil }
+        return PhotoStore.load(entry.coverPhotoName)
+    }
+
     private var ink: UIImage? {
         guard let d = DrawingStore.load(entry.id), !d.strokes.isEmpty,
               d.bounds.width > 1, d.bounds.height > 1 else { return nil }
@@ -50,6 +55,16 @@ struct ReadingView: View {
             PaperBackground()
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
+                    if let cover {
+                        Image(uiImage: cover)
+                            .resizable().scaledToFill()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: sizeClass == .regular ? 300 : 220)
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .stroke(Paper.line, lineWidth: 1))
+                            .padding(.bottom, 4)
+                    }
                     // Small-caps dateline kicker above the title.
                     Text(kicker)
                         .font(EditorialType.font(13, smallCaps: true))

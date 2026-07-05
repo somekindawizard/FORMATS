@@ -7,7 +7,27 @@ struct EntryRow: View {
         entry.createdAt.formatted(.dateTime.weekday(.abbreviated)).uppercased()
     }
 
+    private var cover: UIImage? {
+        guard !entry.isLocked, !entry.coverPhotoName.isEmpty else { return nil }
+        return PhotoStore.load(entry.coverPhotoName)
+    }
+
     var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            content
+            if let cover {
+                Image(uiImage: cover)
+                    .resizable().scaledToFill()
+                    .frame(width: 60, height: 60)
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .stroke(Paper.line, lineWidth: 1))
+            }
+        }
+        .padding(.vertical, 6)
+    }
+
+    private var content: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 6) {
                 Text(dateLabel).sectionLabel()
@@ -52,6 +72,6 @@ struct EntryRow: View {
                 }
             }
         }
-        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
