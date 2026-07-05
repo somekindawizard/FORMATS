@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		01D567AA68237053C6AC3535 /* Prompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A87F893FEEDD086C788AEED /* Prompt.swift */; };
-		0442A212C36180F89A875EF6 /* BinderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 156F94DBB195E9C5407FBDFB /* BinderView.swift */; };
 		0517271B1D128E80B8942A3F /* OnThisDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35FC6DC207A6791C7446EE4 /* OnThisDay.swift */; };
 		08DEA1E14E3440DC001945AA /* RWModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F327C3B26DB2481E8B9B1E8D /* RWModels.swift */; };
 		0D0DE355B9F5C242382E500E /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E955C6672E8D66A488569630 /* SmokeTests.swift */; };
@@ -29,6 +28,7 @@
 		3291FF5A77AE8F8B2D893CCE /* PromptCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB2BB1BE40E5C8BA4A77780 /* PromptCard.swift */; };
 		37DBA60E213431CDD95E2D8F /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ABB577E515BBF1EC0238B8 /* Enums.swift */; };
 		39F5FEA6808CFCC33C58C418 /* ThemeOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FED160A738BC3DE663C28045 /* ThemeOptions.swift */; };
+		3BF3CEC83CD518F3D97EB5C6 /* RedwoodRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 727D83BA5B17248F99E64C89 /* RedwoodRootView.swift */; };
 		3CFB752C4AA04EB824D47F1D /* Prompts+Nier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6827187FF4941AE39243B9E /* Prompts+Nier.swift */; };
 		3D0FB454E38EAC3E80B50E90 /* FiddleheadShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 970190D4D04CBD9FA602D885 /* FiddleheadShape.swift */; };
 		400A3569506D5FCD81502BBF /* BarnsleyFernView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5E1846726DBE1B8EB6ADCED /* BarnsleyFernView.swift */; };
@@ -195,7 +195,6 @@
 		12337FE2289C85966902B783 /* MarkdownExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownExporter.swift; sourceTree = "<group>"; };
 		132EE1FF896A92DFB10E075E /* SharedNotebookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedNotebookView.swift; sourceTree = "<group>"; };
 		14A13CB74024BF409BFCE151 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
-		156F94DBB195E9C5407FBDFB /* BinderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BinderView.swift; sourceTree = "<group>"; };
 		186A14AE8DEDDA5B874B66BD /* SharedNotebookStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedNotebookStore.swift; sourceTree = "<group>"; };
 		19AA713ACBE71683079C911D /* Gambetta-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Gambetta-Medium.otf"; sourceTree = "<group>"; };
 		1BAEDC15B141E62B229D5685 /* RWTemplates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RWTemplates.swift; sourceTree = "<group>"; };
@@ -243,6 +242,7 @@
 		6E4D9D08B30863DB5FA2E563 /* Redaction-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Redaction-Regular.ttf"; sourceTree = "<group>"; };
 		6E6101F538120C732D4B8695 /* MarkdownStylerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownStylerTests.swift; sourceTree = "<group>"; };
 		70573A969736F0D4419D6DA6 /* WeatherProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherProvider.swift; sourceTree = "<group>"; };
+		727D83BA5B17248F99E64C89 /* RedwoodRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedwoodRootView.swift; sourceTree = "<group>"; };
 		74089F72177AC086B585AD67 /* SavedPromptsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPromptsView.swift; sourceTree = "<group>"; };
 		8179EB32444953EE697C2342 /* PhotoStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoStore.swift; sourceTree = "<group>"; };
 		8C16252685A829E96A585FE8 /* ZipWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZipWriter.swift; sourceTree = "<group>"; };
@@ -336,10 +336,10 @@
 		18C4695484EAB2ABB7E6698C /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				156F94DBB195E9C5407FBDFB /* BinderView.swift */,
 				A829AD2F0398005602C71A4B /* CompileView.swift */,
 				D44942E279BD335540316414 /* DocumentEditorView.swift */,
 				2929CFE651CFFB180DB1F615 /* ProjectView.swift */,
+				727D83BA5B17248F99E64C89 /* RedwoodRootView.swift */,
 				2C43EDE9E41EC16B56C3CA6E /* RedwoodSettings.swift */,
 				D34493D1DC6741FEE0795EF1 /* SnapshotsView.swift */,
 			);
@@ -772,7 +772,6 @@
 				4FA11427D629B1D7A35C209C /* AccessoryBar.swift in Sources */,
 				D39A6F73D8B7FC76FD3F2204 /* BarnsleyFern.swift in Sources */,
 				7024D74C23FD639329068964 /* BarnsleyFernView.swift in Sources */,
-				0442A212C36180F89A875EF6 /* BinderView.swift in Sources */,
 				22EEE3A3FF26D753AA0ECE53 /* CompileView.swift in Sources */,
 				86A99155B10E4FB6996D911E /* Components.swift in Sources */,
 				1D80D21C9164034A2947F4DF /* DocumentEditorView.swift in Sources */,
@@ -799,6 +798,7 @@
 				8BC189ECBBE3E285243537A2 /* RWTemplates.swift in Sources */,
 				98B6A141FF7B1252AA3901E6 /* RedwoodApp.swift in Sources */,
 				DA56CD73E1A8222DE842310B /* RedwoodCompiler.swift in Sources */,
+				3BF3CEC83CD518F3D97EB5C6 /* RedwoodRootView.swift in Sources */,
 				92D0C4DFE196536BC0FF6509 /* RedwoodSettings.swift in Sources */,
 				9865957DD7F35828DE4FD1C3 /* SnapshotsView.swift in Sources */,
 				39F5FEA6808CFCC33C58C418 /* ThemeOptions.swift in Sources */,

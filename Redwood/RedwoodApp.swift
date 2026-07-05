@@ -13,7 +13,7 @@ struct RedwoodApp: App {
 
     var body: some Scene {
         WindowGroup {
-            BinderView()
+            RedwoodRootView()
                 .tint(Paper.accent)
                 .environment(theme)
                 // Re-render when the accent (paletteKey) changes so Paper.* colors refresh.
