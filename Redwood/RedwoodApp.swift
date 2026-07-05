@@ -14,6 +14,6 @@ struct RedwoodApp: App {
             BinderView()
                 .tint(Paper.accent)
         }
-        .modelContainer(for: [RWProject.self, RWDocument.self])
+        .modelContainer(for: [RWProject.self, RWDocument.self, RWSnapshot.self])
     }
 }

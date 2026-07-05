@@ -84,6 +84,7 @@
 		91D3B0870053AE6264E7441B /* PromptStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FDEB25A3B8570A4FFF61024 /* PromptStore.swift */; };
 		92ED5F2A942664849205A3E5 /* ThemeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B28F822C8468BE267C3F3293 /* ThemeStore.swift */; };
 		9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28695B781553568A042DBF4C /* DateGrouping.swift */; };
+		9865957DD7F35828DE4FD1C3 /* SnapshotsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34493D1DC6741FEE0795EF1 /* SnapshotsView.swift */; };
 		98B6A141FF7B1252AA3901E6 /* RedwoodApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E7F1C4D49815A076F3A8A3C /* RedwoodApp.swift */; };
 		9A64942EF4BF90D9AA61656A /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E26486E72AA73E121EBA526 /* ActivityView.swift */; };
 		9B31CC201C20F047C9C7BEA4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEABECED98FEE4A7B0EF304 /* RootView.swift */; };
@@ -266,6 +267,7 @@
 		C9AD8AFAC01175AC14737031 /* Prompts+Nature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Nature.swift"; sourceTree = "<group>"; };
 		CBC7E99A123649E4FFAC4ECD /* LocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationProvider.swift; sourceTree = "<group>"; };
 		CD7A3372E778227A40182354 /* InlinePhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlinePhoto.swift; sourceTree = "<group>"; };
+		D34493D1DC6741FEE0795EF1 /* SnapshotsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotsView.swift; sourceTree = "<group>"; };
 		D35FC6DC207A6791C7446EE4 /* OnThisDay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnThisDay.swift; sourceTree = "<group>"; };
 		D383A32ED71D29BD1C19B13C /* FernTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FernTabBar.swift; sourceTree = "<group>"; };
 		D3A20EA5F23C21B6ACF018CE /* Prompts+Extras.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Extras.swift"; sourceTree = "<group>"; };
@@ -327,6 +329,7 @@
 				156F94DBB195E9C5407FBDFB /* BinderView.swift */,
 				D44942E279BD335540316414 /* DocumentEditorView.swift */,
 				2929CFE651CFFB180DB1F615 /* ProjectView.swift */,
+				D34493D1DC6741FEE0795EF1 /* SnapshotsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -762,6 +765,7 @@
 				DD8DF15F45F5C83BCDE68809 /* ProjectView.swift in Sources */,
 				08DEA1E14E3440DC001945AA /* RWModels.swift in Sources */,
 				98B6A141FF7B1252AA3901E6 /* RedwoodApp.swift in Sources */,
+				9865957DD7F35828DE4FD1C3 /* SnapshotsView.swift in Sources */,
 				39F5FEA6808CFCC33C58C418 /* ThemeOptions.swift in Sources */,
 				4241502C06180F2738B93F1F /* ThemeStore.swift in Sources */,
 				9E2545EC6950D4D99AD0BF94 /* Thesaurus.swift in Sources */,

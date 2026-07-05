@@ -75,6 +75,30 @@ extension RWDocument {
     }
 }
 
+/// A frozen copy of a document at a moment in time — Redwood's version
+/// history. Take one before a heavy revision; restore or read it later.
+@Model
+final class RWSnapshot {
+    var id: UUID = UUID()
+    var documentID: UUID = UUID()
+    var title: String = ""
+    var synopsis: String = ""
+    var body: String = ""
+    var label: String = ""          // e.g. "before revise", or blank
+    var createdAt: Date = Date.now
+    var wordCount: Int = 0
+
+    init(documentID: UUID, title: String, synopsis: String, body: String,
+         label: String = "", wordCount: Int = 0) {
+        self.documentID = documentID
+        self.title = title
+        self.synopsis = synopsis
+        self.body = body
+        self.label = label
+        self.wordCount = wordCount
+    }
+}
+
 enum RWStatus: String, CaseIterable, Identifiable {
     case none, todo, draft, revised, final
     var id: String { rawValue }

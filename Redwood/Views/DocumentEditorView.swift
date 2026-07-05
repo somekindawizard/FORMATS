@@ -11,6 +11,8 @@ struct DocumentEditorView: View {
     @State private var showPhotoPicker = false
     @State private var picks: [PhotosPickerItem] = []
     @State private var showingReader = false
+    @State private var showingSnapshots = false
+    @State private var snapshotTaken = false
 
     var body: some View {
         @Bindable var controller = controller
@@ -61,6 +63,13 @@ struct DocumentEditorView: View {
                     Button { controller.presentFind() } label: {
                         Label("Find & Replace", systemImage: "magnifyingglass")
                     }
+                    Divider()
+                    Button { takeSnapshot() } label: {
+                        Label("Take snapshot", systemImage: "camera.aperture")
+                    }
+                    Button { showingSnapshots = true } label: {
+                        Label("Version history", systemImage: "clock.arrow.circlepath")
+                    }
                 } label: {
                     Image(systemName: "ellipsis.circle").foregroundStyle(Paper.accent)
                 }
@@ -68,6 +77,19 @@ struct DocumentEditorView: View {
         }
         .sheet(isPresented: $showingReader) {
             NavigationStack { DocumentReader(doc: doc) }
+        }
+        .sheet(isPresented: $showingSnapshots) {
+            SnapshotsView(doc: doc)
+        }
+        .overlay(alignment: .top) {
+            if snapshotTaken {
+                Text("Snapshot saved")
+                    .font(.calloutSerif).foregroundStyle(Paper.bg)
+                    .padding(.vertical, 8).padding(.horizontal, 16)
+                    .background(Capsule().fill(Paper.ink))
+                    .padding(.top, 8)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
         }
         .sheet(isPresented: $controller.showColorWheel) {
             MutedWheel { rgb in controller.ink.setColor(rgb); controller.applyInk() }
@@ -83,6 +105,20 @@ struct DocumentEditorView: View {
         .onChange(of: doc.body)  { _, _ in doc.updatedAt = .now }
         .onAppear { controller.requestPhoto = { showPhotoPicker = true } }
         .onDisappear { try? context.save() }
+    }
+
+    private func takeSnapshot() {
+        let snap = RWSnapshot(documentID: doc.id, title: doc.title,
+                              synopsis: doc.synopsis, body: doc.body,
+                              wordCount: doc.wordCount)
+        context.insert(snap)
+        try? context.save()
+        Haptics.success()
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { snapshotTaken = true }
+        Task {
+            try? await Task.sleep(for: .seconds(1.6))
+            withAnimation(.easeInOut(duration: 0.3)) { snapshotTaken = false }
+        }
     }
 
     private func insertPhotos(_ items: [PhotosPickerItem]) async {
