@@ -14,6 +14,7 @@ struct ProjectView: View {
     @State private var editingTargets = false
     @State private var targetText = ""
     @State private var goalText = ""
+    @State private var showingCompile = false
 
     init(project: RWProject, parent: RWDocument? = nil) {
         self.project = project
@@ -76,6 +77,9 @@ struct ProjectView: View {
                         Button { beginEditTargets() } label: {
                             Label("Word targets…", systemImage: "target")
                         }
+                        Button { showingCompile = true } label: {
+                            Label("Compile…", systemImage: "square.stack.3d.up")
+                        }
                     }
                 } label: {
                     Image(systemName: "plus.circle").foregroundStyle(Paper.accent)
@@ -91,6 +95,9 @@ struct ProjectView: View {
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("Set an optional target for the whole manuscript and a per-session writing goal. Leave a field at 0 to turn it off.")
+        }
+        .sheet(isPresented: $showingCompile) {
+            CompileView(project: project, docs: allDocs)
         }
     }
 

@@ -18,6 +18,7 @@
 		12F6E70FBF359B44046B6B35 /* EntryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B628B8479289E7CC246E5C5B /* EntryEditorView.swift */; };
 		1A6A86D78DFB6879B49C1D36 /* MarkdownExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12337FE2289C85966902B783 /* MarkdownExporter.swift */; };
 		1D80D21C9164034A2947F4DF /* DocumentEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44942E279BD335540316414 /* DocumentEditorView.swift */; };
+		22EEE3A3FF26D753AA0ECE53 /* CompileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A829AD2F0398005602C71A4B /* CompileView.swift */; };
 		251E2E48E04F375B695C0D48 /* DropCap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 032FBB6A0B3EFEEDE519FABC /* DropCap.swift */; };
 		25F1719DB79389C04B45E15C /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49BCF6E4EFF1274EEAC43A8B /* Typography.swift */; };
 		260305D549C18A272AD1D6E1 /* MarkdownTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5A0D4651E2BDC4D80A6AC9 /* MarkdownTheme.swift */; };
@@ -131,6 +132,7 @@
 		D5B3AC7B5AB7666C2BAEC1DE /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08E10046E72A3938832A9FAD /* Persistence.swift */; };
 		D85467988DD2C1B7C6F01832 /* SpotlightIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232C4DDB499CBDC6E0B73E75 /* SpotlightIndexer.swift */; };
 		D8603E52489C6BE6CBE9D6B7 /* EditorPhotos.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5093FEFE01D3F907485BB252 /* EditorPhotos.swift */; };
+		DA56CD73E1A8222DE842310B /* RedwoodCompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0EAB514165A196C57AFEBE1 /* RedwoodCompiler.swift */; };
 		DD8DF15F45F5C83BCDE68809 /* ProjectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2929CFE651CFFB180DB1F615 /* ProjectView.swift */; };
 		DE9C94EAA72A6FB55D858189 /* StreakFlourish.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9929AF61055BE97B0D2D90B1 /* StreakFlourish.swift */; };
 		E46E487B2EB249A714915481 /* Prompts+Reflective.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498E7586F70ECCFA602F6B03 /* Prompts+Reflective.swift */; };
@@ -254,6 +256,7 @@
 		A3E10DFCAB855A14CE7D486A /* ComposeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposeButton.swift; sourceTree = "<group>"; };
 		A460D16620DAD4DAD40A4768 /* HandwritingOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandwritingOCR.swift; sourceTree = "<group>"; };
 		A6827187FF4941AE39243B9E /* Prompts+Nier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Nier.swift"; sourceTree = "<group>"; };
+		A829AD2F0398005602C71A4B /* CompileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompileView.swift; sourceTree = "<group>"; };
 		AB26D146B901CF925B729558 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AD6943B8927D7DB6D40C3730 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		B28F822C8468BE267C3F3293 /* ThemeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeStore.swift; sourceTree = "<group>"; };
@@ -263,6 +266,7 @@
 		BB27CCF5E64406E93604C436 /* PDFExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExporter.swift; sourceTree = "<group>"; };
 		BC549B1D7037E5DF677DC591 /* FernWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FernWidget.swift; sourceTree = "<group>"; };
 		C08E47716D1CE2229416D3EE /* InkReplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkReplay.swift; sourceTree = "<group>"; };
+		C0EAB514165A196C57AFEBE1 /* RedwoodCompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedwoodCompiler.swift; sourceTree = "<group>"; };
 		C576F242B37F60F2186C68E4 /* FernApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FernApp.swift; sourceTree = "<group>"; };
 		C9AD8AFAC01175AC14737031 /* Prompts+Nature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Nature.swift"; sourceTree = "<group>"; };
 		CBC7E99A123649E4FFAC4ECD /* LocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationProvider.swift; sourceTree = "<group>"; };
@@ -327,6 +331,7 @@
 			isa = PBXGroup;
 			children = (
 				156F94DBB195E9C5407FBDFB /* BinderView.swift */,
+				A829AD2F0398005602C71A4B /* CompileView.swift */,
 				D44942E279BD335540316414 /* DocumentEditorView.swift */,
 				2929CFE651CFFB180DB1F615 /* ProjectView.swift */,
 				D34493D1DC6741FEE0795EF1 /* SnapshotsView.swift */,
@@ -344,6 +349,14 @@
 				498E7586F70ECCFA602F6B03 /* Prompts+Reflective.swift */,
 			);
 			path = Content;
+			sourceTree = "<group>";
+		};
+		34A029D572EFF648BEE42494 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				C0EAB514165A196C57AFEBE1 /* RedwoodCompiler.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 		3AC501E5A8FB92411BEEC48A /* Models */ = {
@@ -537,6 +550,7 @@
 				AB26D146B901CF925B729558 /* Assets.xcassets */,
 				5E7F1C4D49815A076F3A8A3C /* RedwoodApp.swift */,
 				3AC501E5A8FB92411BEEC48A /* Models */,
+				34A029D572EFF648BEE42494 /* Services */,
 				18C4695484EAB2ABB7E6698C /* Views */,
 			);
 			path = Redwood;
@@ -742,6 +756,7 @@
 				D39A6F73D8B7FC76FD3F2204 /* BarnsleyFern.swift in Sources */,
 				7024D74C23FD639329068964 /* BarnsleyFernView.swift in Sources */,
 				0442A212C36180F89A875EF6 /* BinderView.swift in Sources */,
+				22EEE3A3FF26D753AA0ECE53 /* CompileView.swift in Sources */,
 				86A99155B10E4FB6996D911E /* Components.swift in Sources */,
 				1D80D21C9164034A2947F4DF /* DocumentEditorView.swift in Sources */,
 				4EB41FF6573659686F1EC401 /* DrawingStore.swift in Sources */,
@@ -765,6 +780,7 @@
 				DD8DF15F45F5C83BCDE68809 /* ProjectView.swift in Sources */,
 				08DEA1E14E3440DC001945AA /* RWModels.swift in Sources */,
 				98B6A141FF7B1252AA3901E6 /* RedwoodApp.swift in Sources */,
+				DA56CD73E1A8222DE842310B /* RedwoodCompiler.swift in Sources */,
 				9865957DD7F35828DE4FD1C3 /* SnapshotsView.swift in Sources */,
 				39F5FEA6808CFCC33C58C418 /* ThemeOptions.swift in Sources */,
 				4241502C06180F2738B93F1F /* ThemeStore.swift in Sources */,
