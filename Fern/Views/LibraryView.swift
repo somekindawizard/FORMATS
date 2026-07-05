@@ -95,15 +95,41 @@ struct LibraryView: View {
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
             .listRowInsets(EdgeInsets(top: 2, leading: 22, bottom: 2, trailing: 22))
+            .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                Button { togglePin(entry) } label: {
+                    Label(entry.isPinned ? "Unpin" : "Pin",
+                          systemImage: entry.isPinned ? "star.slash.fill" : "star.fill")
+                }
+                .tint(Paper.accent)
+            }
             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                 Button(role: .destructive) { delete(entry) } label: {
                     Label("Delete", systemImage: "trash")
                 }
+                Button { toggleLock(entry) } label: {
+                    Label(entry.isLocked ? "Unlock" : "Lock",
+                          systemImage: entry.isLocked ? "lock.open.fill" : "lock.fill")
+                }
+                .tint(Paper.inkSoft)
             }
     }
 
+    private func togglePin(_ entry: Entry) {
+        Haptics.tap()
+        entry.isPinned.toggle()
+        try? context.save()
+    }
+
+    private func toggleLock(_ entry: Entry) {
+        Haptics.tap()
+        entry.isLocked.toggle()
+        try? context.save()
+    }
+
     private func delete(_ entry: Entry) {
+        Haptics.tap(.medium)
         for name in entry.photoFileNames { PhotoStore.delete(name) }
+        DrawingStore.delete(entry.id)
         SpotlightIndexer.deindex(id: entry.id)
         context.delete(entry)
         try? context.save()
