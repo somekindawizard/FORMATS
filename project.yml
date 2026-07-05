@@ -55,6 +55,11 @@ targets:
         TARGETED_DEVICE_FAMILY: "1,2"
         DEVELOPMENT_TEAM: 775QLS4P2V
         CODE_SIGN_STYLE: Automatic
+        # Mac Catalyst — Fern runs as a Mac app from the same code.
+        SUPPORTS_MACCATALYST: YES
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
+        DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER: NO
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
         # Partial Info.plist (UIBackgroundModes: remote-notification for background
         # CloudKit sync) merged with the generated INFOPLIST_KEY_* values above.
         INFOPLIST_FILE: Fern/Info.plist
@@ -117,6 +122,10 @@ targets:
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: FernWidget/Info.plist
         TARGETED_DEVICE_FAMILY: "1,2"
+        # Catalyst so the widget embeds in the Mac app build.
+        SUPPORTS_MACCATALYST: YES
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
 schemes:
   Fern:
     build:
