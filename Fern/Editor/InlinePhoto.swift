@@ -100,7 +100,12 @@ struct RenderedBody: View {
         blocks.firstIndex { if case .text = $0 { return true } else { return false } }
     }
     private var resolvedPhotoWidth: CGFloat? {
-        photoWidth ?? (sizeClass == .regular ? 460 : nil)
+        if let photoWidth { return photoWidth }
+        #if targetEnvironment(macCatalyst)
+        return 560
+        #else
+        return sizeClass == .regular ? 460 : nil
+        #endif
     }
 
     var body: some View {

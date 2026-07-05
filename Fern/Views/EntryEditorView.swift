@@ -78,6 +78,7 @@ struct EntryEditorView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .hidesFernTabBar()
+        .focusedValue(\.editorController, controller)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 // Apple Pencil drawing — hidden on Mac (no Pencil hardware).

@@ -43,6 +43,7 @@ struct DocumentEditorView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .focusedValue(\.editorController, controller)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 // Apple Pencil drawing — hidden on Mac (no Pencil hardware).

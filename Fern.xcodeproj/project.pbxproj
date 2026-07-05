@@ -31,6 +31,7 @@
 		3BF3CEC83CD518F3D97EB5C6 /* RedwoodRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 727D83BA5B17248F99E64C89 /* RedwoodRootView.swift */; };
 		3CFB752C4AA04EB824D47F1D /* Prompts+Nier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6827187FF4941AE39243B9E /* Prompts+Nier.swift */; };
 		3D0FB454E38EAC3E80B50E90 /* FiddleheadShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 970190D4D04CBD9FA602D885 /* FiddleheadShape.swift */; };
+		3E5FA23149B9339C1E0DCA1D /* EditorCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8555CA55955DA21AAD193E5 /* EditorCommands.swift */; };
 		400A3569506D5FCD81502BBF /* BarnsleyFernView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5E1846726DBE1B8EB6ADCED /* BarnsleyFernView.swift */; };
 		41451E9E40707E96F2655B4C /* Fraunces-OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 41676068049DC79076637EB1 /* Fraunces-OFL.txt */; };
 		418021820E5FEC3DDBC92F84 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38E46173966308F74B1857F /* SampleData.swift */; };
@@ -116,6 +117,7 @@
 		C0E4621C3F0203251652A3FE /* ThemeOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FED160A738BC3DE663C28045 /* ThemeOptions.swift */; };
 		C1ADB5C3D247E41EA84AD646 /* Asset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2821034BF1192AA87B02DA48 /* Asset.swift */; };
 		C30CA974324D7A08754C1CD7 /* Gambetta-Semibold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 4DE4B4BAA147D79AC4DD0B0E /* Gambetta-Semibold.otf */; };
+		C31C1F4E584B0D6583E50EF2 /* EditorCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8555CA55955DA21AAD193E5 /* EditorCommands.swift */; };
 		C4066C9745B5F006C924AE4C /* WeatherProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70573A969736F0D4419D6DA6 /* WeatherProvider.swift */; };
 		C64989F464837161990274E7 /* Gambetta-Semibold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 4DE4B4BAA147D79AC4DD0B0E /* Gambetta-Semibold.otf */; };
 		C685794B33924C00E30B850E /* MarkdownTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D4D39EC866C9EFD80CD9546 /* MarkdownTextView.swift */; };
@@ -263,6 +265,7 @@
 		A460D16620DAD4DAD40A4768 /* HandwritingOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandwritingOCR.swift; sourceTree = "<group>"; };
 		A6827187FF4941AE39243B9E /* Prompts+Nier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Nier.swift"; sourceTree = "<group>"; };
 		A829AD2F0398005602C71A4B /* CompileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompileView.swift; sourceTree = "<group>"; };
+		A8555CA55955DA21AAD193E5 /* EditorCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorCommands.swift; sourceTree = "<group>"; };
 		AB26D146B901CF925B729558 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AD6943B8927D7DB6D40C3730 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		B28F822C8468BE267C3F3293 /* ThemeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeStore.swift; sourceTree = "<group>"; };
@@ -320,6 +323,7 @@
 			children = (
 				3BE4457DFF57CF5D04E853B5 /* AccessoryBar.swift */,
 				032FBB6A0B3EFEEDE519FABC /* DropCap.swift */,
+				A8555CA55955DA21AAD193E5 /* EditorCommands.swift */,
 				5093FEFE01D3F907485BB252 /* EditorPhotos.swift */,
 				214F3FCD16A11CA83BBE0F49 /* InkTools.swift */,
 				CD7A3372E778227A40182354 /* InlinePhoto.swift */,
@@ -777,6 +781,7 @@
 				1D80D21C9164034A2947F4DF /* DocumentEditorView.swift in Sources */,
 				4EB41FF6573659686F1EC401 /* DrawingStore.swift in Sources */,
 				251E2E48E04F375B695C0D48 /* DropCap.swift in Sources */,
+				3E5FA23149B9339C1E0DCA1D /* EditorCommands.swift in Sources */,
 				D8603E52489C6BE6CBE9D6B7 /* EditorPhotos.swift in Sources */,
 				89A3803D9FCF064462EB77D4 /* EditorialType.swift in Sources */,
 				5ED717E3643B2A5B5CA54E3F /* FiddleheadShape.swift in Sources */,
@@ -842,6 +847,7 @@
 				9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */,
 				B4260379C7DF075F533DC4AB /* DrawingStore.swift in Sources */,
 				6AD5556CEDD35ACC4A2E86C1 /* DropCap.swift in Sources */,
+				C31C1F4E584B0D6583E50EF2 /* EditorCommands.swift in Sources */,
 				BE358E151418F55454E77E3B /* EditorPhotos.swift in Sources */,
 				648295A308E820D07E568084 /* EditorialType.swift in Sources */,
 				F349ECAB7A224AE4DBB6C3C5 /* Entry.swift in Sources */,

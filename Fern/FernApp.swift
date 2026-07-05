@@ -37,5 +37,6 @@ struct FernApp: App {
             // Follows the system appearance — light paper, or its dark inverse.
         }
         .modelContainer(Persistence.shared)
+        .commands { FormatCommands() }
     }
 }

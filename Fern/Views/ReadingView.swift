@@ -40,6 +40,16 @@ struct ReadingView: View {
         return wordCount > 0 ? "\(date) · \(readMinutes) min read" : date
     }
 
+    /// Reading column width — wider on Mac, which has ample room, so the reader
+    /// doesn't sit in a sea of empty paper.
+    private var readerMeasure: CGFloat {
+        #if targetEnvironment(macCatalyst)
+        return 860
+        #else
+        return 680
+        #endif
+    }
+
     private var cover: UIImage? {
         guard !entry.coverPhotoName.isEmpty else { return nil }
         return PhotoStore.load(entry.coverPhotoName)
@@ -116,8 +126,8 @@ struct ReadingView: View {
                 .padding(.top, 12)
                 .padding(.bottom, 60)
                 // Optimal measure — hold the column to a readable line length,
-                // centered on wide screens.
-                .frame(maxWidth: 680)
+                // centered on wide screens (wider on Mac, which has room to spare).
+                .frame(maxWidth: readerMeasure)
                 .frame(maxWidth: .infinity, alignment: .center)
             }
             .onScrollGeometryChange(for: CGFloat.self) { geo in

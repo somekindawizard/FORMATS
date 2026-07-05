@@ -20,5 +20,6 @@ struct RedwoodApp: App {
                 .id(theme.paletteKey)
         }
         .modelContainer(for: [RWProject.self, RWDocument.self, RWSnapshot.self])
+        .commands { FormatCommands() }
     }
 }
