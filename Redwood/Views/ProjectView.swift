@@ -9,6 +9,10 @@ struct ProjectView: View {
 
     @Environment(\.modelContext) private var context
     @Query private var allDocs: [RWDocument]
+    @AppStorage("redwood.sessionGoal") private var sessionGoal = 0
+    @State private var editingTargets = false
+    @State private var targetText = ""
+    @State private var goalText = ""
 
     init(project: RWProject, parent: RWDocument? = nil) {
         self.project = project
@@ -27,10 +31,24 @@ struct ProjectView: View {
         allDocs.filter { !$0.isFolder }.reduce(0) { $0 + $1.wordCount }
     }
 
+    /// Words added since this app session began (baseline captured on first open).
+    private var sessionWords: Int {
+        max(0, totalWords - (RWSession.baselineWords ?? totalWords))
+    }
+
     var body: some View {
         ZStack {
             PaperBackground()
             List {
+                if parent == nil {
+                    TargetsBar(project: project, totalWords: totalWords,
+                               sessionWords: sessionWords, sessionGoal: sessionGoal) {
+                        beginEditTargets()
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .moveDisabled(true)
+                }
                 ForEach(nodes) { node in
                     binderRow(node)
                         .listRowBackground(Color.clear)
@@ -38,12 +56,6 @@ struct ProjectView: View {
                 }
                 .onMove(perform: move)
                 .onDelete(perform: delete)
-
-                if parent == nil {
-                    footer
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
@@ -51,6 +63,9 @@ struct ProjectView: View {
         }
         .navigationTitle(parent?.displayTitle ?? project.title)
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            if RWSession.baselineWords == nil { RWSession.baselineWords = totalWords }
+        }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
@@ -60,11 +75,40 @@ struct ProjectView: View {
                     Button { add(isFolder: true) } label: {
                         Label("New folder", systemImage: "folder")
                     }
+                    if parent == nil {
+                        Divider()
+                        Button { beginEditTargets() } label: {
+                            Label("Word targets…", systemImage: "target")
+                        }
+                    }
                 } label: {
                     Image(systemName: "plus.circle").foregroundStyle(Paper.accent)
                 }
             }
         }
+        .alert("Word targets", isPresented: $editingTargets) {
+            TextField("Manuscript target (words)", text: $targetText)
+                .keyboardType(.numberPad)
+            TextField("Session goal (words)", text: $goalText)
+                .keyboardType(.numberPad)
+            Button("Save", action: saveTargets)
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Set an optional target for the whole manuscript and a per-session writing goal. Leave a field at 0 to turn it off.")
+        }
+    }
+
+    private func beginEditTargets() {
+        targetText = project.wordTarget > 0 ? "\(project.wordTarget)" : ""
+        goalText = sessionGoal > 0 ? "\(sessionGoal)" : ""
+        editingTargets = true
+    }
+
+    private func saveTargets() {
+        project.wordTarget = Int(targetText.filter(\.isNumber)) ?? 0
+        sessionGoal = Int(goalText.filter(\.isNumber)) ?? 0
+        try? context.save()
+        Haptics.tap()
     }
 
     @ViewBuilder
@@ -80,15 +124,6 @@ struct ProjectView: View {
                 BinderNodeRow(node: node, childCount: 0)
             }
         }
-    }
-
-    private var footer: some View {
-        HStack {
-            Text("\(totalWords) words")
-                .font(.label).foregroundStyle(Paper.inkFaint)
-            Spacer()
-        }
-        .padding(.top, 8)
     }
 
     private func childCount(of folder: RWDocument) -> Int {
@@ -133,6 +168,97 @@ struct ProjectView: View {
         }
         DrawingStore.delete(node.id)
         context.delete(node)
+    }
+}
+
+/// Tracks the word baseline for the current app session (in-memory, resets on
+/// relaunch) so "words this session" can be shown.
+enum RWSession {
+    static var baselineWords: Int?
+}
+
+/// Manuscript progress + session progress, shown atop the project binder.
+private struct TargetsBar: View {
+    let project: RWProject
+    let totalWords: Int
+    let sessionWords: Int
+    let sessionGoal: Int
+    let onEdit: () -> Void
+
+    private var manuscriptProgress: Double {
+        guard project.wordTarget > 0 else { return 0 }
+        return min(1, Double(totalWords) / Double(project.wordTarget))
+    }
+    private var sessionProgress: Double {
+        guard sessionGoal > 0 else { return 0 }
+        return min(1, Double(sessionWords) / Double(sessionGoal))
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Manuscript total / target
+            if project.wordTarget > 0 {
+                VStack(alignment: .leading, spacing: 5) {
+                    HStack {
+                        Text("\(totalWords) / \(project.wordTarget) words")
+                            .font(.calloutSerif).foregroundStyle(Paper.ink)
+                        Spacer()
+                        Text("\(Int(manuscriptProgress * 100))%")
+                            .font(.label).foregroundStyle(Paper.accent)
+                    }
+                    ProgressBar(value: manuscriptProgress)
+                }
+            } else {
+                HStack {
+                    Text("\(totalWords) words")
+                        .font(.calloutSerif).foregroundStyle(Paper.inkSoft)
+                    Spacer()
+                    Button("Set a target", action: onEdit)
+                        .font(.label).foregroundStyle(Paper.accent)
+                }
+            }
+
+            // Session
+            HStack(spacing: 10) {
+                Image(systemName: "flame")
+                    .font(.system(size: 12)).foregroundStyle(Paper.accent)
+                if sessionGoal > 0 {
+                    Text("\(sessionWords) / \(sessionGoal) this session")
+                        .font(.label).foregroundStyle(Paper.inkSoft)
+                    ProgressBar(value: sessionProgress).frame(maxWidth: 120)
+                    if sessionWords >= sessionGoal {
+                        Image(systemName: "checkmark.seal.fill")
+                            .font(.system(size: 12)).foregroundStyle(Paper.accent)
+                    }
+                } else {
+                    Text("+\(sessionWords) words this session")
+                        .font(.label).foregroundStyle(Paper.inkSoft)
+                }
+                Spacer()
+            }
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Paper.raised)
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Paper.line, lineWidth: 1))
+        )
+        .padding(.vertical, 4)
+    }
+}
+
+/// A thin rounded progress track in the accent color.
+private struct ProgressBar: View {
+    let value: Double
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule().fill(Paper.line)
+                Capsule().fill(Paper.accent)
+                    .frame(width: max(0, geo.size.width * value))
+            }
+        }
+        .frame(height: 5)
     }
 }
 
