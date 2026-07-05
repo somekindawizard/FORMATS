@@ -70,6 +70,13 @@ struct DocumentEditorView: View {
                     Button { showingSnapshots = true } label: {
                         Label("Version history", systemImage: "clock.arrow.circlepath")
                     }
+                    Divider()
+                    Button {
+                        ThemeStore.shared.handedness = ThemeStore.shared.handedness.flipped
+                    } label: {
+                        Label(ThemeStore.shared.handedness == .right ? "Left-handed layout" : "Right-handed layout",
+                              systemImage: "hand.point.up.left")
+                    }
                 } label: {
                     Image(systemName: "ellipsis.circle").foregroundStyle(Paper.accent)
                 }

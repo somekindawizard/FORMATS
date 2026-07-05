@@ -25,11 +25,24 @@ struct RedwoodSettings: View {
                         }
                         .padding(.top, 2)
 
+                        Divider().overlay(Paper.line).padding(.vertical, 6)
+
+                        Text("Handedness").sectionLabel()
+                        Text("Puts the ink and formatting tools on the side your writing hand won't cover.")
+                            .font(.calloutSerif).foregroundStyle(Paper.inkSoft)
+                        Picker("Handedness", selection: Binding(
+                            get: { theme.handedness },
+                            set: { theme.handedness = $0 }
+                        )) {
+                            ForEach(Handedness.allCases) { Text($0.label).tag($0) }
+                        }
+                        .pickerStyle(.segmented)
+
                         // A live preview of the tinted tree.
                         Image("RedwoodTree")
                             .renderingMode(.template)
                             .resizable().scaledToFit()
-                            .frame(height: 220)
+                            .frame(height: 200)
                             .foregroundStyle(Paper.accent)
                             .frame(maxWidth: .infinity)
                             .padding(.top, 12)

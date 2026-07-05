@@ -32,6 +32,11 @@ final class ThemeStore {
     var foldMarkers: Bool {
         didSet { UserDefaults.standard.set(foldMarkers, forKey: "fern.write.fold") }
     }
+    /// Left- or right-handed layout — mirrors the ink & formatting bars so the
+    /// writing hand never covers the controls.
+    var handedness: Handedness {
+        didSet { UserDefaults.standard.set(handedness.rawValue, forKey: "fern.hand") }
+    }
 
     private init() {
         tone = PaperTone(rawValue: UserDefaults.standard.string(forKey: "fern.theme.tone") ?? "") ?? .mist
@@ -41,7 +46,8 @@ final class ThemeStore {
         focusMode = UserDefaults.standard.bool(forKey: "fern.write.focus")
         typewriter = UserDefaults.standard.bool(forKey: "fern.write.typewriter")
         foldMarkers = UserDefaults.standard.object(forKey: "fern.write.fold") as? Bool ?? true
+        handedness = Handedness(rawValue: UserDefaults.standard.string(forKey: "fern.hand") ?? "") ?? .right
     }
 
-    var paletteKey: String { "\(tone.rawValue)-\(accent.rawValue)-\(displayFont.rawValue)-\(paperRule.rawValue)" }
+    var paletteKey: String { "\(tone.rawValue)-\(accent.rawValue)-\(displayFont.rawValue)-\(paperRule.rawValue)-\(handedness.rawValue)" }
 }

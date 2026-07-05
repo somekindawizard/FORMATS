@@ -244,9 +244,14 @@ struct InkToolbar: View {
     /// Line-weight presets (fine → bold).
     private let weights: [CGFloat] = [2, 5, 9, 16]
 
+    /// Left-handers rest their hand on the left, so the tools cluster on the
+    /// right; right-handers get them on the left (Procreate convention).
+    private var trailing: Bool { ThemeStore.shared.handedness.controlsTrailing }
+
     var body: some View {
         VStack(spacing: 10) {
             HStack(spacing: 20) {
+                if trailing { doneButton; Spacer() }
                 ForEach(InkSettings.Pen.allCases) { pen in
                     toolButton(pen.icon, on: !controller.ink.isEraser && controller.ink.pen == pen) {
                         controller.ink.pen = pen; controller.ink.isEraser = false; controller.applyInk()
@@ -260,13 +265,11 @@ struct InkToolbar: View {
                 Divider().frame(height: 22)
                 toolButton("arrow.uturn.backward") { controller.undoInk() }
                 toolButton("trash") { confirmClear = true }
-                Spacer()
-                Button("Done") { controller.setDrawing(false) }
-                    .font(.headlineSerif)
-                    .foregroundStyle(Paper.accent)
+                if !trailing { Spacer(); doneButton }
             }
 
             HStack(spacing: 14) {
+                if trailing { Spacer() }
                 // Line weights
                 ForEach(Array(weights.enumerated()), id: \.offset) { _, w in
                     weightDot(w)
@@ -281,7 +284,7 @@ struct InkToolbar: View {
                         .foregroundStyle(Paper.inkSoft)
                         .frame(width: 30, height: 30)
                 }
-                Spacer()
+                if !trailing { Spacer() }
             }
         }
         .padding(.horizontal, 18).padding(.vertical, 10)
@@ -301,6 +304,12 @@ struct InkToolbar: View {
         } message: {
             Text("This erases all ink on this note. It can't be undone.")
         }
+    }
+
+    private var doneButton: some View {
+        Button("Done") { controller.setDrawing(false) }
+            .font(.headlineSerif)
+            .foregroundStyle(Paper.accent)
     }
 
     private func weightDot(_ w: CGFloat) -> some View {

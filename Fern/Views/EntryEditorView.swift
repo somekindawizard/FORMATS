@@ -124,6 +124,12 @@ struct EntryEditorView: View {
                         Label(entry.photoWash ? "Photo wash: on" : "Photo wash",
                               systemImage: entry.photoWash ? "camera.filters" : "photo.on.rectangle")
                     }
+                    Button {
+                        ThemeStore.shared.handedness = ThemeStore.shared.handedness.flipped
+                    } label: {
+                        Label(ThemeStore.shared.handedness == .right ? "Left-handed layout" : "Right-handed layout",
+                              systemImage: "hand.point.up.left")
+                    }
                     Divider()
                     Button { shareCard() } label: {
                         Label("Share as card", systemImage: "photo")

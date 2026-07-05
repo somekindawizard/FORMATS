@@ -11,6 +11,9 @@ struct AccessoryBar: View {
             SynonymStrip(controller: controller)
 
             HStack(spacing: 0) {
+                // Word count + keyboard-dismiss go on the dominant side so
+                // they're a thumb's reach away.
+                if trailing { dismissGroup; Divider().frame(height: 22) }
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 20) {
                         icon("textformat.size")       { controller.cycleHeading() }
@@ -34,18 +37,7 @@ struct AccessoryBar: View {
                     .padding(.horizontal, 20)
                 }
 
-                Divider().frame(height: 22)
-                Text("\(controller.wordCount)")
-                    .font(.system(size: 12, design: .monospaced))
-                    .foregroundStyle(Paper.inkFaint)
-                    .padding(.leading, 12)
-                Button { controller.dismissKeyboard() } label: {
-                    Image(systemName: "keyboard.chevron.compact.down")
-                        .font(.system(size: 16))
-                        .foregroundStyle(Paper.inkSoft)
-                }
-                .buttonStyle(.plain)
-                .padding(.horizontal, 14)
+                if !trailing { Divider().frame(height: 22); dismissGroup }
             }
             .frame(height: 44)
         }
@@ -53,6 +45,24 @@ struct AccessoryBar: View {
             Rectangle().fill(Paper.raised.opacity(0.96))
                 .overlay(Rectangle().frame(height: 1).foregroundStyle(Paper.line), alignment: .top)
         )
+    }
+
+    private var trailing: Bool { ThemeStore.shared.handedness.controlsTrailing }
+
+    private var dismissGroup: some View {
+        HStack(spacing: 0) {
+            Text("\(controller.wordCount)")
+                .font(.system(size: 12, design: .monospaced))
+                .foregroundStyle(Paper.inkFaint)
+                .padding(.horizontal, 12)
+            Button { controller.dismissKeyboard() } label: {
+                Image(systemName: "keyboard.chevron.compact.down")
+                    .font(.system(size: 16))
+                    .foregroundStyle(Paper.inkSoft)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 14)
+        }
     }
 
     private var divider: some View {

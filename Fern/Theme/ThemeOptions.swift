@@ -108,3 +108,16 @@ enum AccentTone: String, CaseIterable, Identifiable {
     }
     var swatch: Color { Color(red: light.0, green: light.1, blue: light.2) }
 }
+
+/// Which hand the writer uses. Following the drawing-app convention (Procreate),
+/// hand-side controls sit on the *non-dominant* side so the drawing/writing hand
+/// never covers them — right-handers get controls on the left, and vice versa.
+enum Handedness: String, CaseIterable, Identifiable {
+    case right, left
+    var id: String { rawValue }
+    var label: String { self == .right ? "Right-handed" : "Left-handed" }
+    /// True when tool clusters should sit on the trailing (right) edge — i.e.
+    /// the writer is left-handed, so their hand rests on the left.
+    var controlsTrailing: Bool { self == .left }
+    var flipped: Handedness { self == .right ? .left : .right }
+}
