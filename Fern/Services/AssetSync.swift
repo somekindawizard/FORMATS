@@ -28,10 +28,22 @@ enum AssetSync {
         }
     }
 
+    // MARK: background sync (never on the main thread — this ran at launch and
+    // was hanging the main thread long enough to trip the watchdog)
+
+    /// Run materialize + backfill on a detached background context, so the heavy
+    /// asset fetch / file I/O never blocks launch or the UI.
+    nonisolated static func sync(_ container: ModelContainer) {
+        Task.detached(priority: .utility) {
+            let context = ModelContext(container)
+            materializeAll(context)
+            backfill(context)
+        }
+    }
+
     // MARK: materialize (on the device that synced them in)
 
     /// Write any asset whose local file is missing. Idempotent and cheap.
-    @MainActor
     static func materializeAll(_ context: ModelContext) {
         guard let assets = try? context.fetch(FetchDescriptor<Asset>()) else { return }
         for asset in assets {
@@ -47,7 +59,6 @@ enum AssetSync {
 
     /// Create records for local photo/drawing files that don't have one yet, so
     /// pre-existing notes sync their images too.
-    @MainActor
     static func backfill(_ context: ModelContext) {
         guard let entries = try? context.fetch(FetchDescriptor<Entry>()) else { return }
         let known = Set((try? context.fetch(FetchDescriptor<Asset>()))?.map(\.name) ?? [])
@@ -75,13 +86,11 @@ enum AssetSync {
 
     // MARK: helpers
 
-    @MainActor
     private static func fetch(_ context: ModelContext, name: String) -> Asset? {
         let descriptor = FetchDescriptor<Asset>(predicate: #Predicate { $0.name == name })
         return try? context.fetch(descriptor).first
     }
 
-    @MainActor
     private static func exists(_ context: ModelContext, name: String) -> Bool {
         fetch(context, name: name) != nil
     }

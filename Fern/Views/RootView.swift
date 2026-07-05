@@ -77,11 +77,10 @@ struct RootView: View {
         .task {
             await PromptNotifier.refresh()
             SpotlightIndexer.reindexAll(entries)
-            AssetSync.backfill(context)      // push existing local photos/ink to the store
-            AssetSync.materializeAll(context) // write any synced-in bytes to files
+            AssetSync.sync(context.container)   // photos/ink sync on a background context
         }
         .onReceive(NotificationCenter.default.publisher(for: .NSPersistentStoreRemoteChange)) { _ in
-            AssetSync.materializeAll(context)
+            AssetSync.sync(context.container)
         }
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
             if let id = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String,
@@ -95,7 +94,7 @@ struct RootView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 consumeQuickCompose()
-                AssetSync.materializeAll(context)
+                AssetSync.sync(context.container)
             }
         }
         .onOpenURL { url in
