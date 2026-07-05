@@ -67,6 +67,7 @@ final class InkCoordinator: NSObject, PKCanvasViewDelegate {
 /// pencil drawing path.
 final class CanvasScrollGesture: NSObject, UIGestureRecognizerDelegate {
     weak var textView: UITextView?
+    weak var controller: MarkdownEditorController?
     private var startOffset: CGPoint = .zero
 
     @objc func handle(_ g: UIPanGestureRecognizer) {
@@ -84,6 +85,10 @@ final class CanvasScrollGesture: NSObject, UIGestureRecognizerDelegate {
             break
         }
     }
+
+    // Procreate gestures: two-finger tap = undo, three-finger tap = redo.
+    @objc func undoTap() { Haptics.tap(); controller?.undoInk() }
+    @objc func redoTap() { Haptics.tap(); controller?.redoInk() }
 
     func gestureRecognizer(_ g: UIGestureRecognizer,
                            shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool { true }
@@ -127,14 +132,24 @@ extension MarkdownEditorController {
         interaction.delegate = pencilCoord
         c.addInteraction(interaction)
         pencilCoordinator = pencilCoord
-        // Two-finger drag scrolls the document while drawing.
+        // Two-finger drag scrolls the document while drawing; two-/three-finger
+        // taps undo/redo (Procreate).
         let scroll = CanvasScrollGesture()
         scroll.textView = textView
+        scroll.controller = self
         let scrollPan = UIPanGestureRecognizer(target: scroll, action: #selector(CanvasScrollGesture.handle(_:)))
         scrollPan.minimumNumberOfTouches = 2
         scrollPan.maximumNumberOfTouches = 2
         scrollPan.delegate = scroll
         c.addGestureRecognizer(scrollPan)
+        let undoTap = UITapGestureRecognizer(target: scroll, action: #selector(CanvasScrollGesture.undoTap))
+        undoTap.numberOfTouchesRequired = 2
+        undoTap.delegate = scroll
+        c.addGestureRecognizer(undoTap)
+        let redoTap = UITapGestureRecognizer(target: scroll, action: #selector(CanvasScrollGesture.redoTap))
+        redoTap.numberOfTouchesRequired = 3
+        redoTap.delegate = scroll
+        c.addGestureRecognizer(redoTap)
         scrollPanHandler = scroll
         if let saved = DrawingStore.load(entryID) { c.drawing = saved }
         c.backgroundColor = PaperTiles.pattern(for: ThemeStore.shared.paperRule,
@@ -198,6 +213,7 @@ extension MarkdownEditorController {
     }
 
     func undoInk() { canvas?.undoManager?.undo() }
+    func redoInk() { canvas?.undoManager?.redo() }
 
     func toggleRuler() {
         showRuler.toggle()
@@ -306,11 +322,10 @@ struct InkToolbar: View {
         Group {
             if collapsed { collapsedBar } else { fullBar }
         }
-        .padding(.horizontal, 18).padding(.vertical, 10)
-        .background(
-            Rectangle().fill(Paper.raised.opacity(0.98))
-                .overlay(Rectangle().frame(height: 1).foregroundStyle(Paper.line), alignment: .top)
-        )
+        .padding(.horizontal, collapsed ? 14 : 18)
+        .padding(.vertical, collapsed ? 10 : 10)
+        .frame(maxWidth: .infinity, alignment: collapsed ? (trailing ? .trailing : .leading) : .center)
+        .background { if !collapsed { barBackground } }
         .popover(isPresented: $showWheel) {
             MutedWheel(current: controller.ink.isEraser ? nil
                        : (controller.ink.r, controller.ink.g, controller.ink.b)) { rgb in
@@ -328,10 +343,38 @@ struct InkToolbar: View {
         }
     }
 
+    private var barBackground: some View {
+        Rectangle().fill(Paper.raised.opacity(0.98))
+            .overlay(Rectangle().frame(height: 1).foregroundStyle(Paper.line), alignment: .top)
+    }
+
     private var fullBar: some View {
+        HStack(alignment: .top, spacing: 14) {
+            if !trailing { doneColumn; barDivider }
+            toolsStack
+            if trailing { barDivider; doneColumn }
+        }
+    }
+
+    /// Done on top with undo / redo directly beneath it, in a corner.
+    private var doneColumn: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 6) { doneButton; hideButton }
+            HStack(spacing: 6) {
+                toolButton("arrow.uturn.backward") { controller.undoInk() }
+                toolButton("arrow.uturn.forward")  { controller.redoInk() }
+            }
+        }
+    }
+
+    private var barDivider: some View {
+        Rectangle().fill(Paper.line).frame(width: 1, height: 54)
+    }
+
+    private var toolsStack: some View {
         VStack(spacing: 10) {
-            HStack(spacing: 20) {
-                if trailing { doneButton; hideButton; Spacer() }
+            HStack(spacing: 18) {
+                if trailing { Spacer() }
                 ForEach(InkSettings.Pen.allCases) { pen in
                     toolButton(pen.icon, on: !controller.ink.isEraser && controller.ink.pen == pen) {
                         controller.ink.pen = pen; controller.ink.isEraser = false; controller.applyInk()
@@ -342,12 +385,9 @@ struct InkToolbar: View {
                 }
                 toolButton("lasso", on: controller.isSelecting) { controller.selectStrokes() }
                 toolButton("ruler", on: controller.showRuler) { controller.toggleRuler() }
-                Divider().frame(height: 22)
-                toolButton("arrow.uturn.backward") { controller.undoInk() }
                 toolButton("trash") { confirmClear = true }
-                if !trailing { Spacer(); hideButton; doneButton }
+                if !trailing { Spacer() }
             }
-
             HStack(spacing: 14) {
                 if trailing { Spacer() }
                 ForEach(Array(weights.enumerated()), id: \.offset) { _, w in weightDot(w) }
@@ -360,20 +400,33 @@ struct InkToolbar: View {
         }
     }
 
-    /// Slim bar when the tools are hidden — a fresh, unobstructed canvas.
+    /// When hidden, a small Notes-style circle floats in the corner (showing the
+    /// current ink color); tap it to bring the tools back. Done sits beside it.
     private var collapsedBar: some View {
-        HStack(spacing: 16) {
-            if trailing { doneButton; Spacer() }
-            Button { withAnimation(.easeOut(duration: 0.2)) { collapsed = false } } label: {
-                Label("Tools", systemImage: "chevron.up")
-                    .font(.calloutSerif).foregroundStyle(Paper.inkSoft)
-            }
-            .buttonStyle(.plain)
-            // The live ink color, so you know what you're drawing with while hidden.
-            currentColorChip
-            if !trailing { Spacer(); doneButton }
+        HStack(spacing: 12) {
+            if trailing { doneButton; expandCircle }
+            else { expandCircle; doneButton }
         }
-        .frame(height: 30)
+    }
+
+    private var expandCircle: some View {
+        Button { withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { collapsed = false } } label: {
+            ZStack {
+                Circle().fill(Paper.raised)
+                    .overlay(Circle().strokeBorder(Paper.line, lineWidth: 1))
+                    .shadow(color: Paper.ink.opacity(0.16), radius: 5, y: 2)
+                    .frame(width: 48, height: 48)
+                if controller.ink.isEraser {
+                    Image(systemName: "eraser.fill").font(.system(size: 16)).foregroundStyle(Paper.inkSoft)
+                } else {
+                    Circle().fill(controller.ink.color)
+                        .frame(width: 22, height: 22)
+                        .overlay(Circle().strokeBorder(.white.opacity(0.7), lineWidth: 1))
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Show tools")
     }
 
     /// Shows the color currently in use (or the eraser) — also opens the wheel.
