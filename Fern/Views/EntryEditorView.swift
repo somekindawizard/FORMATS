@@ -9,7 +9,6 @@ struct EntryEditorView: View {
     @Environment(\.modelContext) private var context
     @Query private var allEntries: [Entry]
     @FocusState private var bodyFocused: Bool
-    @State private var isEditing = false
     @State private var locator = LocationProvider()
     @State private var noteUnlocked = false
     @State private var controller = MarkdownEditorController()
@@ -56,18 +55,16 @@ struct EntryEditorView: View {
                 WritingRule()
 
                 MarkdownTextView(text: $entry.body, controller: controller,
-                                 wash: entry.photoWash, entryID: entry.id,
-                                 onEditingChange: { isEditing = $0 })
+                                 wash: entry.photoWash, entryID: entry.id)
                     .focused($bodyFocused)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .padding(.horizontal, 22)
             .safeAreaInset(edge: .bottom) {
+                // The formatting toolbar is now the keyboard's inputAccessoryView;
+                // only the ink toolbar rides here (keyboard is down while drawing).
                 if controller.isDrawing {
                     InkToolbar(controller: controller)
-                } else if isEditing {
-                    AccessoryBar(controller: controller, text: entry.body,
-                                 onInsertPhoto: { showInlinePhotoPicker = true })
                 }
             }
 
@@ -185,6 +182,7 @@ struct EntryEditorView: View {
             try? context.save()
         }
         .onAppear {
+            controller.requestPhoto = { showInlinePhotoPicker = true }
             if entry.isLocked && !noteUnlocked {
                 Task { await tryUnlockNote() }
             } else {

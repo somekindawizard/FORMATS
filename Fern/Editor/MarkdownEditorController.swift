@@ -33,6 +33,12 @@ final class MarkdownEditorController {
     /// by the synonym strip.
     var currentWord: String = ""
 
+    /// Live word count, shown in the accessory bar.
+    var wordCount: Int = 0
+
+    /// Present the inline-photo picker (wired by the editor view).
+    @ObservationIgnored var requestPhoto: (() -> Void)?
+
     /// Whether inline photos should render in the theme-toned wash (mirrors the
     /// entry setting; used when inserting a new photo).
     @ObservationIgnored var photoWash = false

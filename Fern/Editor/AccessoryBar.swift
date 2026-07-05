@@ -5,13 +5,6 @@ import SwiftUI
 /// word count below.
 struct AccessoryBar: View {
     @Bindable var controller: MarkdownEditorController
-    let text: String
-    /// Insert an inline photo at the caret (wired by the editor).
-    var onInsertPhoto: (() -> Void)? = nil
-
-    private var wordCount: Int {
-        text.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count
-    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -34,15 +27,15 @@ struct AccessoryBar: View {
                         divider
                         icon("link")                  { controller.insertLink() }
                         icon("minus")                 { controller.insertRule() }
-                        if onInsertPhoto != nil {
-                            icon("photo") { onInsertPhoto?() }
+                        if controller.requestPhoto != nil {
+                            icon("photo") { controller.requestPhoto?() }
                         }
                     }
                     .padding(.horizontal, 20)
                 }
 
                 Divider().frame(height: 22)
-                Text("\(wordCount)")
+                Text("\(controller.wordCount)")
                     .font(.system(size: 12, design: .monospaced))
                     .foregroundStyle(Paper.inkFaint)
                     .padding(.leading, 12)

@@ -115,8 +115,26 @@ struct MarkdownTextView: UIViewRepresentable {
         tv.isFindInteractionEnabled = true   // native find & replace
         tv.typingAttributes = MarkdownStyler.baseAttributes()
         tv.attributedText = EditorPhotos.attributed(fromMarkdown: text, width: Self.contentWidth(tv), wash: wash)
+        controller?.wordCount = wordCount(in: text)
+
+        // Keyboard toolbar as the text view's inputAccessoryView — UIKit keeps it
+        // glued to the keyboard regardless of navigation (SwiftUI focus state
+        // desynced across the reader push/pop, hiding it).
+        if let controller {
+            let host = UIHostingController(rootView: AccessoryBar(controller: controller))
+            host.sizingOptions = [.intrinsicContentSize]
+            host.view.backgroundColor = .clear
+            host.view.frame = CGRect(x: 0, y: 0, width: tv.bounds.width, height: 44)
+            context.coordinator.accessoryHost = host
+            tv.inputAccessoryView = host.view
+        }
+
         if let entryID { controller?.setupCanvas(on: tv, entryID: entryID) }
         return tv
+    }
+
+    private func wordCount(in s: String) -> Int {
+        s.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count
     }
 
     func updateUIView(_ uiView: UITextView, context: Context) {
@@ -156,6 +174,7 @@ struct MarkdownTextView: UIViewRepresentable {
         var parent: MarkdownTextView
         var lastWash = false
         let foldDelegate = FoldingLayoutDelegate()
+        var accessoryHost: UIViewController?   // retains the inputAccessoryView host
         private var lastParagraph = NSRange(location: NSNotFound, length: 0)
         init(parent: MarkdownTextView) { self.parent = parent }
 
@@ -164,6 +183,8 @@ struct MarkdownTextView: UIViewRepresentable {
             let before = textView.contentOffset
             restyle(textView)
             parent.controller?.refreshCurrentWord()
+            parent.controller?.wordCount = (textView.text ?? "")
+                .split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count
             if ThemeStore.shared.typewriter {
                 centerCaret(textView)
             } else {
