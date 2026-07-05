@@ -3,10 +3,18 @@ import SwiftUI
 struct LockGate<Content: View>: View {
     @Environment(BiometricLock.self) private var lock
     @Environment(\.scenePhase) private var scenePhase
+    /// The "touch the fern" welcome ritual — shown on open even when Face ID /
+    /// Touch ID are off. Biometrics, when enabled, layer authentication on top.
+    @AppStorage("fern.gate.enabled") private var welcomeGate = true
+    @State private var locked = true
     @State private var veilOpacity: Double = 1
     @State private var pulse = false
     @State private var shakeX: CGFloat = 0
     let content: () -> Content
+
+    /// Show the fern when the session hasn't been entered yet and either the
+    /// welcome ritual is on or biometrics require it.
+    private var gateShown: Bool { locked && (welcomeGate || lock.isEnabled) }
 
     // A fresh, unique fern grows on every unlock — regenerated when the gate
     // re-locks. Slightly fewer points since it re-draws each frame while swaying.
@@ -15,8 +23,8 @@ struct LockGate<Content: View>: View {
     var body: some View {
         ZStack {
             content()
-                .allowsHitTesting(lock.isUnlocked)
-            if lock.isEnabled && !lock.isUnlocked {
+                .allowsHitTesting(!gateShown)
+            if gateShown {
                 veil
                     .opacity(veilOpacity)
                     .transition(.opacity)
@@ -24,10 +32,6 @@ struct LockGate<Content: View>: View {
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .background { relock() }
-        }
-        .onChange(of: lock.isEnabled) { _, enabled in
-            // Toggling off in Settings drops the gate immediately.
-            if !enabled { lock.isUnlocked = true; veilOpacity = 0 }
         }
     }
 
@@ -47,7 +51,7 @@ struct LockGate<Content: View>: View {
                     Text("Fern")
                         .font(.masthead)
                         .foregroundStyle(Paper.ink)
-                    Text("Tap the fern to unlock")
+                    Text(lock.isEnabled ? "Tap the fern to unlock" : "Tap the fern to begin")
                         .font(.calloutSerif)
                         .foregroundStyle(Paper.inkSoft)
                 }
@@ -56,26 +60,41 @@ struct LockGate<Content: View>: View {
     }
 
     private func relock() {
-        guard lock.isEnabled else { return }
-        lock.isUnlocked = false
-        fern = BarnsleyFern.random(count: 11_000)   // a new fern each unlock
+        // Re-show the fern on return — the welcome ritual (and biometric re-lock).
+        guard welcomeGate || lock.isEnabled else { return }
+        locked = true
+        lock.relock()
+        fern = BarnsleyFern.random(count: 11_000)   // a new fern each time
         veilOpacity = 1
         pulse = false
         shakeX = 0
     }
 
     private func reactAndUnlock() async {
-        // The fern blooms slightly as the system prompt comes up.
+        // The fern blooms slightly as it opens.
         withAnimation(.spring(response: 0.35, dampingFraction: 0.55)) { pulse = true }
 
-        let ok = await lock.authenticate()
-
-        if ok {
-            // Hold the bloom, then dissolve the veil to reveal the library.
-            withAnimation(.easeOut(duration: 0.5)) { veilOpacity = 0 }
+        if lock.isEnabled {
+            let ok = await lock.authenticate()
+            if ok {
+                dissolve()
+            } else {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { pulse = false }
+                await shake()
+            }
         } else {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { pulse = false }
-            await shake()
+            // No biometrics — the fern touch alone opens the app.
+            dissolve()
+        }
+    }
+
+    /// Fade the veil away, then remove it and reset for next time.
+    private func dissolve() {
+        withAnimation(.easeOut(duration: 0.5)) { veilOpacity = 0 }
+        Task {
+            try? await Task.sleep(for: .seconds(0.5))
+            locked = false
+            veilOpacity = 1
         }
     }
 
