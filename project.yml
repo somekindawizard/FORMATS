@@ -82,6 +82,12 @@ targets:
         TARGETED_DEVICE_FAMILY: "1,2"
         DEVELOPMENT_TEAM: 775QLS4P2V
         CODE_SIGN_STYLE: Automatic
+        # Mac Catalyst — Redwood runs as a Mac app from the same code (incl. the
+        # UIKit/TextKit editor and PencilKit). iPhone/iPad/Mac, one codebase.
+        SUPPORTS_MACCATALYST: YES
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
+        DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER: NO
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
         # Theme-colored alternate app icons — one per accent. The picker in
         # Settings swaps between them (primary AppIcon = sienna).
         ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES
