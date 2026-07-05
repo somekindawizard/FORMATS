@@ -4,8 +4,8 @@ import PencilKit
 // MARK: - Ink settings
 
 /// The current Pencil selection: pen type, color, width, eraser.
-struct InkSettings {
-    enum Pen: String, CaseIterable, Identifiable {
+struct InkSettings: Codable {
+    enum Pen: String, CaseIterable, Identifiable, Codable {
         case pen, fountainPen, pencil, monoline, marker, crayon
         var id: String { rawValue }
         var pk: PKInkingTool.InkType {
@@ -49,6 +49,23 @@ struct InkSettings {
     }
 }
 
+/// Remembers each note's last-used ink (pen, color, width) so a note reopens
+/// with the tools you left it with. Keyed by the note's id in UserDefaults.
+enum InkPrefsStore {
+    private static func key(_ id: UUID) -> String { "fern.ink.\(id.uuidString)" }
+
+    static func save(_ id: UUID, _ settings: InkSettings) {
+        if let data = try? JSONEncoder().encode(settings) {
+            UserDefaults.standard.set(data, forKey: key(id))
+        }
+    }
+
+    static func load(_ id: UUID) -> InkSettings? {
+        guard let data = UserDefaults.standard.data(forKey: key(id)) else { return nil }
+        return try? JSONDecoder().decode(InkSettings.self, from: data)
+    }
+}
+
 // MARK: - Canvas management on the controller
 
 /// PencilKit's delegate must be an NSObject; the controller isn't one, so this
@@ -58,6 +75,11 @@ final class InkCoordinator: NSObject, PKCanvasViewDelegate {
     init(_ controller: MarkdownEditorController) { self.controller = controller }
     func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
         controller?.saveDrawing()
+    }
+    /// The Pencil touched the page — auto-reveal the ink tools (and dismiss the
+    /// keyboard). This is the reliable "auto-detect Apple Pencil" hook.
+    func canvasViewDidBeginUsingTool(_ canvasView: PKCanvasView) {
+        if controller?.isDrawing == false { controller?.setDrawing(true) }
     }
 }
 
@@ -111,18 +133,32 @@ final class PencilInteractionCoordinator: NSObject, UIPencilInteractionDelegate 
     }
 }
 
+/// A canvas that **claims Apple Pencil touches** (so the Pencil always draws,
+/// auto-detected) but **passes finger touches through** to the text view beneath
+/// — so a finger types, scrolls, and places the caret exactly as before, with no
+/// drawing "mode" to toggle.
+final class InkCanvas: PKCanvasView {
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        if let touches = event?.allTouches, touches.contains(where: { $0.type == .pencil }) {
+            return super.hitTest(point, with: event)   // Pencil → draw
+        }
+        return nil                                       // finger → text view
+    }
+}
+
 extension MarkdownEditorController {
 
     /// Attach a transparent PencilKit canvas over the text, sized to (and
-    /// scrolling with) the document. Display-only until drawing mode is on.
+    /// scrolling with) the document. Always live: the Pencil draws on contact
+    /// (finger touches fall through to the text), so there's no mode to enter.
     func setupCanvas(on textView: UITextView, entryID: UUID) {
         guard canvas == nil else { return }
-        let c = PKCanvasView()
+        let c = InkCanvas()
         c.backgroundColor = .clear
         c.isOpaque = false
         c.isScrollEnabled = false          // it rides along inside the text scroll view
-        c.drawingPolicy = .pencilOnly       // finger stays for typing/scrolling
-        c.isUserInteractionEnabled = false  // until draw mode
+        c.drawingPolicy = .pencilOnly       // Pencil draws; finger passes through
+        c.isUserInteractionEnabled = true   // always on (hitTest routes finger away)
         let coord = InkCoordinator(self)
         c.delegate = coord
         inkCoordinator = coord
@@ -132,31 +168,26 @@ extension MarkdownEditorController {
         interaction.delegate = pencilCoord
         c.addInteraction(interaction)
         pencilCoordinator = pencilCoord
-        // Two-finger drag scrolls the document while drawing; two-/three-finger
-        // taps undo/redo (Procreate).
-        let scroll = CanvasScrollGesture()
-        scroll.textView = textView
-        scroll.controller = self
-        let scrollPan = UIPanGestureRecognizer(target: scroll, action: #selector(CanvasScrollGesture.handle(_:)))
-        scrollPan.minimumNumberOfTouches = 2
-        scrollPan.maximumNumberOfTouches = 2
-        scrollPan.delegate = scroll
-        c.addGestureRecognizer(scrollPan)
-        let undoTap = UITapGestureRecognizer(target: scroll, action: #selector(CanvasScrollGesture.undoTap))
+        // Procreate gestures on the *text view* (finger touches land there):
+        // two-finger tap = undo, three-finger tap = redo.
+        let taps = CanvasScrollGesture()
+        taps.controller = self
+        let undoTap = UITapGestureRecognizer(target: taps, action: #selector(CanvasScrollGesture.undoTap))
         undoTap.numberOfTouchesRequired = 2
-        undoTap.delegate = scroll
-        c.addGestureRecognizer(undoTap)
-        let redoTap = UITapGestureRecognizer(target: scroll, action: #selector(CanvasScrollGesture.redoTap))
+        undoTap.delegate = taps
+        textView.addGestureRecognizer(undoTap)
+        let redoTap = UITapGestureRecognizer(target: taps, action: #selector(CanvasScrollGesture.redoTap))
         redoTap.numberOfTouchesRequired = 3
-        redoTap.delegate = scroll
-        c.addGestureRecognizer(redoTap)
-        scrollPanHandler = scroll
+        redoTap.delegate = taps
+        textView.addGestureRecognizer(redoTap)
+        scrollPanHandler = taps
         if let saved = DrawingStore.load(entryID) { c.drawing = saved }
         c.backgroundColor = PaperTiles.pattern(for: ThemeStore.shared.paperRule,
                                                spacing: CGFloat(ThemeStore.shared.ruleSpacing)) ?? .clear
         textView.addSubview(c)
         canvas = c
         drawingEntryID = entryID
+        ink = InkPrefsStore.load(entryID) ?? InkSettings()   // this note's last ink
         applyInk()
         resizeCanvas()
         // Keep the ink surface matched to the text's growing content height.
@@ -176,9 +207,11 @@ extension MarkdownEditorController {
         c.frame = CGRect(x: 0, y: 0, width: w, height: h)
     }
 
-    /// Build the active tool from the current settings.
+    /// Build the active tool from the current settings, and remember this note's
+    /// ink choice (pen/color/width) so it's restored next time.
     func applyInk() {
         guard let c = canvas else { return }
+        if let id = drawingEntryID { InkPrefsStore.save(id, ink) }
         isSelecting = false
         c.tool = ink.isEraser ? PKEraserTool(.vector)
                               : PKInkingTool(ink.pen.pk, color: ink.uiColor, width: ink.width)
@@ -193,16 +226,14 @@ extension MarkdownEditorController {
 
     func setDrawing(_ active: Bool) {
         isDrawing = active
-        canvas?.isUserInteractionEnabled = active
         if active {
             applyInk()
             textView?.resignFirstResponder()
-            // Let the page scroll into the blank drawing room below the text.
-            textView?.contentInset.bottom = drawingRoom
         } else {
-            textView?.contentInset.bottom = 0
             saveDrawing()
         }
+        // Blank room below the text to draw into (scroll down to reach it).
+        textView?.contentInset.bottom = drawingRoom
         resizeCanvas()
     }
 

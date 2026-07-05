@@ -34,6 +34,8 @@ struct DocumentEditorView: View {
                 MarkdownTextView(text: $doc.body, controller: controller,
                                  wash: false, entryID: doc.id)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    // Full width so ink reaches the edges; text keeps its margin.
+                    .padding(.horizontal, -22)
             }
             .padding(.horizontal, 22)
             .safeAreaInset(edge: .bottom) {

@@ -59,6 +59,9 @@ struct EntryEditorView: View {
                                  wash: entry.photoWash, entryID: entry.id)
                     .focused($bodyFocused)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    // Span the full screen width so ink reaches the edges; the
+                    // text keeps its readable margin via the container inset.
+                    .padding(.horizontal, -22)
             }
             .padding(.horizontal, 22)
             .safeAreaInset(edge: .bottom) {

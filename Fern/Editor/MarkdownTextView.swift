@@ -7,14 +7,6 @@ import UIKit
 final class PhotoTextView: UITextView {
     private var lastWidth: CGFloat = 0
     private var didInitialLayout = false
-    /// Fired when an Apple Pencil first touches the page — used to auto-enter
-    /// drawing mode (no need to tap the pencil button first).
-    var onPencilTouch: (() -> Void)?
-
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if touches.contains(where: { $0.type == .pencil }) { onPencilTouch?() }
-        super.touchesBegan(touches, with: event)
-    }
 
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -123,7 +115,10 @@ struct MarkdownTextView: UIViewRepresentable {
         controller?.textView = tv
         controller?.photoWash = wash
         tv.backgroundColor = .clear
-        tv.textContainerInset = UIEdgeInsets(top: 8, left: 4, bottom: 80, right: 4)
+        // The text view spans the full screen width (so ink reaches the edges);
+        // the readable text margin lives here on the container, aligned with the
+        // editor's 22pt header padding.
+        tv.textContainerInset = UIEdgeInsets(top: 8, left: 22, bottom: 80, right: 22)
         tv.textContainer.lineFragmentPadding = 0
         tv.alwaysBounceVertical = true
         tv.autocorrectionType = .yes
@@ -149,12 +144,6 @@ struct MarkdownTextView: UIViewRepresentable {
         }
 
         if let entryID { controller?.setupCanvas(on: tv, entryID: entryID) }
-        // Auto-detect Apple Pencil: touching the page with a Pencil enters
-        // drawing mode automatically.
-        tv.onPencilTouch = { [weak controller = self.controller] in
-            guard let controller, !controller.isDrawing else { return }
-            controller.setDrawing(true)
-        }
         return tv
     }
 
