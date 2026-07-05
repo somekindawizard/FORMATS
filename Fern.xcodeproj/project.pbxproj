@@ -61,6 +61,7 @@
 		6BA4DEAECEFBCFF57B6066B3 /* FernWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC549B1D7037E5DF677DC591 /* FernWidget.swift */; };
 		7024D74C23FD639329068964 /* BarnsleyFernView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5E1846726DBE1B8EB6ADCED /* BarnsleyFernView.swift */; };
 		70EBAECB0734E21D12105353 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E45CA19533DB05C24AC2162D /* SearchView.swift */; };
+		71FE0DFC47C1F0E54D1926AC /* ZipWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C16252685A829E96A585FE8 /* ZipWriter.swift */; };
 		7247B5144A9C2346788FEE39 /* LibraryExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38E27EF4D706838525532A07 /* LibraryExporter.swift */; };
 		73E92527F6D012AF55009E80 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A13CB74024BF409BFCE151 /* Haptics.swift */; };
 		746E38C71A4F2CEF9BEBB03D /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4414F13CC04DFCD17197E71 /* Palette.swift */; };
@@ -244,6 +245,7 @@
 		70573A969736F0D4419D6DA6 /* WeatherProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherProvider.swift; sourceTree = "<group>"; };
 		74089F72177AC086B585AD67 /* SavedPromptsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPromptsView.swift; sourceTree = "<group>"; };
 		8179EB32444953EE697C2342 /* PhotoStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoStore.swift; sourceTree = "<group>"; };
+		8C16252685A829E96A585FE8 /* ZipWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZipWriter.swift; sourceTree = "<group>"; };
 		8EA5FF350A88CF4395BEF962 /* Redwood.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Redwood.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8EF8119C721CD1304B059C77 /* AppIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntents.swift; sourceTree = "<group>"; };
 		970190D4D04CBD9FA602D885 /* FiddleheadShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiddleheadShape.swift; sourceTree = "<group>"; };
@@ -360,6 +362,7 @@
 			isa = PBXGroup;
 			children = (
 				C0EAB514165A196C57AFEBE1 /* RedwoodCompiler.swift */,
+				8C16252685A829E96A585FE8 /* ZipWriter.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -802,6 +805,7 @@
 				4241502C06180F2738B93F1F /* ThemeStore.swift in Sources */,
 				9E2545EC6950D4D99AD0BF94 /* Thesaurus.swift in Sources */,
 				25F1719DB79389C04B45E15C /* Typography.swift in Sources */,
+				71FE0DFC47C1F0E54D1926AC /* ZipWriter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -12,6 +12,7 @@ struct CompileView: View {
 
     @State private var mdURL: URL?
     @State private var pdfURL: URL?
+    @State private var epubURL: URL?
     @State private var building = false
 
     private var options: RedwoodCompiler.Options {
@@ -67,6 +68,11 @@ struct CompileView: View {
                             shareLabel("PDF", "doc.richtext")
                         }
                     }
+                    if let epubURL {
+                        ShareLink(item: epubURL) {
+                            shareLabel("EPUB", "book")
+                        }
+                    }
                     if building { ProgressView().tint(Paper.accent) }
                 }
                 .padding(.horizontal, 22).padding(.vertical, 12)
@@ -95,5 +101,11 @@ struct CompileView: View {
             RedwoodCompiler.pdf(markdown: md)
         }.value
         pdfURL = RedwoodCompiler.writeTemp(pdfData, name: "\(base).pdf")
+        // EPUB reads the document tree (models) — build on the main actor.
+        let author = UserDefaults.standard.string(forKey: "fern.userName") ?? ""
+        let stamp = ISO8601DateFormatter().string(from: .now)
+        let epubData = RedwoodCompiler.epub(project: project, docs: docs, options: options,
+                                            author: author, modified: stamp)
+        epubURL = RedwoodCompiler.writeTemp(epubData, name: "\(base).epub")
     }
 }

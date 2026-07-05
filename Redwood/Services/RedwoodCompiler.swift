@@ -125,6 +125,155 @@ enum RedwoodCompiler {
         return data as Data
     }
 
+    // MARK: EPUB
+
+    /// A reflowable EPUB 3 of the manuscript — one chapter per document.
+    static func epub(project: RWProject, docs: [RWDocument], options: Options = Options(),
+                     author: String, modified: String) -> Data {
+        let chapters = ordered(docs, parent: nil, depth: 0)
+            .filter { !$0.0.isFolder }
+            .map { $0.0 }
+        let bookID = UUID().uuidString
+
+        var zip = ZipWriter()
+        // mimetype MUST be first and stored uncompressed.
+        zip.add("mimetype", bytes: Array("application/epub+zip".utf8))
+        zip.add("META-INF/container.xml", bytes: Array(containerXML.utf8))
+        zip.add("OEBPS/style.css", bytes: Array(epubCSS.utf8))
+
+        var manifest = #"    <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>\#n"#
+        manifest += #"    <item id="css" href="style.css" media-type="text/css"/>\#n"#
+        var spine = ""
+        var navItems = ""
+
+        for (i, doc) in chapters.enumerated() {
+            let title = xmlEscape(doc.displayTitle)
+            let file = "chap\(i).xhtml"
+            let xhtml = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <!DOCTYPE html>
+            <html xmlns="http://www.w3.org/1999/xhtml">
+            <head><title>\(title)</title><link rel="stylesheet" href="style.css" type="text/css"/></head>
+            <body>
+            <h1>\(title)</h1>
+            \(xhtmlBody(doc.body))
+            </body></html>
+            """
+            zip.add("OEBPS/\(file)", bytes: Array(xhtml.utf8))
+            manifest += #"    <item id="c\#(i)" href="\#(file)" media-type="application/xhtml+xml"/>\#n"#
+            spine += #"    <itemref idref="c\#(i)"/>\#n"#
+            navItems += "      <li><a href=\"\(file)\">\(title)</a></li>\n"
+        }
+
+        let nav = """
+        <?xml version="1.0" encoding="utf-8"?>
+        <!DOCTYPE html>
+        <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+        <head><title>Contents</title><link rel="stylesheet" href="style.css" type="text/css"/></head>
+        <body>
+        <nav epub:type="toc" id="toc"><h1>Contents</h1>
+        <ol>
+        \(navItems)    </ol></nav>
+        </body></html>
+        """
+        zip.add("OEBPS/nav.xhtml", bytes: Array(nav.utf8))
+
+        let opf = """
+        <?xml version="1.0" encoding="utf-8"?>
+        <package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid">
+          <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+            <dc:identifier id="bookid">urn:uuid:\(bookID)</dc:identifier>
+            <dc:title>\(xmlEscape(project.title))</dc:title>
+            <dc:language>en</dc:language>
+            <dc:creator>\(xmlEscape(author))</dc:creator>
+            <meta property="dcterms:modified">\(modified)</meta>
+          </metadata>
+          <manifest>
+        \(manifest)  </manifest>
+          <spine>
+        \(spine)  </spine>
+        </package>
+        """
+        zip.add("OEBPS/content.opf", bytes: Array(opf.utf8))
+        return zip.finalize()
+    }
+
+    private static let containerXML = """
+    <?xml version="1.0" encoding="utf-8"?>
+    <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+      <rootfiles>
+        <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
+      </rootfiles>
+    </container>
+    """
+
+    private static let epubCSS = """
+    body { font-family: Georgia, 'Times New Roman', serif; line-height: 1.5; margin: 5% 7%; }
+    h1 { font-size: 1.6em; margin: 1.4em 0 0.6em; }
+    h2 { font-size: 1.3em; } h3 { font-size: 1.1em; }
+    p { margin: 0 0 0.8em; text-indent: 1.2em; }
+    blockquote { font-style: italic; margin: 1em 2em; }
+    hr { border: 0; text-align: center; margin: 1.4em 0; }
+    code { font-family: monospace; }
+    """
+
+    private static func xmlEscape(_ s: String) -> String {
+        s.replacingOccurrences(of: "&", with: "&amp;")
+         .replacingOccurrences(of: "<", with: "&lt;")
+         .replacingOccurrences(of: ">", with: "&gt;")
+    }
+
+    /// Markdown → a run of XHTML block elements (headings, paragraphs, lists,
+    /// quotes, rules) with inline emphasis. Inline photos are dropped.
+    private static func xhtmlBody(_ markdown: String) -> String {
+        var html = ""
+        var listOpen = false, listOrdered = false
+        func closeList() {
+            if listOpen { html += listOrdered ? "</ol>\n" : "</ul>\n"; listOpen = false }
+        }
+        for raw in markdown.components(separatedBy: "\n") {
+            let t = raw.trimmingCharacters(in: .whitespaces)
+            if t.isEmpty { closeList(); continue }
+            if let m = t.range(of: #"^#{1,6}\s+"#, options: .regularExpression) {
+                closeList()
+                let level = min(t.prefix { $0 == "#" }.count, 6)
+                html += "<h\(level)>\(inlineHTML(String(t[m.upperBound...])))</h\(level)>\n"
+            } else if t.count >= 3, Set(t).count == 1, "-*_".contains(t.first!) {
+                closeList(); html += "<hr/>\n"
+            } else if t.hasPrefix(">") {
+                closeList()
+                let inner = String(t.dropFirst()).trimmingCharacters(in: .whitespaces)
+                html += "<blockquote><p>\(inlineHTML(inner))</p></blockquote>\n"
+            } else if let m = t.range(of: #"^[-*+]\s+"#, options: .regularExpression) {
+                if !listOpen || listOrdered { closeList(); html += "<ul>\n"; listOpen = true; listOrdered = false }
+                html += "<li>\(inlineHTML(String(t[m.upperBound...])))</li>\n"
+            } else if let m = t.range(of: #"^\d+\.\s+"#, options: .regularExpression) {
+                if !listOpen || !listOrdered { closeList(); html += "<ol>\n"; listOpen = true; listOrdered = true }
+                html += "<li>\(inlineHTML(String(t[m.upperBound...])))</li>\n"
+            } else {
+                closeList(); html += "<p>\(inlineHTML(t))</p>\n"
+            }
+        }
+        closeList()
+        return html
+    }
+
+    private static func inlineHTML(_ text: String) -> String {
+        var s = xmlEscape(text)
+        func sub(_ pattern: String, _ repl: String) {
+            s = s.replacingOccurrences(of: pattern, with: repl, options: .regularExpression)
+        }
+        sub(#"!\[[^\]]*\]\(fern://[^)]+\)"#, "")                 // drop inline photos
+        sub(#"\[\[([^\]]+)\]\]"#, "$1")                          // wiki-links → text
+        sub(#"\[([^\]]+)\]\(([^)]+)\)"#, "<a href=\"$2\">$1</a>")
+        sub(#"\*\*(.+?)\*\*"#, "<strong>$1</strong>")
+        sub(#"(?<!\*)\*(?!\*)([^*]+)\*(?!\*)"#, "<em>$1</em>")
+        sub(#"~~(.+?)~~"#, "<del>$1</del>")
+        sub(#"==(.+?)=="#, "<mark>$1</mark>")
+        sub(#"`([^`]+)`"#, "<code>$1</code>")
+        return s
+    }
+
     // MARK: file helpers
 
     static func writeTemp(_ contents: String, name: String) -> URL? {
