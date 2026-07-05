@@ -40,7 +40,7 @@ struct SettingsView: View {
                     NavigationLink {
                         SharedNotebookView()
                     } label: {
-                        Label("Shared with Austin", systemImage: "person.2")
+                        Label("Shared with \(SharedNotebookStore.partnerName)", systemImage: "person.2")
                     }
                     NavigationLink {
                         WashLabView()

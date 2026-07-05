@@ -31,7 +31,7 @@ struct SharedNotebookView: View {
                 .scrollContentBackground(.hidden)
             }
         }
-        .navigationTitle("Austin & me")
+        .navigationTitle("You & \(store.partnerName)")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
@@ -91,14 +91,14 @@ struct SharedNotebookView: View {
         VStack(spacing: 16) {
             Image(systemName: "person.2")
                 .font(.system(size: 34)).foregroundStyle(Paper.inkFaint)
-            Text("A notebook you and Austin share")
+            Text("A notebook you and \(store.partnerName) share")
                 .font(.titleSerif).foregroundStyle(Paper.ink)
                 .multilineTextAlignment(.center)
-            Text("Invite Austin, then start a note — you'll both see and edit it.")
+            Text("Invite \(store.partnerName), then start a note — you'll both see and edit it.")
                 .font(.bodySerif).foregroundStyle(Paper.inkSoft)
                 .multilineTextAlignment(.center).padding(.horizontal, 40)
-            Button("Invite Austin") { invite() }
-                .buttonStyle(InkButtonStyle()).frame(width: 220)
+            Button("Invite \(store.partnerName)") { invite() }
+                .buttonStyle(InkButtonStyle()).frame(width: 240)
         }
     }
 }
@@ -175,7 +175,7 @@ struct CloudSharingView: UIViewControllerRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator() }
 
     final class Coordinator: NSObject, UICloudSharingControllerDelegate {
-        func itemTitle(for csc: UICloudSharingController) -> String? { "Fern — Austin & me" }
+        func itemTitle(for csc: UICloudSharingController) -> String? { "Fern — a shared notebook" }
         func cloudSharingController(_ csc: UICloudSharingController,
                                     failedToSaveShareWithError error: Error) {}
     }

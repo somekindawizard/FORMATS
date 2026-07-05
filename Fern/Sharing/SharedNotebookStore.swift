@@ -29,6 +29,32 @@ final class SharedNotebookStore {
         return n.isEmpty ? "Me" : n
     }
 
+    /// The collaborator's name, from this device's user name (Brandon ↔ Austin).
+    /// Falls back to a name learned from the share's participants, then generic.
+    nonisolated static var partnerName: String {
+        let me = (UserDefaults.standard.string(forKey: "fern.userName") ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        switch me.lowercased() {
+        case "austin":  return "Brandon"
+        case "brandon": return "Austin"
+        default:
+            if let learned = UserDefaults.standard.string(forKey: "fern.partnerName"),
+               !learned.isEmpty { return learned }
+            return "your collaborator"
+        }
+    }
+    var partnerName: String { Self.partnerName }
+
+    /// Remember the other participant's name from a live share, for the generic case.
+    private func learnPartner(from share: CKShare) {
+        let others = share.participants.filter { $0.userIdentity.userRecordID != share.currentUserParticipant?.userIdentity.userRecordID }
+        if let name = others.compactMap({ $0.userIdentity.nameComponents })
+            .map({ PersonNameComponentsFormatter().string(from: $0) })
+            .first(where: { !$0.isEmpty }) {
+            UserDefaults.standard.set(name, forKey: "fern.partnerName")
+        }
+    }
+
     var notes: [SharedNote] = []
     var hasNotebook = false
     var isBusy = false
@@ -46,16 +72,17 @@ final class SharedNotebookStore {
             root = existing
         } else {
             root = CKRecord(recordType: "Notebook", recordID: ownedRootID)
-            root["title"] = "Austin & me" as CKRecordValue
+            root["title"] = "\(myName) & \(partnerName)" as CKRecordValue
         }
 
         if let shareRef = root.share,
            let existing = try? await privateDB.record(for: shareRef.recordID) as? CKShare {
+            learnPartner(from: existing)
             return existing
         }
 
         let share = CKShare(rootRecord: root)
-        share[CKShare.SystemFieldKey.title] = "Fern — Austin & me" as CKRecordValue
+        share[CKShare.SystemFieldKey.title] = "Fern — \(myName) & \(partnerName)" as CKRecordValue
         share.publicPermission = .none
         let result = try await privateDB.modifyRecords(saving: [root, share], deleting: [])
         if case .success(let saved) = result.saveResults[share.recordID], let s = saved as? CKShare {
