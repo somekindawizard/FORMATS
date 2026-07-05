@@ -6,6 +6,7 @@ import UIKit
 /// not on every layout pass, which would feed back into typing jitter.
 final class PhotoTextView: UITextView {
     private var lastWidth: CGFloat = 0
+    private var didInitialLayout = false
 
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -13,6 +14,16 @@ final class PhotoTextView: UITextView {
         // container width (which can fluctuate a point per layout on iPad and
         // was re-firing the image re-fit on every keystroke → the jitter).
         let usable = bounds.width - textContainerInset.left - textContainerInset.right
+
+        // On first real width, force a full layout. TextKit 1 lays out lazily,
+        // and the attributed text was set before the view had a frame — without
+        // this the note shows only its first line until you scroll or tap.
+        if usable > 1, !didInitialLayout {
+            didInitialLayout = true
+            layoutManager.ensureLayout(for: textContainer)
+            setNeedsDisplay()
+        }
+
         guard usable > 1, abs(usable - lastWidth) > 2 else { return }
         lastWidth = usable
         let storage = textStorage

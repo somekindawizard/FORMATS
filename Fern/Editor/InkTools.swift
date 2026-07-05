@@ -61,6 +61,34 @@ final class InkCoordinator: NSObject, PKCanvasViewDelegate {
     }
 }
 
+/// Lets you scroll the document while drawing with a **two-finger drag** — the
+/// pencil keeps drawing, two fingers pan the page (so you can reach and draw on
+/// any part of a long note). Additive: it never touches the single-finger /
+/// pencil drawing path.
+final class CanvasScrollGesture: NSObject, UIGestureRecognizerDelegate {
+    weak var textView: UITextView?
+    private var startOffset: CGPoint = .zero
+
+    @objc func handle(_ g: UIPanGestureRecognizer) {
+        guard let tv = textView else { return }
+        switch g.state {
+        case .began:
+            startOffset = tv.contentOffset
+        case .changed:
+            let t = g.translation(in: tv)
+            let minY = -tv.adjustedContentInset.top
+            let maxY = max(minY, tv.contentSize.height + tv.adjustedContentInset.bottom - tv.bounds.height)
+            let y = min(max(startOffset.y - t.y, minY), maxY)
+            tv.setContentOffset(CGPoint(x: 0, y: y), animated: false)
+        default:
+            break
+        }
+    }
+
+    func gestureRecognizer(_ g: UIGestureRecognizer,
+                           shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool { true }
+}
+
 /// Forwards Apple Pencil double-tap (Pencil 2) and squeeze (Pencil Pro) to the
 /// controller, honoring the user's system-preferred double-tap action.
 final class PencilInteractionCoordinator: NSObject, UIPencilInteractionDelegate {
@@ -99,6 +127,15 @@ extension MarkdownEditorController {
         interaction.delegate = pencilCoord
         c.addInteraction(interaction)
         pencilCoordinator = pencilCoord
+        // Two-finger drag scrolls the document while drawing.
+        let scroll = CanvasScrollGesture()
+        scroll.textView = textView
+        let scrollPan = UIPanGestureRecognizer(target: scroll, action: #selector(CanvasScrollGesture.handle(_:)))
+        scrollPan.minimumNumberOfTouches = 2
+        scrollPan.maximumNumberOfTouches = 2
+        scrollPan.delegate = scroll
+        c.addGestureRecognizer(scrollPan)
+        scrollPanHandler = scroll
         if let saved = DrawingStore.load(entryID) { c.drawing = saved }
         c.backgroundColor = PaperTiles.pattern(for: ThemeStore.shared.paperRule,
                                                spacing: CGFloat(ThemeStore.shared.ruleSpacing)) ?? .clear
@@ -113,10 +150,14 @@ extension MarkdownEditorController {
         }
     }
 
+    /// Blank canvas room below the text while drawing, so ink isn't boxed to the
+    /// written area — scroll (two-finger) down into it to keep drawing.
+    private var drawingRoom: CGFloat { isDrawing ? 1200 : 0 }
+
     func resizeCanvas() {
         guard let tv = textView, let c = canvas else { return }
         let w = tv.contentSize.width > 0 ? tv.contentSize.width : tv.bounds.width
-        let h = max(tv.contentSize.height, tv.bounds.height)
+        let h = max(tv.contentSize.height, tv.bounds.height) + drawingRoom
         c.frame = CGRect(x: 0, y: 0, width: w, height: h)
     }
 
@@ -141,9 +182,13 @@ extension MarkdownEditorController {
         if active {
             applyInk()
             textView?.resignFirstResponder()
+            // Let the page scroll into the blank drawing room below the text.
+            textView?.contentInset.bottom = drawingRoom
         } else {
+            textView?.contentInset.bottom = 0
             saveDrawing()
         }
+        resizeCanvas()
     }
 
     /// Re-apply the ruled / dot paper pattern live (rule or spacing changed).

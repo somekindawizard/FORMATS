@@ -15,6 +15,7 @@ final class MarkdownEditorController {
     @ObservationIgnored var drawingEntryID: UUID?
     @ObservationIgnored var contentSizeObservation: NSKeyValueObservation?
     @ObservationIgnored var inkCoordinator: InkCoordinator?
+    @ObservationIgnored var scrollPanHandler: CanvasScrollGesture?
     @ObservationIgnored var pencilCoordinator: PencilInteractionCoordinator?
     /// The last pen used before switching to the eraser (for double-tap toggle).
     @ObservationIgnored var previousPen: InkSettings.Pen = .pen
