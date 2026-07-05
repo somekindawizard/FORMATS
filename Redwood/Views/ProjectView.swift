@@ -15,6 +15,7 @@ struct ProjectView: View {
     @State private var targetText = ""
     @State private var goalText = ""
     @State private var showingCompile = false
+    @State private var editingSynopsis: RWDocument?
 
     init(project: RWProject, parent: RWDocument? = nil) {
         self.project = project
@@ -72,6 +73,15 @@ struct ProjectView: View {
                     Button { add(isFolder: true) } label: {
                         Label("New folder", systemImage: "folder")
                     }
+                    Menu {
+                        ForEach(RWTemplates.all) { t in
+                            Button { addFromTemplate(t) } label: {
+                                Label(t.name, systemImage: t.symbol)
+                            }
+                        }
+                    } label: {
+                        Label("New from template", systemImage: "doc.badge.plus")
+                    }
                     if parent == nil {
                         Divider()
                         Button { beginEditTargets() } label: {
@@ -99,6 +109,68 @@ struct ProjectView: View {
         .sheet(isPresented: $showingCompile) {
             CompileView(project: project, docs: allDocs)
         }
+        .sheet(item: $editingSynopsis) { doc in
+            SynopsisEditor(doc: doc)
+        }
+    }
+
+    /// Long-press menu shared by every binder row / card / outline row.
+    @ViewBuilder
+    private func nodeMenu(_ node: RWDocument) -> some View {
+        if !node.isFolder {
+            Button { editingSynopsis = node } label: {
+                Label("Edit synopsis…", systemImage: "text.alignleft")
+            }
+        }
+        let targets = moveTargets(for: node)
+        if !targets.isEmpty || node.parentID != nil {
+            Menu {
+                if node.parentID != nil {
+                    Button { move(node, to: nil) } label: { Label("Top level", systemImage: "tray") }
+                }
+                ForEach(targets) { folder in
+                    Button { move(node, to: folder) } label: {
+                        Label(folder.displayTitle, systemImage: "folder")
+                    }
+                }
+            } label: {
+                Label("Move to…", systemImage: "folder")
+            }
+        }
+        Divider()
+        Button(role: .destructive) {
+            Haptics.tap(.medium); deleteRecursively(node)
+            project.updatedAt = .now; try? context.save()
+        } label: {
+            Label("Delete", systemImage: "trash")
+        }
+    }
+
+    /// Folders this node may move into — excludes the node itself, its current
+    /// parent, and (for folders) its own descendants, to prevent cycles.
+    private func moveTargets(for node: RWDocument) -> [RWDocument] {
+        let banned = descendantIDs(of: node).union([node.id])
+        return allDocs
+            .filter { $0.isFolder && !banned.contains($0.id) && $0.id != node.parentID }
+            .sorted { $0.displayTitle < $1.displayTitle }
+    }
+
+    private func descendantIDs(of node: RWDocument) -> Set<UUID> {
+        var ids = Set<UUID>()
+        for child in allDocs where child.parentID == node.id {
+            ids.insert(child.id)
+            ids.formUnion(descendantIDs(of: child))
+        }
+        return ids
+    }
+
+    private func move(_ node: RWDocument, to folder: RWDocument?) {
+        Haptics.tap()
+        node.parentID = folder?.id
+        let siblings = allDocs.filter { $0.parentID == folder?.id && $0.id != node.id }
+        node.order = (siblings.map(\.order).max() ?? -1) + 1
+        project.updatedAt = .now
+        try? context.save()
     }
 
     private func beginEditTargets() {
@@ -147,17 +219,19 @@ struct ProjectView: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 150, maximum: 240), spacing: 14)],
                       spacing: 14) {
                 ForEach(nodes) { node in
-                    if node.isFolder {
-                        NavigationLink { ProjectView(project: project, parent: node) } label: {
-                            IndexCard(node: node, childCount: childCount(of: node))
+                    Group {
+                        if node.isFolder {
+                            NavigationLink { ProjectView(project: project, parent: node) } label: {
+                                IndexCard(node: node, childCount: childCount(of: node))
+                            }
+                        } else {
+                            NavigationLink(value: node) {
+                                IndexCard(node: node, childCount: 0)
+                            }
                         }
-                        .buttonStyle(.plain)
-                    } else {
-                        NavigationLink(value: node) {
-                            IndexCard(node: node, childCount: 0)
-                        }
-                        .buttonStyle(.plain)
                     }
+                    .buttonStyle(.plain)
+                    .contextMenu { nodeMenu(node) }
                 }
             }
             .padding(16)
@@ -193,6 +267,7 @@ struct ProjectView: View {
                 }
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
+                .contextMenu { nodeMenu(item.node) }
             }
         }
         .listStyle(.plain)
@@ -207,10 +282,12 @@ struct ProjectView: View {
             } label: {
                 BinderNodeRow(node: node, childCount: childCount(of: node))
             }
+            .contextMenu { nodeMenu(node) }
         } else {
             NavigationLink(value: node) {
                 BinderNodeRow(node: node, childCount: 0)
             }
+            .contextMenu { nodeMenu(node) }
         }
     }
 
@@ -225,6 +302,18 @@ struct ProjectView: View {
         let order = (nodes.map(\.order).max() ?? -1) + 1
         let node = RWDocument(projectID: project.id, isFolder: isFolder,
                               order: order, parentID: parent?.id)
+        context.insert(node)
+        project.updatedAt = .now
+        try? context.save()
+    }
+
+    private func addFromTemplate(_ template: RWTemplate) {
+        Haptics.tap()
+        let order = (nodes.map(\.order).max() ?? -1) + 1
+        let node = RWDocument(projectID: project.id, isFolder: false,
+                              order: order, parentID: parent?.id)
+        node.synopsis = template.synopsis
+        node.body = template.body
         context.insert(node)
         project.updatedAt = .now
         try? context.save()
@@ -256,6 +345,50 @@ struct ProjectView: View {
         }
         DrawingStore.delete(node.id)
         context.delete(node)
+    }
+}
+
+/// A small sheet for writing a document's index-card synopsis without opening it.
+private struct SynopsisEditor: View {
+    @Bindable var doc: RWDocument
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var context
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                PaperBackground()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(doc.displayTitle).font(.headlineSerif).foregroundStyle(Paper.ink)
+                        .padding(.horizontal, 4)
+                    TextEditor(text: $doc.synopsis)
+                        .font(.calloutSerif)
+                        .foregroundStyle(Paper.inkSoft)
+                        .scrollContentBackground(.hidden)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .overlay(alignment: .topLeading) {
+                            if doc.synopsis.isEmpty {
+                                Text("A sentence or two on what happens here…")
+                                    .font(.calloutSerif).foregroundStyle(Paper.inkFaint)
+                                    .padding(.top, 8).padding(.leading, 5)
+                                    .allowsHitTesting(false)
+                            }
+                        }
+                }
+                .padding(18)
+            }
+            .navigationTitle("Synopsis")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        doc.updatedAt = .now; try? context.save(); dismiss()
+                    }
+                    .tint(Paper.accent).fontWeight(.semibold)
+                }
+            }
+        }
+        .presentationDetents([.medium])
     }
 }
 
