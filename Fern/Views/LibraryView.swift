@@ -201,7 +201,7 @@ struct LibraryView: View {
 }
 
 private struct EmptyStateFern: View {
-    private let fern = BarnsleyFern(seed: 4_211, count: 18_000)
+    private let fern = BarnsleyFern.random(count: 18_000)
     var body: some View {
         VStack(spacing: 12) {
             BarnsleyFernView(fern: fern)

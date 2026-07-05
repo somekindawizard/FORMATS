@@ -8,9 +8,9 @@ struct LockGate<Content: View>: View {
     @State private var shakeX: CGFloat = 0
     let content: () -> Content
 
-    // The lock fern — deterministic, same seed as the icon/empty state.
-    // Slightly fewer points since it re-draws every frame while swaying.
-    private let fern = BarnsleyFern(seed: 4_211, count: 11_000)
+    // A fresh, unique fern grows on every unlock — regenerated when the gate
+    // re-locks. Slightly fewer points since it re-draws each frame while swaying.
+    @State private var fern = BarnsleyFern.random(count: 11_000)
 
     var body: some View {
         ZStack {
@@ -58,6 +58,7 @@ struct LockGate<Content: View>: View {
     private func relock() {
         guard lock.isEnabled else { return }
         lock.isUnlocked = false
+        fern = BarnsleyFern.random(count: 11_000)   // a new fern each unlock
         veilOpacity = 1
         pulse = false
         shakeX = 0

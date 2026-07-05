@@ -6,7 +6,7 @@ struct StreakFlourish: View {
     let days: Int
     let onDismiss: () -> Void
     @State private var appear = false
-    private let fern = BarnsleyFern(seed: 4_211, count: 22_000)
+    private let fern = BarnsleyFern.random(count: 22_000)
 
     var body: some View {
         ZStack {
