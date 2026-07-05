@@ -13,6 +13,24 @@ enum MarkdownRender {
         var ink: Color
         var soft: Color
         var accent: Color
+
+        /// Reading-mode typography — the app's serif scale with syntax removed.
+        /// Lives here (not on a view) so any surface, in any app built on this
+        /// editor, can render the same reader style. Computed so a live
+        /// theme/accent change is reflected.
+        static var reader: Style {
+            Style(
+                body: EditorialType.font(18),
+                heading: { level in
+                    switch level {
+                    case 1:  return EditorialType.font(28, weight: .semibold)
+                    case 2:  return EditorialType.font(23, weight: .semibold)
+                    default: return EditorialType.font(20, weight: .semibold)
+                    }
+                },
+                mono: .system(size: 16, design: .monospaced),
+                ink: Paper.ink, soft: Paper.inkSoft, accent: Paper.accent)
+        }
     }
 
     /// All Markdown syntax stripped to readable plain text — for list previews

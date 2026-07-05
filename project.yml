@@ -58,6 +58,30 @@ targets:
         # Partial Info.plist (UIBackgroundModes: remote-notification for background
         # CloudKit sync) merged with the generated INFOPLIST_KEY_* values above.
         INFOPLIST_FILE: Fern/Info.plist
+  Redwood:
+    type: application
+    platform: iOS
+    # Redwood shares Fern's editor/render/theme/botanical layer by compiling
+    # the same source folders (no file moves — Fern is untouched). Its own code
+    # lives in Redwood/. Fonts are bundled so Fonts.register() finds them.
+    sources:
+      - Redwood
+      - Fern/Theme
+      - Fern/Editor
+      - Fern/Botanical
+      - Fern/Fonts
+      - path: Fern/Store/ThemeStore.swift
+      - path: Fern/Services/Haptics.swift
+      - path: Fern/Services/PhotoStore.swift
+      - path: Fern/Services/DrawingStore.swift
+      - path: Fern/Services/Fonts.swift
+      - path: Fern/Services/HandwritingOCR.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: garden.fern.Redwood
+        TARGETED_DEVICE_FAMILY: "1,2"
+        DEVELOPMENT_TEAM: 775QLS4P2V
+        CODE_SIGN_STYLE: Automatic
   FernTests:
     type: bundle.unit-test
     platform: iOS
@@ -91,3 +115,7 @@ schemes:
         FernTests: [test]
     test:
       targets: [FernTests]
+  Redwood:
+    build:
+      targets:
+        Redwood: all

@@ -200,19 +200,8 @@ struct ReadingView: View {
         try? context.save()
     }
 
-    /// Reading-mode typography — the same serif scale as the app, syntax removed.
-    /// Computed so a live theme/accent change is reflected.
-    static var readerStyle: MarkdownRender.Style {
-        MarkdownRender.Style(
-        body: EditorialType.font(18),
-        heading: { level in
-            switch level {
-            case 1:  return EditorialType.font(28, weight: .semibold)
-            case 2:  return EditorialType.font(23, weight: .semibold)
-            default: return EditorialType.font(20, weight: .semibold)
-            }
-        },
-        mono: .system(size: 16, design: .monospaced),
-        ink: Paper.ink, soft: Paper.inkSoft, accent: Paper.accent)
-    }
+    /// Reading-mode typography now lives on `MarkdownRender.Style.reader`
+    /// (shared across apps built on the editor). Kept here as an alias so
+    /// existing call sites and the styler don't have to change.
+    static var readerStyle: MarkdownRender.Style { .reader }
 }

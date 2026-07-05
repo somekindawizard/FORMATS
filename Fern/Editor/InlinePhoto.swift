@@ -76,7 +76,7 @@ struct RenderedBody: View {
     let markdown: String
     let wash: Bool
     /// Typography/colors — reader defaults; the share card passes a larger, fixed-light style.
-    var style: MarkdownRender.Style = ReadingView.readerStyle
+    var style: MarkdownRender.Style = .reader
     /// Disabled for PDF export / the card (ImageRenderer can't snapshot the UIKit drop cap).
     var dropCap: Bool = true
     /// Fixed inline-photo width (card). When nil, adapts to the size class.
