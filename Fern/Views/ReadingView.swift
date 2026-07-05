@@ -45,10 +45,10 @@ struct ReadingView: View {
         return PhotoStore.load(entry.coverPhotoName)
     }
 
-    private var ink: UIImage? {
+    private var inkDrawing: PKDrawing? {
         guard let d = DrawingStore.load(entry.id), !d.strokes.isEmpty,
               d.bounds.width > 1, d.bounds.height > 1 else { return nil }
-        return d.image(from: d.bounds, scale: UIScreen.main.scale)
+        return d
     }
 
     private var outline: [RenderedBody.Heading] { RenderedBody.outline(entry.body) }
@@ -84,11 +84,9 @@ struct ReadingView: View {
                     RenderedBody(markdown: entry.body, wash: entry.photoWash,
                                  onToggleTask: toggleTask, detectData: true)
 
-                    if let ink {
-                        Image(uiImage: ink)
-                            .resizable().scaledToFit()
-                            .frame(maxWidth: sizeClass == .regular ? 460 : .infinity)
-                            .frame(maxWidth: .infinity, alignment: .center)
+                    if let inkDrawing {
+                        InkReplay(drawing: inkDrawing,
+                                  maxWidth: sizeClass == .regular ? 460 : .infinity)
                             .padding(.top, 8)
                     }
 
