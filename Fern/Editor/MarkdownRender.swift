@@ -46,6 +46,38 @@ enum MarkdownRender {
         return s.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    /// Data detectors — turn bare URLs and phone numbers into tappable links,
+    /// leaving any Markdown links already present untouched. Reading mode only.
+    static func autolink(_ attr: AttributedString, accent: Color) -> AttributedString {
+        var out = attr
+        let plain = String(attr.characters)
+        guard !plain.isEmpty,
+              let detector = try? NSDataDetector(
+                types: NSTextCheckingResult.CheckingType([.link, .phoneNumber]).rawValue)
+        else { return attr }
+        let matches = detector.matches(in: plain, range: NSRange(location: 0, length: (plain as NSString).length))
+        for m in matches {
+            guard let swiftRange = Range(m.range, in: plain) else { continue }
+            let lower = plain.distance(from: plain.startIndex, to: swiftRange.lowerBound)
+            let upper = plain.distance(from: plain.startIndex, to: swiftRange.upperBound)
+            let start = out.index(out.startIndex, offsetByCharacters: lower)
+            let end = out.index(out.startIndex, offsetByCharacters: upper)
+            let range = start..<end
+            if out[range].link != nil { continue }   // don't stomp Markdown links
+            var url: URL?
+            if m.resultType == .link { url = m.url }
+            else if m.resultType == .phoneNumber, let phone = m.phoneNumber {
+                url = URL(string: "tel:\(phone.filter { !$0.isWhitespace && $0 != "-" && $0 != "(" && $0 != ")" })")
+            }
+            if let url {
+                out[range].link = url
+                out[range].foregroundColor = accent
+                out[range].underlineStyle = .single
+            }
+        }
+        return out
+    }
+
     /// A styled string for the whole document, blocks separated by newlines.
     static func styled(_ source: String, _ s: Style) -> AttributedString {
         var out = AttributedString("")

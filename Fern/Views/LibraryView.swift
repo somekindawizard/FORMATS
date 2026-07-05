@@ -15,9 +15,27 @@ struct LibraryView: View {
         Array(Set(entries.compactMap(\.notebook))).sorted()
     }
 
+    // Nested tags use "/" (e.g. walks/ecotherapy). The bar shows roots, then
+    // reveals the children of whichever branch is active.
+    private var tagRoots: [String] {
+        Array(Set(allTags.map { $0.components(separatedBy: "/").first ?? $0 })).sorted()
+    }
+    private func tagChildren(of root: String) -> [String] {
+        allTags.filter { $0.hasPrefix(root + "/") }.sorted()
+    }
+    private var activeRoot: String? {
+        selectedTag?.components(separatedBy: "/").first
+    }
+
+    /// A tag selection matches an entry tagged with it OR any nested child.
+    private func matchesTag(_ e: Entry) -> Bool {
+        guard let sel = selectedTag else { return true }
+        return e.tagNames.contains { $0 == sel || $0.hasPrefix(sel + "/") }
+    }
+
     private var filtered: [Entry] {
         entries.filter { e in
-            (selectedTag == nil || e.tagNames.contains(selectedTag!))
+            matchesTag(e)
             && (selectedNotebook == nil || e.notebook == selectedNotebook)
             && (!draftsOnly || (e.collection == .piece && !e.isFinished))
         }
@@ -63,6 +81,14 @@ struct LibraryView: View {
         }
         .navigationTitle("Library")
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                NavigationLink {
+                    CalendarBrowse(entries: entries)
+                } label: {
+                    Image(systemName: "calendar").foregroundStyle(Paper.accent)
+                }
+                .accessibilityLabel("Calendar")
+            }
             if !notebooks.isEmpty || draftsOnly || selectedNotebook != nil {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
@@ -139,9 +165,19 @@ struct LibraryView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 tagChip("All", active: selectedTag == nil) { selectedTag = nil }
-                ForEach(allTags, id: \.self) { tag in
-                    tagChip("#\(tag)", active: selectedTag == tag) {
-                        selectedTag = (selectedTag == tag) ? nil : tag
+                ForEach(tagRoots, id: \.self) { root in
+                    let hasChildren = !tagChildren(of: root).isEmpty
+                    tagChip("#\(root)" + (hasChildren ? " ›" : ""), active: activeRoot == root) {
+                        selectedTag = (selectedTag == root) ? nil : root
+                    }
+                }
+                if let root = activeRoot, !tagChildren(of: root).isEmpty {
+                    Rectangle().fill(Paper.line).frame(width: 1, height: 20)
+                    ForEach(tagChildren(of: root), id: \.self) { child in
+                        let leaf = child.components(separatedBy: "/").dropFirst().joined(separator: "/")
+                        tagChip(leaf, active: selectedTag == child) {
+                            selectedTag = (selectedTag == child) ? root : child
+                        }
                     }
                 }
             }

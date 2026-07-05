@@ -13,6 +13,7 @@ struct ReadingView: View {
     @State private var linkedEntry: Entry?
     @State private var speech = ReadAloud.shared
     @State private var scrollY: CGFloat = 0
+    @State private var scrollProxy: ScrollViewProxy?
 
     /// The masthead title hands off to the nav bar as it scrolls away.
     private var mastheadHandoff: Double {
@@ -50,9 +51,12 @@ struct ReadingView: View {
         return d.image(from: d.bounds, scale: UIScreen.main.scale)
     }
 
+    private var outline: [RenderedBody.Heading] { RenderedBody.outline(entry.body) }
+
     var body: some View {
         ZStack {
             PaperBackground()
+            ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     if let cover {
@@ -78,7 +82,7 @@ struct ReadingView: View {
                             .opacity(1 - mastheadHandoff)
                     }
                     RenderedBody(markdown: entry.body, wash: entry.photoWash,
-                                 onToggleTask: toggleTask)
+                                 onToggleTask: toggleTask, detectData: true)
 
                     if let ink {
                         Image(uiImage: ink)
@@ -121,10 +125,31 @@ struct ReadingView: View {
             .onScrollGeometryChange(for: CGFloat.self) { geo in
                 geo.contentOffset.y + geo.contentInsets.top
             } action: { _, y in scrollY = y }
+            .onAppear { scrollProxy = proxy }
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
         .tint(Paper.accent)
         .toolbar {
+            if outline.count >= 2 {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        ForEach(outline) { h in
+                            Button {
+                                Haptics.tap()
+                                withAnimation(.easeInOut(duration: 0.4)) {
+                                    scrollProxy?.scrollTo(h.id, anchor: .top)
+                                }
+                            } label: {
+                                Text(String(repeating: "   ", count: max(0, h.level - 1)) + h.title)
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "list.bullet.indent").foregroundStyle(Paper.accent)
+                    }
+                    .accessibilityLabel("Outline")
+                }
+            }
             ToolbarItem(placement: .principal) {
                 Text(entry.displayTitle)
                     .font(.headlineSerif)

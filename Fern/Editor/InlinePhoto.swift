@@ -86,7 +86,14 @@ struct RenderedBody: View {
     var spacing: CGFloat = 16
     /// Tap a checkbox to toggle it (by task index). Nil = non-interactive (card/PDF).
     var onToggleTask: ((Int) -> Void)? = nil
+    /// Turn bare URLs / phone numbers into tappable links (reading mode).
+    var detectData: Bool = false
     @Environment(\.horizontalSizeClass) private var sizeClass
+
+    private func rendered(_ s: String) -> AttributedString {
+        let styled = MarkdownRender.styled(s, style)
+        return detectData ? MarkdownRender.autolink(styled, accent: style.accent) : styled
+    }
 
     private var blocks: [ReaderBlock] { RenderedBody.blocks(markdown) }
     private var firstTextIndex: Int? {
@@ -105,7 +112,7 @@ struct RenderedBody: View {
                         DropCapText(markdown: s)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     } else {
-                        Text(MarkdownRender.styled(s, style))
+                        Text(rendered(s))
                             .lineSpacing(6)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .textSelection(.enabled)
@@ -124,7 +131,7 @@ struct RenderedBody: View {
                         HStack(alignment: .firstTextBaseline, spacing: 10) {
                             Image(systemName: checked ? "checkmark.circle.fill" : "circle")
                                 .foregroundStyle(checked ? style.accent : style.soft)
-                            Text(MarkdownRender.styled(text, style))
+                            Text(rendered(text))
                                 .strikethrough(checked, color: style.soft)
                                 .foregroundStyle(checked ? style.soft : style.ink)
                         }
@@ -147,6 +154,27 @@ struct RenderedBody: View {
                         .padding(.vertical, 8)
                 }
             }
+        }
+    }
+
+    // MARK: outline
+
+    struct Heading: Identifiable {
+        let id: Int      // matches the block offset used as the ForEach id
+        let level: Int
+        let title: String
+    }
+
+    /// Document headings paired with their block offset, so the reader can scroll
+    /// to them (the offset is the same id RenderedBody's ForEach uses).
+    static func outline(_ markdown: String) -> [Heading] {
+        blocks(markdown).enumerated().compactMap { i, b in
+            guard case .text(let s) = b,
+                  let m = s.range(of: #"^#{1,6}[ \t]+"#, options: .regularExpression) else { return nil }
+            let level = s[s.startIndex..<m.upperBound].prefix { $0 == "#" }.count
+            let title = MarkdownRender.plainText(String(s[m.upperBound...]))
+            guard !title.isEmpty else { return nil }
+            return Heading(id: i, level: level, title: title)
         }
     }
 
@@ -173,7 +201,11 @@ struct RenderedBody: View {
                 }
                 for line in text.components(separatedBy: "\n") {
                     let t = line.trimmingCharacters(in: .whitespaces)
-                    if let m = t.range(of: #"^- \[[ xX]\][ \t]*"#, options: .regularExpression) {
+                    if t.range(of: #"^#{1,6}[ \t]+"#, options: .regularExpression) != nil {
+                        // Headings become their own block so they anchor the outline
+                        // and get clean spacing.
+                        flushText(); flushQuote(); out.append(.text(t))
+                    } else if let m = t.range(of: #"^- \[[ xX]\][ \t]*"#, options: .regularExpression) {
                         flushText(); flushQuote()
                         let checked = t.range(of: #"\[[xX]\]"#, options: .regularExpression) != nil
                         out.append(.task(index: taskIndex, checked: checked, text: String(t[m.upperBound...])))

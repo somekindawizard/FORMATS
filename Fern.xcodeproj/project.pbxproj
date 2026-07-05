@@ -72,6 +72,7 @@
 		B644B497FD07EFA1C899E95D /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287563240408442B1C299030 /* ModelTests.swift */; };
 		B860398E1BA261EE37594B57 /* SuggestionsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F742AB1A0EB1B95CC7A91A9D /* SuggestionsButton.swift */; };
 		BAAD7E05C3F0C47032BF6E88 /* InlinePhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD7A3372E778227A40182354 /* InlinePhoto.swift */; };
+		BB265BDD87AD52A1EA2381BB /* CalendarBrowse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D169EBE697B65EFB3254C49 /* CalendarBrowse.swift */; };
 		BB8ECF80E64C3F7845CD07C5 /* Redaction-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9BC51BE11191B28C0AA2C34F /* Redaction-Bold.ttf */; };
 		BCD36B9B75C19D47A5B91681 /* NameSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1195D5175BBFD5A209F39E /* NameSync.swift */; };
 		BDB9D4177DA66409E04B8B4D /* ComposeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E10DFCAB855A14CE7D486A /* ComposeButton.swift */; };
@@ -181,6 +182,7 @@
 		5176A8356310FFA7D76E741E /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		55662AF595DC7900135BE0CA /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFern.swift; sourceTree = "<group>"; };
+		5D169EBE697B65EFB3254C49 /* CalendarBrowse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarBrowse.swift; sourceTree = "<group>"; };
 		61EF746BB6AAD23AA2AEFD56 /* WashLabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WashLabView.swift; sourceTree = "<group>"; };
 		655279ADA8C6783C3A2943A0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6874D40188440206C80B5EE5 /* Fern.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fern.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -389,6 +391,7 @@
 			isa = PBXGroup;
 			children = (
 				6E26486E72AA73E121EBA526 /* ActivityView.swift */,
+				5D169EBE697B65EFB3254C49 /* CalendarBrowse.swift */,
 				A3E10DFCAB855A14CE7D486A /* ComposeButton.swift */,
 				B628B8479289E7CC246E5C5B /* EntryEditorView.swift */,
 				33B710B62EE4D952BA7B3585 /* EntryRow.swift */,
@@ -639,6 +642,7 @@
 				D1F83BB5944806CC63145AAB /* BarnsleyFern.swift in Sources */,
 				400A3569506D5FCD81502BBF /* BarnsleyFernView.swift in Sources */,
 				533F6945C4B9BFA4D02EEE09 /* BiometricLock.swift in Sources */,
+				BB265BDD87AD52A1EA2381BB /* CalendarBrowse.swift in Sources */,
 				62166C608582EFCE76A75612 /* Components.swift in Sources */,
 				BDB9D4177DA66409E04B8B4D /* ComposeButton.swift in Sources */,
 				9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */,
