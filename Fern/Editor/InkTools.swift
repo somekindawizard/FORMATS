@@ -1,5 +1,6 @@
 import SwiftUI
 import PencilKit
+import UIKit.UIGestureRecognizerSubclass
 
 // MARK: - Ink settings
 
@@ -112,8 +113,25 @@ final class CanvasScrollGesture: NSObject, UIGestureRecognizerDelegate {
     @objc func undoTap() { Haptics.tap(); controller?.undoInk() }
     @objc func redoTap() { Haptics.tap(); controller?.redoInk() }
 
+    /// A Pencil touched the page while not drawing — enter drawing mode.
+    @objc func pencilBegan() {
+        if controller?.isDrawing == false { controller?.setDrawing(true) }
+    }
+
     func gestureRecognizer(_ g: UIGestureRecognizer,
                            shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool { true }
+}
+
+/// Recognizes an Apple Pencil touch on the text view **only while not already
+/// drawing**, so it can auto-enter drawing mode without ever interfering with
+/// the live canvas (which sits above the text once drawing).
+final class PencilTouchGesture: UIGestureRecognizer {
+    weak var controller: MarkdownEditorController?
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesBegan(touches, with: event)
+        if controller?.isDrawing == true { state = .failed; return }
+        state = touches.contains(where: { $0.type == .pencil }) ? .recognized : .failed
+    }
 }
 
 /// Forwards Apple Pencil double-tap (Pencil 2) and squeeze (Pencil Pro) to the
@@ -133,32 +151,19 @@ final class PencilInteractionCoordinator: NSObject, UIPencilInteractionDelegate 
     }
 }
 
-/// A canvas that **claims Apple Pencil touches** (so the Pencil always draws,
-/// auto-detected) but **passes finger touches through** to the text view beneath
-/// — so a finger types, scrolls, and places the caret exactly as before, with no
-/// drawing "mode" to toggle.
-final class InkCanvas: PKCanvasView {
-    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        if let touches = event?.allTouches, touches.contains(where: { $0.type == .pencil }) {
-            return super.hitTest(point, with: event)   // Pencil → draw
-        }
-        return nil                                       // finger → text view
-    }
-}
-
 extension MarkdownEditorController {
 
     /// Attach a transparent PencilKit canvas over the text, sized to (and
-    /// scrolling with) the document. Always live: the Pencil draws on contact
-    /// (finger touches fall through to the text), so there's no mode to enter.
+    /// scrolling with) the document. Interactive only in drawing mode; a Pencil
+    /// touch auto-enters that mode (see PencilTouchGesture).
     func setupCanvas(on textView: UITextView, entryID: UUID) {
         guard canvas == nil else { return }
-        let c = InkCanvas()
+        let c = PKCanvasView()
         c.backgroundColor = .clear
         c.isOpaque = false
         c.isScrollEnabled = false          // it rides along inside the text scroll view
-        c.drawingPolicy = .pencilOnly       // Pencil draws; finger passes through
-        c.isUserInteractionEnabled = true   // always on (hitTest routes finger away)
+        c.drawingPolicy = .pencilOnly       // finger stays for typing/scrolling
+        c.isUserInteractionEnabled = false  // until draw mode
         let coord = InkCoordinator(self)
         c.delegate = coord
         inkCoordinator = coord
@@ -168,19 +173,32 @@ extension MarkdownEditorController {
         interaction.delegate = pencilCoord
         c.addInteraction(interaction)
         pencilCoordinator = pencilCoord
-        // Procreate gestures on the *text view* (finger touches land there):
-        // two-finger tap = undo, three-finger tap = redo.
-        let taps = CanvasScrollGesture()
-        taps.controller = self
-        let undoTap = UITapGestureRecognizer(target: taps, action: #selector(CanvasScrollGesture.undoTap))
+        // On the canvas (which receives touches while drawing): two-finger drag
+        // scrolls, two-/three-finger taps undo/redo (Procreate).
+        let g = CanvasScrollGesture()
+        g.textView = textView
+        g.controller = self
+        let scrollPan = UIPanGestureRecognizer(target: g, action: #selector(CanvasScrollGesture.handle(_:)))
+        scrollPan.minimumNumberOfTouches = 2
+        scrollPan.maximumNumberOfTouches = 2
+        scrollPan.delegate = g
+        c.addGestureRecognizer(scrollPan)
+        let undoTap = UITapGestureRecognizer(target: g, action: #selector(CanvasScrollGesture.undoTap))
         undoTap.numberOfTouchesRequired = 2
-        undoTap.delegate = taps
-        textView.addGestureRecognizer(undoTap)
-        let redoTap = UITapGestureRecognizer(target: taps, action: #selector(CanvasScrollGesture.redoTap))
+        undoTap.delegate = g
+        c.addGestureRecognizer(undoTap)
+        let redoTap = UITapGestureRecognizer(target: g, action: #selector(CanvasScrollGesture.redoTap))
         redoTap.numberOfTouchesRequired = 3
-        redoTap.delegate = taps
-        textView.addGestureRecognizer(redoTap)
-        scrollPanHandler = taps
+        redoTap.delegate = g
+        c.addGestureRecognizer(redoTap)
+        scrollPanHandler = g
+        // Auto-detect: a Pencil touch on the text enters drawing mode. Fails when
+        // already drawing, so it never interferes with the live canvas.
+        let pencilDetect = PencilTouchGesture(target: g, action: #selector(CanvasScrollGesture.pencilBegan))
+        pencilDetect.controller = self
+        pencilDetect.cancelsTouchesInView = true
+        pencilDetect.delegate = g
+        textView.addGestureRecognizer(pencilDetect)
         if let saved = DrawingStore.load(entryID) { c.drawing = saved }
         c.backgroundColor = PaperTiles.pattern(for: ThemeStore.shared.paperRule,
                                                spacing: CGFloat(ThemeStore.shared.ruleSpacing)) ?? .clear
@@ -226,6 +244,7 @@ extension MarkdownEditorController {
 
     func setDrawing(_ active: Bool) {
         isDrawing = active
+        canvas?.isUserInteractionEnabled = active
         if active {
             applyInk()
             textView?.resignFirstResponder()
