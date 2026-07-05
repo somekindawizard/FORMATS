@@ -13,6 +13,11 @@ struct TodayView: View {
     @State private var creativePrompt: Prompt?
 
     @AppStorage("fern.userName") private var userName = ""
+    @AppStorage("fern.lastMilestone") private var lastMilestone = 0
+    @State private var milestone: Int?
+
+    /// Streaks worth pausing for.
+    private static let milestones: Set<Int> = [3, 7, 14, 21, 30, 50, 75, 100, 150, 200, 300, 365, 500, 1000]
 
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: .now)
@@ -95,6 +100,14 @@ struct TodayView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
+        .overlay {
+            if let m = milestone {
+                StreakFlourish(days: m) {
+                    lastMilestone = m
+                    milestone = nil
+                }
+            }
+        }
         .toolbar(.hidden, for: .navigationBar)
         .navigationDestination(for: Entry.self) { entry in
             EntryEditorView(entry: entry)
@@ -102,9 +115,21 @@ struct TodayView: View {
         .navigationDestination(item: $draft) { entry in
             EntryEditorView(entry: entry)
         }
-        .onAppear { loadInitialPrompts() }
+        .onAppear { loadInitialPrompts(); checkMilestone() }
+        .onChange(of: streak) { _, _ in checkMilestone() }
         .onChange(of: journalTheme) { _, _ in refresh(.journal) }
         .onChange(of: creativeTheme) { _, _ in refresh(.creative) }
+    }
+
+    /// Show the flourish once when the streak crosses a milestone we haven't
+    /// celebrated yet. If the streak lapses, allow the same milestone again.
+    private func checkMilestone() {
+        let s = streak
+        if Self.milestones.contains(s), s > lastMilestone {
+            milestone = s
+        } else if s < lastMilestone {
+            lastMilestone = s   // streak broke — reset so it can recur
+        }
     }
 
     // MARK: prompts

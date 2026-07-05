@@ -94,6 +94,7 @@
 		D3988507F66A8D5E8CF88039 /* MarkdownStyler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7826A6B5EB47145BAAF378E /* MarkdownStyler.swift */; };
 		D5B3AC7B5AB7666C2BAEC1DE /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08E10046E72A3938832A9FAD /* Persistence.swift */; };
 		D85467988DD2C1B7C6F01832 /* SpotlightIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232C4DDB499CBDC6E0B73E75 /* SpotlightIndexer.swift */; };
+		DE9C94EAA72A6FB55D858189 /* StreakFlourish.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9929AF61055BE97B0D2D90B1 /* StreakFlourish.swift */; };
 		E46E487B2EB249A714915481 /* Prompts+Reflective.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498E7586F70ECCFA602F6B03 /* Prompts+Reflective.swift */; };
 		E473E6FD8FFFD9B1D6D51332 /* FernTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = D383A32ED71D29BD1C19B13C /* FernTabBar.swift */; };
 		E5B87471D24573544FF784FD /* PromptNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED830E78A8ED4F64E15ECC2C /* PromptNotifier.swift */; };
@@ -195,6 +196,7 @@
 		8EF8119C721CD1304B059C77 /* AppIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntents.swift; sourceTree = "<group>"; };
 		970190D4D04CBD9FA602D885 /* FiddleheadShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiddleheadShape.swift; sourceTree = "<group>"; };
 		9786137BD2FB7930DFE52557 /* ReadAloud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadAloud.swift; sourceTree = "<group>"; };
+		9929AF61055BE97B0D2D90B1 /* StreakFlourish.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakFlourish.swift; sourceTree = "<group>"; };
 		9A7151C81AE2B364DEA4C780 /* Entry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entry.swift; sourceTree = "<group>"; };
 		9BC51BE11191B28C0AA2C34F /* Redaction-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Redaction-Bold.ttf"; sourceTree = "<group>"; };
 		9C7BF305C70EF6B5198FA801 /* AssetSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetSync.swift; sourceTree = "<group>"; };
@@ -401,6 +403,7 @@
 				74089F72177AC086B585AD67 /* SavedPromptsView.swift */,
 				E45CA19533DB05C24AC2162D /* SearchView.swift */,
 				A1A9DEAFC77D976210B3D73F /* SettingsView.swift */,
+				9929AF61055BE97B0D2D90B1 /* StreakFlourish.swift */,
 				F742AB1A0EB1B95CC7A91A9D /* SuggestionsButton.swift */,
 				44DC35D8BD947984A93C106B /* TodayView.swift */,
 				61EF746BB6AAD23AA2AEFD56 /* WashLabView.swift */,
@@ -695,6 +698,7 @@
 				A5337A96A39EF50CFE51E4C5 /* SharedNotebookStore.swift in Sources */,
 				91B3BE71F2F3C574BA6BDE26 /* SharedNotebookView.swift in Sources */,
 				D85467988DD2C1B7C6F01832 /* SpotlightIndexer.swift in Sources */,
+				DE9C94EAA72A6FB55D858189 /* StreakFlourish.swift in Sources */,
 				B860398E1BA261EE37594B57 /* SuggestionsButton.swift in Sources */,
 				5FF5CDEE5C4F0D31194A4C7C /* Templates.swift in Sources */,
 				C0E4621C3F0203251652A3FE /* ThemeOptions.swift in Sources */,

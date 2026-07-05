@@ -12,6 +12,12 @@ struct ReadingView: View {
     @Query private var allEntries: [Entry]
     @State private var linkedEntry: Entry?
     @State private var speech = ReadAloud.shared
+    @State private var scrollY: CGFloat = 0
+
+    /// The masthead title hands off to the nav bar as it scrolls away.
+    private var mastheadHandoff: Double {
+        min(1, max(0, Double((scrollY - 44) / 44)))
+    }
 
     /// Notes that link to this one via [[title]].
     private var backlinks: [Entry] {
@@ -54,6 +60,7 @@ struct ReadingView: View {
                             .font(.masthead)
                             .foregroundStyle(Paper.ink)
                             .padding(.bottom, 2)
+                            .opacity(1 - mastheadHandoff)
                     }
                     RenderedBody(markdown: entry.body, wash: entry.photoWash,
                                  onToggleTask: toggleTask)
@@ -96,10 +103,20 @@ struct ReadingView: View {
                 .frame(maxWidth: 680)
                 .frame(maxWidth: .infinity, alignment: .center)
             }
+            .onScrollGeometryChange(for: CGFloat.self) { geo in
+                geo.contentOffset.y + geo.contentInsets.top
+            } action: { _, y in scrollY = y }
         }
         .navigationBarTitleDisplayMode(.inline)
         .tint(Paper.accent)
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(entry.displayTitle)
+                    .font(.headlineSerif)
+                    .foregroundStyle(Paper.ink)
+                    .lineLimit(1)
+                    .opacity(mastheadHandoff)
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     Haptics.tap()
