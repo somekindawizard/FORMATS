@@ -80,6 +80,8 @@ struct EntryEditorView: View {
         .hidesFernTabBar()
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
+                // Apple Pencil drawing — hidden on Mac (no Pencil hardware).
+                #if !targetEnvironment(macCatalyst)
                 Button {
                     Haptics.tap()
                     controller.setDrawing(!controller.isDrawing)
@@ -88,6 +90,7 @@ struct EntryEditorView: View {
                         .foregroundStyle(controller.isDrawing ? Paper.accent : Paper.inkSoft)
                 }
                 .accessibilityLabel(controller.isDrawing ? "Stop drawing" : "Draw")
+                #endif
                 NavigationLink {
                     ReadingView(entry: entry)
                 } label: {

@@ -45,12 +45,15 @@ struct DocumentEditorView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
+                // Apple Pencil drawing — hidden on Mac (no Pencil hardware).
+                #if !targetEnvironment(macCatalyst)
                 Button {
                     Haptics.tap(); controller.setDrawing(!controller.isDrawing)
                 } label: {
                     Image(systemName: controller.isDrawing ? "pencil.and.scribble" : "pencil.tip.crop.circle")
                         .foregroundStyle(controller.isDrawing ? Paper.accent : Paper.inkSoft)
                 }
+                #endif
                 Button { showingReader = true } label: {
                     Image(systemName: "book").foregroundStyle(Paper.accent)
                 }

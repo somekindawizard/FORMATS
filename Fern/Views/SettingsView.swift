@@ -4,6 +4,14 @@ import SwiftData
 struct SettingsView: View {
     @Environment(BiometricLock.self) private var lock
     @AppStorage("fern.gate.enabled") private var welcomeGate = true
+
+    private var biometricLabel: String {
+        #if targetEnvironment(macCatalyst)
+        return "Lock with Touch ID or password"
+        #else
+        return "Lock with Face ID"
+        #endif
+    }
     @Environment(ThemeStore.self) private var theme
     @Query(sort: \Entry.createdAt, order: .reverse) private var entries: [Entry]
     @State private var promptReminder = PromptNotifier.isEnabled
@@ -98,10 +106,10 @@ struct SettingsView: View {
                 Section {
                     Toggle("Touch the fern to open", isOn: $welcomeGate)
                         .tint(Paper.accent)
-                    Toggle("Lock with Face ID", isOn: $lock.isEnabled)
+                    Toggle(biometricLabel, isOn: $lock.isEnabled)
                         .tint(Paper.accent)
                 } footer: {
-                    Text("The fern greets you on open — tap it to begin. With Face ID on, Fern also asks to authenticate.")
+                    Text("The fern greets you on open — tap it to begin. With the lock on, Fern also asks to authenticate.")
                         .font(.calloutSerif)
                         .foregroundStyle(Paper.inkSoft)
                 }
