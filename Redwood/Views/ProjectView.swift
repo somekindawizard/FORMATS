@@ -10,6 +10,7 @@ struct ProjectView: View {
     @Environment(\.modelContext) private var context
     @Query private var allDocs: [RWDocument]
     @AppStorage("redwood.sessionGoal") private var sessionGoal = 0
+    @AppStorage("redwood.binderMode") private var mode = BinderMode.binder
     @State private var editingTargets = false
     @State private var targetText = ""
     @State private var goalText = ""
@@ -39,27 +40,11 @@ struct ProjectView: View {
     var body: some View {
         ZStack {
             PaperBackground()
-            List {
-                if parent == nil {
-                    TargetsBar(project: project, totalWords: totalWords,
-                               sessionWords: sessionWords, sessionGoal: sessionGoal) {
-                        beginEditTargets()
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .moveDisabled(true)
-                }
-                ForEach(nodes) { node in
-                    binderRow(node)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                }
-                .onMove(perform: move)
-                .onDelete(perform: delete)
+            switch mode {
+            case .binder:    binderList
+            case .corkboard: corkboard
+            case .outline:   outline
             }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            .environment(\.editMode, .constant(.active))
         }
         .navigationTitle(parent?.displayTitle ?? project.title)
         .navigationBarTitleDisplayMode(.inline)
@@ -67,6 +52,17 @@ struct ProjectView: View {
             if RWSession.baselineWords == nil { RWSession.baselineWords = totalWords }
         }
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Menu {
+                    Picker("View", selection: $mode) {
+                        ForEach(BinderMode.allCases) { m in
+                            Label(m.label, systemImage: m.symbol).tag(m)
+                        }
+                    }
+                } label: {
+                    Image(systemName: mode.symbol).foregroundStyle(Paper.accent)
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button { add(isFolder: false) } label: {
@@ -109,6 +105,91 @@ struct ProjectView: View {
         sessionGoal = Int(goalText.filter(\.isNumber)) ?? 0
         try? context.save()
         Haptics.tap()
+    }
+
+    // MARK: — Binder (list) mode
+
+    private var binderList: some View {
+        List {
+            if parent == nil {
+                TargetsBar(project: project, totalWords: totalWords,
+                           sessionWords: sessionWords, sessionGoal: sessionGoal) {
+                    beginEditTargets()
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .moveDisabled(true)
+            }
+            ForEach(nodes) { node in
+                binderRow(node)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+            }
+            .onMove(perform: move)
+            .onDelete(perform: delete)
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .environment(\.editMode, .constant(.active))
+    }
+
+    // MARK: — Corkboard mode
+
+    private var corkboard: some View {
+        ScrollView {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150, maximum: 240), spacing: 14)],
+                      spacing: 14) {
+                ForEach(nodes) { node in
+                    if node.isFolder {
+                        NavigationLink { ProjectView(project: project, parent: node) } label: {
+                            IndexCard(node: node, childCount: childCount(of: node))
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        NavigationLink(value: node) {
+                            IndexCard(node: node, childCount: 0)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .padding(16)
+        }
+    }
+
+    // MARK: — Outline mode
+
+    /// The whole subtree in reading order, with depth for indentation.
+    private func flatten(parent pid: UUID?, depth: Int) -> [(node: RWDocument, depth: Int)] {
+        var out: [(RWDocument, Int)] = []
+        for n in allDocs.filter({ $0.parentID == pid }).sorted(by: { $0.order < $1.order }) {
+            out.append((n, depth))
+            if n.isFolder { out += flatten(parent: n.id, depth: depth + 1) }
+        }
+        return out
+    }
+
+    private var outline: some View {
+        List {
+            ForEach(flatten(parent: parent?.id, depth: 0), id: \.node.id) { item in
+                Group {
+                    if item.node.isFolder {
+                        NavigationLink { ProjectView(project: project, parent: item.node) } label: {
+                            OutlineRow(node: item.node, depth: item.depth,
+                                       childCount: childCount(of: item.node))
+                        }
+                    } else {
+                        NavigationLink(value: item.node) {
+                            OutlineRow(node: item.node, depth: item.depth, childCount: 0)
+                        }
+                    }
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+            }
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
     }
 
     @ViewBuilder
@@ -171,10 +252,116 @@ struct ProjectView: View {
     }
 }
 
+/// How the binder is shown: list, corkboard of index cards, or flat outline.
+enum BinderMode: String, CaseIterable, Identifiable {
+    case binder, corkboard, outline
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .binder:    return "Binder"
+        case .corkboard: return "Corkboard"
+        case .outline:   return "Outline"
+        }
+    }
+    var symbol: String {
+        switch self {
+        case .binder:    return "list.bullet"
+        case .corkboard: return "rectangle.grid.2x2"
+        case .outline:   return "list.bullet.indent"
+        }
+    }
+}
+
 /// Tracks the word baseline for the current app session (in-memory, resets on
 /// relaunch) so "words this session" can be shown.
 enum RWSession {
     static var baselineWords: Int?
+}
+
+/// A corkboard index card: title, a ruled line, the synopsis, and a footer.
+private struct IndexCard: View {
+    let node: RWDocument
+    let childCount: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Image(systemName: node.isFolder ? "folder.fill" : "doc.text")
+                    .font(.system(size: 11))
+                    .foregroundStyle(node.isFolder ? Paper.accent : Paper.inkFaint)
+                Text(node.displayTitle)
+                    .font(.headlineSerif).foregroundStyle(Paper.ink)
+                    .lineLimit(2)
+            }
+            Rectangle().fill(Paper.accent.opacity(0.5)).frame(height: 1)
+            if node.isFolder {
+                Text("\(childCount) item\(childCount == 1 ? "" : "s")")
+                    .font(.calloutSerif).foregroundStyle(Paper.inkSoft)
+            } else {
+                Text(node.synopsis.isEmpty ? "No synopsis yet" : node.synopsis)
+                    .font(.calloutSerif)
+                    .foregroundStyle(node.synopsis.isEmpty ? Paper.inkFaint : Paper.inkSoft)
+                    .lineLimit(5)
+            }
+            Spacer(minLength: 0)
+            HStack {
+                if !node.isFolder {
+                    Text("\(node.wordCount) words")
+                        .font(.label).foregroundStyle(Paper.inkFaint)
+                }
+                Spacer()
+                if node.status != .none {
+                    Text(node.status.label.uppercased())
+                        .font(.system(size: 8, weight: .semibold))
+                        .foregroundStyle(Paper.accent)
+                }
+            }
+        }
+        .padding(12)
+        .frame(height: 158, alignment: .top)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Paper.raised)
+                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Paper.line, lineWidth: 1))
+                .shadow(color: Paper.ink.opacity(0.06), radius: 4, y: 2)
+        )
+    }
+}
+
+/// A compact outline row: indented by depth, with word count and status.
+private struct OutlineRow: View {
+    let node: RWDocument
+    let depth: Int
+    let childCount: Int
+
+    var body: some View {
+        HStack(spacing: 8) {
+            if depth > 0 {
+                Rectangle().fill(.clear).frame(width: CGFloat(depth) * 16)
+            }
+            Image(systemName: node.isFolder ? "folder" : "doc.text")
+                .font(.system(size: 12))
+                .foregroundStyle(node.isFolder ? Paper.accent : Paper.inkSoft)
+            Text(node.displayTitle)
+                .font(node.isFolder ? .bodySerif.weight(.medium) : .bodySerif)
+                .foregroundStyle(Paper.ink).lineLimit(1)
+            Spacer()
+            if node.isFolder {
+                Text("\(childCount)")
+                    .font(.label).foregroundStyle(Paper.inkFaint)
+            } else {
+                if node.status != .none {
+                    Text(node.status.label.uppercased())
+                        .font(.system(size: 8, weight: .semibold))
+                        .foregroundStyle(Paper.accent)
+                }
+                Text("\(node.wordCount)")
+                    .font(.label).foregroundStyle(Paper.inkFaint)
+            }
+        }
+        .padding(.vertical, 4)
+    }
 }
 
 /// Manuscript progress + session progress, shown atop the project binder.
