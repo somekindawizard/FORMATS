@@ -65,6 +65,11 @@ enum InkPrefsStore {
         guard let data = UserDefaults.standard.data(forKey: key(id)) else { return nil }
         return try? JSONDecoder().decode(InkSettings.self, from: data)
     }
+
+    /// Clean up when a note is deleted (otherwise the plist grows forever).
+    static func remove(_ id: UUID) {
+        UserDefaults.standard.removeObject(forKey: key(id))
+    }
 }
 
 // MARK: - Canvas management on the controller

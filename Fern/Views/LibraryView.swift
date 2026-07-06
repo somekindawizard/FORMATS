@@ -180,8 +180,13 @@ struct LibraryView: View {
 
     private func delete(_ entry: Entry) {
         Haptics.tap(.medium)
-        for name in entry.photoFileNames { PhotoStore.delete(name) }
+        for name in entry.photoFileNames {
+            PhotoStore.delete(name)
+            AssetSync.tombstone(context, name: name)   // so the delete syncs
+        }
         DrawingStore.delete(entry.id)
+        AssetSync.tombstoneDrawing(context, entryID: entry.id)
+        InkPrefsStore.remove(entry.id)
         SpotlightIndexer.deindex(id: entry.id)
         context.delete(entry)
         try? context.save()

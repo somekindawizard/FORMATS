@@ -222,12 +222,18 @@ struct EntryEditorView: View {
             // Discard a note that was started but never written in.
             if entry.isBlank {
                 DrawingStore.delete(entry.id)
+                AssetSync.tombstoneDrawing(context, entryID: entry.id)
+                InkPrefsStore.remove(entry.id)
                 SpotlightIndexer.deindex(id: entry.id)
                 context.delete(entry)
             } else {
                 ocrInkForSearch()
                 if let d = DrawingStore.load(entry.id), !d.strokes.isEmpty {
                     AssetSync.recordDrawing(context, entryID: entry.id, data: d.dataRepresentation())
+                } else {
+                    // Ink was erased this session — the deletion must sync too,
+                    // or the old strokes resurrect from the stale asset record.
+                    AssetSync.tombstoneDrawing(context, entryID: entry.id)
                 }
                 SpotlightIndexer.index(entry)
             }
@@ -541,6 +547,7 @@ private struct PhotoStrip: View {
         entry.photoFileNames.removeAll { $0 == name }
         if entry.coverPhotoName == name { entry.coverPhotoName = "" }
         PhotoStore.delete(name)
+        AssetSync.tombstone(context, name: name)   // so the delete syncs everywhere
     }
 }
 

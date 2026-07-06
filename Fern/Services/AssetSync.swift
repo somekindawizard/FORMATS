@@ -28,6 +28,25 @@ enum AssetSync {
         }
     }
 
+    // MARK: delete (tombstones)
+
+    /// Deletion must propagate: rather than deleting the record (which other
+    /// devices would just re-upload from their local file), we EMPTY its bytes.
+    /// The empty record syncs everywhere, and `materializeAll` removes the
+    /// matching local file on each device. Without this, deleted photos and
+    /// erased handwriting resurrected on every sync.
+    @MainActor
+    static func tombstone(_ context: ModelContext, name: String) {
+        guard let existing = fetch(context, name: name), !existing.data.isEmpty else { return }
+        existing.data = Data()
+        try? context.save()
+    }
+
+    @MainActor
+    static func tombstoneDrawing(_ context: ModelContext, entryID: UUID) {
+        tombstone(context, name: "\(entryID.uuidString).drawing")
+    }
+
     // MARK: background sync (never on the main thread — this ran at launch and
     // was hanging the main thread long enough to trip the watchdog)
 
@@ -43,13 +62,39 @@ enum AssetSync {
 
     // MARK: materialize (on the device that synced them in)
 
-    /// Write any asset whose local file is missing. Idempotent and cheap.
+    /// Write any asset whose local file is missing; remove files whose asset
+    /// was tombstoned (emptied) on another device; collapse duplicate records
+    /// (two devices backfilling the same name). Idempotent and cheap.
     static func materializeAll(_ context: ModelContext) {
         guard let assets = try? context.fetch(FetchDescriptor<Asset>()) else { return }
+        // Dedup by name. A tombstone among duplicates means a deletion raced a
+        // backfill — deletion wins. Otherwise duplicates carry identical bytes.
+        var byName: [String: Asset] = [:]
+        var removedDupes = false
         for asset in assets {
+            if let kept = byName[asset.name] {
+                if kept.data.isEmpty || asset.data.isEmpty {
+                    let tomb = kept.data.isEmpty ? kept : asset
+                    let other = kept.data.isEmpty ? asset : kept
+                    context.delete(other)
+                    byName[asset.name] = tomb
+                } else {
+                    context.delete(asset)
+                }
+                removedDupes = true
+            } else {
+                byName[asset.name] = asset
+            }
+        }
+        if removedDupes { try? context.save() }
+
+        for asset in byName.values {
             let dir = asset.kind == "drawing" ? DrawingStore.directory : PhotoStore.directory
             let url = dir.appendingPathComponent(asset.name)
-            if !FileManager.default.fileExists(atPath: url.path), !asset.data.isEmpty {
+            if asset.data.isEmpty {
+                // Tombstone — a deletion propagating from another device.
+                try? FileManager.default.removeItem(at: url)
+            } else if !FileManager.default.fileExists(atPath: url.path) {
                 try? asset.data.write(to: url)
             }
         }
