@@ -39,8 +39,7 @@ struct LockGate<Content: View>: View {
         ZStack {
             PaperBackground()
             VStack(spacing: 22) {
-                UnfurlingFlameFern(fern: fern)
-                    .id(fern.maxY)   // replay the unfurl for each fresh fern
+                FlameFernView(fern: fern, sway: true)
                     .frame(maxWidth: 360)
                     .frame(height: 460)
                     .scaleEffect(pulse ? 1.04 : 1.0)
