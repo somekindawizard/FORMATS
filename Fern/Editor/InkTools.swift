@@ -76,11 +76,17 @@ final class InkCoordinator: NSObject, PKCanvasViewDelegate {
     init(_ controller: MarkdownEditorController) { self.controller = controller }
     func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
         controller?.saveDrawing()
+        // Grow the drawing room as ink extends downward, and keep the ink word
+        // count fresh.
+        controller?.resizeCanvas()
+        controller?.scheduleInkWordCount()
     }
-    /// The Pencil touched the page — auto-reveal the ink tools (and dismiss the
-    /// keyboard). This is the reliable "auto-detect Apple Pencil" hook.
+    /// A tool started touching the page. Auto-enter drawing mode if a Pencil
+    /// woke us (the reliable "auto-detect Apple Pencil" hook), and tuck the
+    /// toolbar away so it's never under your hand while you make marks.
     func canvasViewDidBeginUsingTool(_ canvasView: PKCanvasView) {
         if controller?.isDrawing == false { controller?.setDrawing(true) }
+        controller?.inkToolsCollapsed = true
     }
 }
 
@@ -214,15 +220,27 @@ extension MarkdownEditorController {
         }
     }
 
-    /// Blank canvas room below the text while drawing, so ink isn't boxed to the
-    /// written area — scroll (two-finger) down into it to keep drawing.
-    private var drawingRoom: CGFloat { isDrawing ? 1200 : 0 }
-
+    /// Size the ink surface (and the scrollable room) so:
+    ///  • your handwriting is **always** reachable — even below the text and even
+    ///    when not drawing (the old bug: room only existed mid-draw, so ink under
+    ///    the text became unscrollable the moment you tapped Done);
+    ///  • while drawing, a generous slab of blank room sits below the lowest
+    ///    content and **grows** as your ink extends downward, so it feels endless.
     func resizeCanvas() {
         guard let tv = textView, let c = canvas else { return }
         let w = tv.contentSize.width > 0 ? tv.contentSize.width : tv.bounds.width
-        let h = max(tv.contentSize.height, tv.bounds.height) + drawingRoom
-        c.frame = CGRect(x: 0, y: 0, width: w, height: h)
+        let base = max(tv.contentSize.height, tv.bounds.height)
+        let inkBottom = c.drawing.strokes.isEmpty ? 0 : c.drawing.bounds.maxY
+        // Room below the text: while drawing keep ≥1200pt beyond the lowest
+        // content (grows with the ink); otherwise just enough to reach the ink.
+        let extra = isDrawing
+            ? max(1200, inkBottom + 500 - base)
+            : max(0, ceil(inkBottom) + 40 - base)
+        if abs(tv.contentInset.bottom - extra) > 0.5 { tv.contentInset.bottom = extra }
+        let h = base + max(0, extra)
+        if abs(c.frame.height - h) > 0.5 || abs(c.frame.width - w) > 0.5 {
+            c.frame = CGRect(x: 0, y: 0, width: w, height: h)
+        }
     }
 
     /// Build the active tool from the current settings, and remember this note's
@@ -246,13 +264,14 @@ extension MarkdownEditorController {
         isDrawing = active
         canvas?.isUserInteractionEnabled = active
         if active {
+            inkToolsCollapsed = false        // show the tools when you enter
             applyInk()
             textView?.resignFirstResponder()
+            scheduleInkWordCount()
         } else {
             saveDrawing()
         }
-        // Blank room below the text to draw into (scroll down to reach it).
-        textView?.contentInset.bottom = drawingRoom
+        // resizeCanvas sets the scroll room + inset for the current mode.
         resizeCanvas()
     }
 
@@ -352,9 +371,17 @@ enum PaperTiles {
 /// stays in the theme's value space, pen/pencil/marker, width, eraser, undo.
 struct InkToolbar: View {
     @Bindable var controller: MarkdownEditorController
+    /// Size of the area the pill can roam within (for clamping the drag).
+    var bounds: CGSize = .zero
     @State private var showWheel = false
     @State private var confirmClear = false
-    @State private var collapsed = false
+    /// Reveal the line-weight dots (Procreate-style: a second tap on the brush).
+    @State private var showWeights = false
+    /// Free position of the pill on screen (draggable via its grip).
+    @State private var offset: CGSize = .zero
+    @GestureState private var drag: CGSize = .zero
+
+    private var collapsed: Bool { controller.inkToolsCollapsed }
 
     /// The five theme accent colours as inks.
     private var themeInks: [(Double, Double, Double)] {
@@ -364,18 +391,15 @@ struct InkToolbar: View {
     /// Line-weight presets (fine → bold).
     private let weights: [CGFloat] = [2, 5, 9, 16]
 
-    /// Left-handers rest their hand on the left, so the tools cluster on the
-    /// right; right-handers get them on the left (Procreate convention).
-    private var trailing: Bool { ThemeStore.shared.handedness.controlsTrailing }
-
     var body: some View {
         Group {
             if collapsed { collapsedBar } else { fullBar }
         }
-        .padding(.horizontal, collapsed ? 14 : 18)
-        .padding(.vertical, collapsed ? 10 : 10)
-        .frame(maxWidth: .infinity, alignment: collapsed ? (trailing ? .trailing : .leading) : .center)
-        .background { if !collapsed { barBackground } }
+        .padding(.horizontal, collapsed ? 6 : 16)
+        .padding(.vertical, collapsed ? 6 : 12)
+        .background { pillBackground }
+        .offset(x: offset.width + drag.width, y: offset.height + drag.height)
+        .padding(.bottom, 10)
         .popover(isPresented: $showWheel) {
             MutedWheel(current: controller.ink.isEraser ? nil
                        : (controller.ink.r, controller.ink.g, controller.ink.b)) { rgb in
@@ -393,74 +417,115 @@ struct InkToolbar: View {
         }
     }
 
-    private var barBackground: some View {
-        Rectangle().fill(Paper.raised.opacity(0.98))
-            .overlay(Rectangle().frame(height: 1).foregroundStyle(Paper.line), alignment: .top)
+    /// A rounded, floating pill — no longer an edge-to-edge bar.
+    private var pillBackground: some View {
+        RoundedRectangle(cornerRadius: collapsed ? 28 : 22, style: .continuous)
+            .fill(Paper.raised.opacity(0.99))
+            .overlay(RoundedRectangle(cornerRadius: collapsed ? 28 : 22, style: .continuous)
+                .strokeBorder(Paper.line, lineWidth: 1))
+            .shadow(color: Paper.ink.opacity(0.18), radius: 14, y: 5)
+    }
+
+    /// Drag anywhere on the pill's grip to reposition it, clamped to the screen.
+    private var dragGesture: some Gesture {
+        DragGesture()
+            .updating($drag) { v, s, _ in s = v.translation }
+            .onEnded { v in
+                var o = CGSize(width: offset.width + v.translation.width,
+                               height: offset.height + v.translation.height)
+                if bounds != .zero {
+                    let mx = bounds.width / 2, my = bounds.height
+                    o.width = min(max(o.width, -mx + 40), mx - 40)
+                    o.height = min(max(o.height, -my + 120), 20)
+                }
+                offset = o
+            }
+    }
+
+    /// A grip handle — the drag affordance for moving the pill.
+    private var grip: some View {
+        Capsule().fill(Paper.line)
+            .frame(width: 30, height: 5)
+            .frame(width: 44, height: 26)
+            .contentShape(Rectangle())
+            .gesture(dragGesture)
+            .accessibilityLabel("Move tools")
     }
 
     private var fullBar: some View {
-        HStack(alignment: .top, spacing: 14) {
-            if !trailing { doneColumn; barDivider }
-            toolsStack
-            if trailing { barDivider; doneColumn }
-        }
-    }
-
-    /// Done on top with undo / redo directly beneath it, in a corner.
-    private var doneColumn: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 6) { doneButton; hideButton }
-            HStack(spacing: 6) {
+        VStack(spacing: 10) {
+            HStack(spacing: 14) {
+                grip
+                doneButton
+                barDivider
                 toolButton("arrow.uturn.backward") { controller.undoInk() }
                 toolButton("arrow.uturn.forward")  { controller.redoInk() }
-            }
-        }
-    }
-
-    private var barDivider: some View {
-        Rectangle().fill(Paper.line).frame(width: 1, height: 54)
-    }
-
-    private var toolsStack: some View {
-        VStack(spacing: 10) {
-            HStack(spacing: 18) {
-                if trailing { Spacer() }
-                ForEach(InkSettings.Pen.allCases) { pen in
-                    toolButton(pen.icon, on: !controller.ink.isEraser && controller.ink.pen == pen) {
-                        controller.ink.pen = pen; controller.ink.isEraser = false; controller.applyInk()
-                    }
-                }
+                barDivider
+                brushes
+                barDivider
                 toolButton("eraser", on: controller.ink.isEraser) {
-                    controller.ink.isEraser = true; controller.applyInk()
+                    controller.ink.isEraser = true; showWeights = false; controller.applyInk()
                 }
                 toolButton("lasso", on: controller.isSelecting) { controller.selectStrokes() }
                 toolButton("ruler", on: controller.showRuler) { controller.toggleRuler() }
                 toolButton("trash") { confirmClear = true }
-                if !trailing { Spacer() }
+                hideButton
             }
-            HStack(spacing: 14) {
-                if trailing { Spacer() }
-                ForEach(Array(weights.enumerated()), id: \.offset) { _, w in weightDot(w) }
-                Divider().frame(height: 22)
-                swatch(ink)
-                ForEach(Array(themeInks.enumerated()), id: \.offset) { _, c in swatch(c) }
-                paletteButton
-                if !trailing { Spacer() }
+            if showWeights { weightRow }
+            colorRow
+        }
+    }
+
+    /// The six pens. Tapping the already-selected pen discloses the sizes.
+    private var brushes: some View {
+        HStack(spacing: 14) {
+            ForEach(InkSettings.Pen.allCases) { pen in
+                let selected = !controller.ink.isEraser && controller.ink.pen == pen
+                toolButton(pen.icon, on: selected) {
+                    if selected {
+                        withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) { showWeights.toggle() }
+                    } else {
+                        controller.ink.pen = pen; controller.ink.isEraser = false
+                        controller.applyInk()
+                    }
+                }
             }
         }
     }
 
-    /// When hidden, a small Notes-style circle floats in the corner (showing the
-    /// current ink color); tap it to bring the tools back. Done sits beside it.
+    private var weightRow: some View {
+        HStack(spacing: 14) {
+            ForEach(Array(weights.enumerated()), id: \.offset) { _, w in weightDot(w) }
+        }
+        .transition(.opacity.combined(with: .move(edge: .top)))
+    }
+
+    private var colorRow: some View {
+        HStack(spacing: 12) {
+            swatch(ink)
+            ForEach(Array(themeInks.enumerated()), id: \.offset) { _, c in swatch(c) }
+            paletteButton
+        }
+    }
+
+    private var barDivider: some View {
+        Rectangle().fill(Paper.line).frame(width: 1, height: 26)
+    }
+
+    /// When hidden, a small Notes-style circle floats (showing the current ink
+    /// color); tap it to bring the tools back. Done sits beside it.
     private var collapsedBar: some View {
         HStack(spacing: 12) {
-            if trailing { doneButton; expandCircle }
-            else { expandCircle; doneButton }
+            grip
+            expandCircle
+            doneButton
         }
     }
 
     private var expandCircle: some View {
-        Button { withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { collapsed = false } } label: {
+        Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { controller.inkToolsCollapsed = false }
+        } label: {
             ZStack {
                 Circle().fill(Paper.raised)
                     .overlay(Circle().strokeBorder(Paper.line, lineWidth: 1))
@@ -507,7 +572,7 @@ struct InkToolbar: View {
     }
 
     private var hideButton: some View {
-        Button { withAnimation(.easeOut(duration: 0.2)) { collapsed = true } } label: {
+        Button { withAnimation(.easeOut(duration: 0.2)) { controller.inkToolsCollapsed = true } } label: {
             Image(systemName: "chevron.down")
                 .font(.system(size: 16))
                 .foregroundStyle(Paper.inkSoft)

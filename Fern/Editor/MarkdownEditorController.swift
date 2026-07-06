@@ -30,12 +30,41 @@ final class MarkdownEditorController {
     /// The current pen/color/width selection.
     var ink = InkSettings()
 
+    /// The floating ink toolbar auto-collapses to its circle when a stroke
+    /// begins, so the tools never sit under your hand while you write.
+    var inkToolsCollapsed = false
+
+    /// An OCR estimate of how many words you've handwritten, shown beside the
+    /// typed count while drawing. Recomputed on a debounce as the ink changes.
+    var inkWordCount: Int = 0
+    @ObservationIgnored private var inkOCRWork: DispatchWorkItem?
+
     /// The word the caret currently sits in (empty when between words). Observed
     /// by the synonym strip.
     var currentWord: String = ""
 
-    /// Live word count, shown in the accessory bar.
+    /// Live word count of the typed body, shown in the accessory bar.
     var wordCount: Int = 0
+
+    /// Debounced OCR of the current drawing → a handwritten word count.
+    func scheduleInkWordCount() {
+        inkOCRWork?.cancel()
+        guard let c = canvas else { return }
+        let work = DispatchWorkItem { [weak self] in
+            let drawing = c.drawing
+            guard !drawing.strokes.isEmpty,
+                  drawing.bounds.width > 1, drawing.bounds.height > 1 else {
+                self?.inkWordCount = 0; return
+            }
+            let image = drawing.image(from: drawing.bounds, scale: 2)
+            Task { @MainActor in
+                let text = await HandwritingOCR.recognize(image)
+                self?.inkWordCount = text.split(whereSeparator: \.isWhitespace).count
+            }
+        }
+        inkOCRWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2, execute: work)
+    }
 
     /// Present the inline-photo picker (wired by the editor view).
     @ObservationIgnored var requestPhoto: (() -> Void)?

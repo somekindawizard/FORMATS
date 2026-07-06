@@ -7,6 +7,7 @@ import CoreLocation
 struct EntryEditorView: View {
     @Bindable var entry: Entry
     @Environment(\.modelContext) private var context
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @Query private var allEntries: [Entry]
     @FocusState private var bodyFocused: Bool
     @State private var locator = LocationProvider()
@@ -64,12 +65,19 @@ struct EntryEditorView: View {
                     .padding(.horizontal, -22)
             }
             .padding(.horizontal, 22)
-            .safeAreaInset(edge: .bottom) {
-                // The formatting toolbar is now the keyboard's inputAccessoryView;
-                // only the ink toolbar rides here (keyboard is down while drawing).
-                if controller.isDrawing {
-                    InkToolbar(controller: controller)
+
+            // The floating, movable ink pill (keyboard is down while drawing).
+            if controller.isDrawing {
+                GeometryReader { geo in
+                    InkToolbar(controller: controller, bounds: geo.size)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                 }
+                .ignoresSafeArea(.keyboard)
+                // Live word count — typed, plus an OCR estimate of handwriting.
+                InkWordCountBadge(typed: controller.wordCount, ink: controller.inkWordCount)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .padding(.leading, 22)
+                    .allowsHitTesting(false)
             }
 
             if entry.isLocked && !noteUnlocked {
@@ -215,6 +223,8 @@ struct EntryEditorView: View {
         }
         .onAppear {
             controller.requestPhoto = { showInlinePhotoPicker = true }
+            // On iPad/Mac, collapse the sidebar to give the note the full width.
+            if sizeClass == .regular { FernNav.shared.columnVisibility = .detailOnly }
             if entry.isLocked && !noteUnlocked {
                 Task { await tryUnlockNote() }
             } else {
@@ -295,6 +305,32 @@ struct EntryEditorView: View {
         if let image = renderer.uiImage {
             shareItems = ShareItems(items: [image])
         }
+    }
+}
+
+// MARK: - Ink word count
+
+/// A small floating readout shown while drawing: typed words, plus an OCR
+/// estimate of handwritten words when there's ink to count.
+private struct InkWordCountBadge: View {
+    let typed: Int
+    let ink: Int
+
+    private var label: String {
+        ink > 0 ? "\(typed) typed · ~\(ink) ink" : "\(typed) words"
+    }
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Image(systemName: "pencil.and.scribble").font(.system(size: 10))
+            Text(label)
+        }
+        .font(.system(size: 11, weight: .medium, design: .monospaced))
+        .foregroundStyle(Paper.inkSoft)
+        .padding(.vertical, 5).padding(.horizontal, 10)
+        .background(Capsule().fill(Paper.raised.opacity(0.96))
+            .overlay(Capsule().strokeBorder(Paper.line, lineWidth: 1)))
+        .padding(.top, 6)
     }
 }
 

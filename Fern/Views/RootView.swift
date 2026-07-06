@@ -32,6 +32,13 @@ enum Destination: String, CaseIterable, Identifiable {
     }
 }
 
+/// Shared navigation state so the Today masthead can toggle the sidebar and the
+/// editor can collapse it — mirrors the `ThemeStore.shared` convention.
+@Observable final class FernNav {
+    static let shared = FernNav()
+    var columnVisibility: NavigationSplitViewVisibility = .automatic
+}
+
 struct RootView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.modelContext) private var context
@@ -47,9 +54,10 @@ struct RootView: View {
     @AppStorage("fern.userName") private var userName = ""
 
     var body: some View {
-        Group {
+        @Bindable var nav = FernNav.shared
+        return Group {
             if sizeClass == .regular {
-                NavigationSplitView {
+                NavigationSplitView(columnVisibility: $nav.columnVisibility) {
                     List(selection: $sidebarSelection) {
                         ForEach(Destination.allCases) { dest in
                             Label(dest.title, systemImage: dest.symbol).tag(dest)

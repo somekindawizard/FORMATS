@@ -3,6 +3,7 @@ import SwiftData
 
 struct TodayView: View {
     @Environment(\.modelContext) private var context
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(PromptStore.self) private var promptStore
     @Query(sort: \Entry.createdAt, order: .reverse) private var entries: [Entry]
 
@@ -45,7 +46,21 @@ struct TodayView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(Date.now.formatted(.dateTime.weekday(.wide).month(.wide).day()))
                             .sectionLabel()
-                        HStack(alignment: .center) {
+                        HStack(alignment: .center, spacing: 12) {
+                            // Sidebar toggle — iPad/Mac only (iPhone uses the tab bar).
+                            if sizeClass == .regular {
+                                Button {
+                                    withAnimation(.easeInOut(duration: 0.25)) {
+                                        FernNav.shared.columnVisibility =
+                                            FernNav.shared.columnVisibility == .detailOnly ? .all : .detailOnly
+                                    }
+                                } label: {
+                                    Image(systemName: "sidebar.leading")
+                                        .font(.system(size: 18, weight: .medium))
+                                        .foregroundStyle(Paper.inkSoft)
+                                }
+                                .accessibilityLabel("Toggle sidebar")
+                            }
                             Text("Today")
                                 .font(.display(30))
                                 .foregroundStyle(Paper.ink)
