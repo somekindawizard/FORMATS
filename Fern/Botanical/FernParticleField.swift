@@ -32,9 +32,13 @@ final class FernTuning: ObservableObject {
 
     init(_ params: FernPhysicsParams = .defaults) {
         if let data = UserDefaults.standard.data(forKey: Self.storageKey),
-           let saved = try? JSONDecoder().decode(FernPhysicsParams.self, from: data) {
+           let saved = try? JSONDecoder().decode(FernPhysicsParams.self, from: data),
+           saved != .defaults {
             self.params = saved
         } else {
+            // A saved session identical to the shipped defaults is stale —
+            // drop it so future default changes aren't shadowed.
+            UserDefaults.standard.removeObject(forKey: Self.storageKey)
             self.params = params
         }
     }

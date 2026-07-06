@@ -16,10 +16,13 @@ struct FernPhysicsParams: Codable, Equatable {
     var toneFloor: Float      // matches FlameFern
     var densityDenom: Float   // log-density normalizer (tuned for the point count)
 
+    // Dialed in by hand on-device via Fern Lab (2026-07-06): a lazy spring,
+    // heavy damping, and a small, gentle finger — the fern parts slowly under
+    // a touch and drifts back rather than snapping.
     static let defaults = FernPhysicsParams(
-        springK: 120, damping: 6, globalDamp: 0.985,
-        fingerRadius: 90, pushStrength: 26000, dragCoupling: 2.2,
-        pointSize: 2.2, toneGamma: 2.3, toneFloor: 0.55, densityDenom: 5.2)
+        springK: 24, damping: 12.3, globalDamp: 0.982,
+        fingerRadius: 30, pushStrength: 2833, dragCoupling: 0.70,
+        pointSize: 1.30, toneGamma: 2.3, toneFloor: 0.40, densityDenom: 5.2)
 }
 
 /// Pure integrator for one point, one step. The Metal `fern_physics` kernel is a
