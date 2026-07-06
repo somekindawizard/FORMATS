@@ -114,7 +114,12 @@ struct LockGate<Content: View>: View {
         guard welcomeGate || lock.isEnabled else { return }
         locked = true
         lock.relock()
-        fern = nil   // a new fern each time — grown off-main by the veil's .task
+        // Grow the replacement fern HERE (off-main), not via the veil's .task:
+        // .task only fires when the veil newly enters the hierarchy, so
+        // relocking while the gate was already up (or while backgrounded)
+        // left fern nil forever — an empty veil on return.
+        fern = nil
+        Task { fern = await Self.growFern() }
         veilOpacity = 1
         pulse = false
         shakeX = 0
