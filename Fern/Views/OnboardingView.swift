@@ -7,7 +7,7 @@ struct OnboardingView: View {
     var onBegin: (String) -> Void
     @State private var name = ""
     @FocusState private var nameFocused: Bool
-    private let fern = BarnsleyFern.random(count: 26_000)
+    private let fern = BarnsleyFern.random(count: 130_000)
 
     private var trimmedName: String {
         name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -18,7 +18,7 @@ struct OnboardingView: View {
             PaperBackground()
             VStack(spacing: 26) {
                 Spacer()
-                BarnsleyFernView(fern: fern, tint: Paper.accent, dotSize: 1.1, alpha: 0.7)
+                FlameFernView(fern: fern)
                     .frame(width: 140, height: 196)
 
                 VStack(spacing: 12) {

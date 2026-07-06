@@ -14,7 +14,7 @@ struct PaperCard: View {
     private let accent  = Color(red: 0.604, green: 0.290, blue: 0.176)
     private let line    = Color(red: 0.922, green: 0.914, blue: 0.882)
     // Each entry grows its own fern — the note's fingerprint, stable across shares.
-    private var fern: BarnsleyFern { BarnsleyFern.forID(entry.id, count: 14_000) }
+    private var fern: BarnsleyFern { BarnsleyFern.forID(entry.id, count: 130_000) }
 
     /// Card typography — large, fixed-light, with the editorial figure/ligature
     /// features. Fed to the same `RenderedBody` renderer the reader uses.
@@ -70,8 +70,12 @@ struct PaperCard: View {
                     .foregroundStyle(ink)
                 + Text(".").font(.system(size: 40, design: .serif)).foregroundStyle(accent)
                 Spacer()
-                BarnsleyFernView(fern: fern, tint: accent, dotSize: 1.0, alpha: 0.7)
-                    .frame(width: 130, height: 180)
+                // The card is snapshotted synchronously by ImageRenderer, so
+                // render the flame fern here rather than via the async view.
+                if let img = FlameFern.image(fern, height: 360, tint: UIColor(accent)) {
+                    Image(uiImage: img).resizable().scaledToFit()
+                        .frame(width: 130, height: 180)
+                }
             }
         }
         .padding(64)

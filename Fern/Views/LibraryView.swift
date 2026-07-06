@@ -201,10 +201,10 @@ struct LibraryView: View {
 }
 
 private struct EmptyStateFern: View {
-    private let fern = BarnsleyFern.random(count: 18_000)
+    private let fern = BarnsleyFern.random(count: 130_000)
     var body: some View {
         VStack(spacing: 12) {
-            BarnsleyFernView(fern: fern)
+            FlameFernView(fern: fern)
                 .frame(width: 220, height: 300)
             Text("Begin a new entry from Today.")
                 .font(.calloutSerif)

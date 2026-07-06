@@ -18,7 +18,7 @@ struct LockGate<Content: View>: View {
 
     // A fresh, unique fern grows on every unlock — regenerated when the gate
     // re-locks. Slightly fewer points since it re-draws each frame while swaying.
-    @State private var fern = BarnsleyFern.random(count: 42_000)
+    @State private var fern = BarnsleyFern.random(count: 130_000)
 
     var body: some View {
         ZStack {
@@ -39,7 +39,7 @@ struct LockGate<Content: View>: View {
         ZStack {
             PaperBackground()
             VStack(spacing: 22) {
-                BarnsleyFernView(fern: fern, dotSize: 0.9, alpha: 0.5, sway: true)
+                FlameFernView(fern: fern, sway: true)
                     .frame(maxWidth: 360)
                     .frame(height: 460)
                     .scaleEffect(pulse ? 1.04 : 1.0)
@@ -64,7 +64,7 @@ struct LockGate<Content: View>: View {
         guard welcomeGate || lock.isEnabled else { return }
         locked = true
         lock.relock()
-        fern = BarnsleyFern.random(count: 42_000)   // a new fern each time
+        fern = BarnsleyFern.random(count: 130_000)   // a new fern each time
         veilOpacity = 1
         pulse = false
         shakeX = 0

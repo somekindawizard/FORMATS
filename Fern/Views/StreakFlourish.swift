@@ -6,7 +6,7 @@ struct StreakFlourish: View {
     let days: Int
     let onDismiss: () -> Void
     @State private var appear = false
-    private let fern = BarnsleyFern.random(count: 22_000)
+    private let fern = BarnsleyFern.random(count: 130_000)
 
     var body: some View {
         ZStack {
@@ -15,7 +15,7 @@ struct StreakFlourish: View {
                 .onTapGesture { dismiss() }
 
             VStack(spacing: 14) {
-                BarnsleyFernView(fern: fern, tint: Paper.accent, dotSize: 1.1, alpha: 0.85)
+                FlameFernView(fern: fern)
                     .frame(width: 120, height: 168)
                     .scaleEffect(appear ? 1 : 0.5, anchor: .bottom)
                 VStack(spacing: 4) {
