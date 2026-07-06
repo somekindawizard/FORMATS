@@ -14,7 +14,7 @@ struct PaperCard: View {
     private let accent  = Color(red: 0.604, green: 0.290, blue: 0.176)
     private let line    = Color(red: 0.922, green: 0.914, blue: 0.882)
     // Each entry grows its own fern — the note's fingerprint, stable across shares.
-    private var fern: BarnsleyFern { BarnsleyFern.forID(entry.id, count: 130_000) }
+    private var fern: BarnsleyFern { BarnsleyFern.forID(entry.id, count: 800_000) }
 
     /// Card typography — large, fixed-light, with the editorial figure/ligature
     /// features. Fed to the same `RenderedBody` renderer the reader uses.

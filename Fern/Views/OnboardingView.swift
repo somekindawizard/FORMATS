@@ -7,7 +7,7 @@ struct OnboardingView: View {
     var onBegin: (String) -> Void
     @State private var name = ""
     @FocusState private var nameFocused: Bool
-    private let fern = BarnsleyFern.random(count: 130_000)
+    private let fern = BarnsleyFern.random(count: 800_000)
 
     private var trimmedName: String {
         name.trimmingCharacters(in: .whitespacesAndNewlines)
