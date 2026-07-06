@@ -21,7 +21,11 @@ enum AssetSync {
     static func recordDrawing(_ context: ModelContext, entryID: UUID, data: Data) {
         let name = "\(entryID.uuidString).drawing"
         if let existing = fetch(context, name: name) {
+            // Re-drawing after an erase resurrects a tombstoned record.
+            let kindChanged = existing.kind != "drawing"
+            if kindChanged { existing.kind = "drawing" }
             if existing.data != data { existing.data = data; try? context.save() }
+            else if kindChanged { try? context.save() }
         } else {
             context.insert(Asset(name: name, kind: "drawing", data: data))
             try? context.save()
@@ -31,14 +35,23 @@ enum AssetSync {
     // MARK: delete (tombstones)
 
     /// Deletion must propagate: rather than deleting the record (which other
-    /// devices would just re-upload from their local file), we EMPTY its bytes.
-    /// The empty record syncs everywhere, and `materializeAll` removes the
-    /// matching local file on each device. Without this, deleted photos and
-    /// erased handwriting resurrected on every sync.
+    /// devices would just re-upload from their local file), we EMPTY its bytes
+    /// and mark the `kind` with a ".deleted" suffix. The record syncs
+    /// everywhere, and `materializeAll` removes the matching local file on
+    /// each device. Without this, deleted photos and erased handwriting
+    /// resurrected on every sync.
+    ///
+    /// The marker lives in `kind` (a tiny string) — NOT in the data — so that
+    /// materializeAll can detect tombstones without touching `data`, which is
+    /// `.externalStorage`: reading it faults the whole blob into memory
+    /// (checking `data.isEmpty` per record loaded every photo in the library
+    /// on every launch and jetsammed the app).
     @MainActor
     static func tombstone(_ context: ModelContext, name: String) {
-        guard let existing = fetch(context, name: name), !existing.data.isEmpty else { return }
+        guard let existing = fetch(context, name: name),
+              !existing.kind.hasSuffix(".deleted") else { return }
         existing.data = Data()
+        existing.kind += ".deleted"
         try? context.save()
     }
 
@@ -63,8 +76,14 @@ enum AssetSync {
     // MARK: materialize (on the device that synced them in)
 
     /// Write any asset whose local file is missing; remove files whose asset
-    /// was tombstoned (emptied) on another device; collapse duplicate records
-    /// (two devices backfilling the same name). Idempotent and cheap.
+    /// was tombstoned on another device; collapse duplicate records (two
+    /// devices backfilling the same name). Idempotent and cheap.
+    ///
+    /// CRITICAL: this must never read `asset.data` outside the rare
+    /// missing-file branch. `data` is `.externalStorage`, so any access —
+    /// even `.isEmpty` — faults the whole blob into memory; doing that per
+    /// record loaded every photo in the library on every launch/foreground
+    /// and jetsammed the app. Tombstones are detected from `kind` instead.
     static func materializeAll(_ context: ModelContext) {
         guard let assets = try? context.fetch(FetchDescriptor<Asset>()) else { return }
         // Dedup by name. A tombstone among duplicates means a deletion raced a
@@ -73,9 +92,11 @@ enum AssetSync {
         var removedDupes = false
         for asset in assets {
             if let kept = byName[asset.name] {
-                if kept.data.isEmpty || asset.data.isEmpty {
-                    let tomb = kept.data.isEmpty ? kept : asset
-                    let other = kept.data.isEmpty ? asset : kept
+                let keptDead = kept.kind.hasSuffix(".deleted")
+                let mineDead = asset.kind.hasSuffix(".deleted")
+                if keptDead || mineDead {
+                    let tomb = keptDead ? kept : asset
+                    let other = keptDead ? asset : kept
                     context.delete(other)
                     byName[asset.name] = tomb
                 } else {
@@ -89,13 +110,20 @@ enum AssetSync {
         if removedDupes { try? context.save() }
 
         for asset in byName.values {
-            let dir = asset.kind == "drawing" ? DrawingStore.directory : PhotoStore.directory
+            let dead = asset.kind.hasSuffix(".deleted")
+            let baseKind = dead ? String(asset.kind.dropLast(".deleted".count)) : asset.kind
+            let dir = baseKind == "drawing" ? DrawingStore.directory : PhotoStore.directory
             let url = dir.appendingPathComponent(asset.name)
-            if asset.data.isEmpty {
+            if dead {
                 // Tombstone — a deletion propagating from another device.
                 try? FileManager.default.removeItem(at: url)
             } else if !FileManager.default.fileExists(atPath: url.path) {
-                try? asset.data.write(to: url)
+                // The only place the blob is faulted in — and only for files
+                // that are genuinely missing locally. Pooled so consecutive
+                // writes don't accumulate.
+                autoreleasepool {
+                    if !asset.data.isEmpty { try? asset.data.write(to: url) }
+                }
             }
         }
     }
