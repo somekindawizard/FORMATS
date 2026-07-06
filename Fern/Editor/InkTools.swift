@@ -245,6 +245,7 @@ extension MarkdownEditorController {
         let reachInk = max(0, inkBottom + 60 - content)
         let extra = isDrawing ? max(1200, inkBottom + 500 - content) : reachInk
         if abs(tv.contentInset.bottom - extra) > 0.5 { tv.contentInset.bottom = extra }
+        inkRoomInset = extra   // caret-reveal subtracts this (room ≠ occlusion)
         // The canvas must span the whole scrollable extent (text + the room).
         let h = content + extra
         if abs(c.frame.height - h) > 0.5 || abs(c.frame.width - w) > 0.5 {
@@ -282,6 +283,16 @@ extension MarkdownEditorController {
         }
         // resizeCanvas sets the scroll room + inset for the current mode.
         resizeCanvas()
+        // Leaving draw mode shrinks the room; if the user was scrolled deep in
+        // it, the offset is now out of range — clamp so the next touch doesn't
+        // rubber-band the page in a jarring jump.
+        if !active, let tv = textView {
+            let maxY = max(-tv.adjustedContentInset.top,
+                           tv.contentSize.height + tv.contentInset.bottom - tv.bounds.height)
+            if tv.contentOffset.y > maxY {
+                tv.setContentOffset(CGPoint(x: 0, y: maxY), animated: true)
+            }
+        }
     }
 
     /// Re-apply the ruled / dot paper pattern live (rule or spacing changed).

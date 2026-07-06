@@ -216,8 +216,14 @@ struct MarkdownTextView: UIViewRepresentable {
             guard let range = tv.selectedTextRange else { return }
             let caret = tv.caretRect(for: range.end)
             guard !caret.isNull, caret.minY.isFinite, caret.maxY.isFinite else { return }
+            // adjustedContentInset.bottom mixes real occlusion (keyboard, safe
+            // area) with the scrollable ink room; only occlusion hides the
+            // caret. Counting the room here over-scrolled on every keystroke
+            // in any note with handwriting below the text.
+            let room = parent.controller?.inkRoomInset ?? 0
+            let occlusion = max(0, tv.adjustedContentInset.bottom - room)
             let visibleTop = tv.contentOffset.y + tv.adjustedContentInset.top
-            let visibleBottom = tv.contentOffset.y + tv.bounds.height - tv.adjustedContentInset.bottom
+            let visibleBottom = tv.contentOffset.y + tv.bounds.height - occlusion
             if caret.maxY > visibleBottom {
                 tv.setContentOffset(CGPoint(x: 0, y: tv.contentOffset.y + (caret.maxY - visibleBottom) + 8),
                                     animated: false)

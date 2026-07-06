@@ -34,6 +34,12 @@ final class MarkdownEditorController {
     /// begins, so the tools never sit under your hand while you write.
     var inkToolsCollapsed = false
 
+    /// How much of the text view's bottom contentInset is *scrollable ink room*
+    /// (reaching handwriting below the text) rather than real occlusion like
+    /// the keyboard. Caret-reveal math must subtract this — treating the room
+    /// as occlusion made every keystroke over-scroll into the blank slab.
+    @ObservationIgnored var inkRoomInset: CGFloat = 0
+
     /// An OCR estimate of how many words you've handwritten, shown beside the
     /// typed count while drawing. Recomputed on a debounce as the ink changes.
     var inkWordCount: Int = 0
