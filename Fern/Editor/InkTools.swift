@@ -766,17 +766,29 @@ struct MutedWheel: View {
             .frame(width: side, height: side)
             .contentShape(Circle())
             .gesture(
-                DragGesture(minimumDistance: 0).onChanged { v in
-                    let cx = side / 2, cy = side / 2
-                    var a = atan2(v.location.y - cy, v.location.x - cx)
-                    if a < 0 { a += 2 * .pi }
-                    let h = a / (2 * .pi)
-                    hue = h
-                    onPick(Self.rgb(from: h))
-                }
+                // The indicator previews live; the pick commits on release —
+                // committing per drag tick re-encoded the ink prefs to
+                // UserDefaults and rebuilt the PencilKit tool dozens of times
+                // per wheel spin.
+                DragGesture(minimumDistance: 0)
+                    .onChanged { v in
+                        hue = Self.hue(at: v.location, side: side)
+                    }
+                    .onEnded { v in
+                        let h = Self.hue(at: v.location, side: side)
+                        hue = h
+                        onPick(Self.rgb(from: h))
+                    }
             )
         }
         .onAppear { if hue == nil { hue = Self.hue(of: current) } }
+    }
+
+    /// The hue under a touch point on the wheel.
+    private static func hue(at p: CGPoint, side: CGFloat) -> Double {
+        var a = atan2(p.y - side / 2, p.x - side / 2)
+        if a < 0 { a += 2 * .pi }
+        return a / (2 * .pi)
     }
 
     /// The wheel hue for a color (nil when there's no current color).

@@ -48,10 +48,28 @@ final class JournalingTests: XCTestCase {
         XCTAssertEqual(WritingStats.currentStreak(entries, asOf: now), 3)
     }
 
-    func test_currentStreak_zeroWhenNothingToday() {
+    // A chain ending yesterday is intact — you just haven't written *yet*
+    // today. (Reading "0 days" every morning mid-streak was demoralizing and
+    // corrupted the milestone bookkeeping.)
+    func test_currentStreak_survivesUntilEndOfToday() {
         let now = date(2026, 6, 17)
-        let entries = [Entry(title: "", body: "x", collection: .journal, createdAt: date(2026, 6, 16))]
+        let entries = [
+            Entry(title: "", body: "x", collection: .journal, createdAt: date(2026, 6, 16)),
+            Entry(title: "", body: "x", collection: .journal, createdAt: date(2026, 6, 15)),
+        ]
+        XCTAssertEqual(WritingStats.currentStreak(entries, asOf: now), 2)
+    }
+
+    func test_currentStreak_zeroAfterAFullMissedDay() {
+        let now = date(2026, 6, 17)
+        let entries = [Entry(title: "", body: "x", collection: .journal, createdAt: date(2026, 6, 15))]
         XCTAssertEqual(WritingStats.currentStreak(entries, asOf: now), 0)
+    }
+
+    func test_currentStreak_wroteTodayNeedsNoGrace() {
+        let now = date(2026, 6, 17, 20)
+        let entries = [Entry(title: "", body: "x", collection: .journal, createdAt: date(2026, 6, 17, 8))]
+        XCTAssertEqual(WritingStats.currentStreak(entries, asOf: now), 1)
     }
 
     // MARK: prompts

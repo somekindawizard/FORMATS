@@ -9,7 +9,7 @@ struct EntryRow: View {
 
     private var cover: UIImage? {
         guard !entry.isLocked, !entry.coverPhotoName.isEmpty else { return nil }
-        return PhotoStore.load(entry.coverPhotoName)
+        return PhotoStore.thumbnail(entry.coverPhotoName)   // cached, row-sized decode
     }
 
     var body: some View {

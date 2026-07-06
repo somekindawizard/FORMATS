@@ -18,6 +18,7 @@ struct SettingsView: View {
     @State private var shareItems: ShareItems?
     @State private var exporting = false
     @AppStorage("fern.userName") private var userName = ""
+    @State private var nameSyncTask: Task<Void, Never>?
 
     var body: some View {
         @Bindable var lock = lock
@@ -33,7 +34,16 @@ struct SettingsView: View {
                             .multilineTextAlignment(.trailing)
                             .textInputAutocapitalization(.words)
                             .foregroundStyle(Paper.inkSoft)
-                            .onChange(of: userName) { _, name in NameSync.push(name) }
+                            // Debounced — the KVS is rate-limited, and this
+                            // pushed to iCloud on every typed character.
+                            .onChange(of: userName) { _, name in
+                                nameSyncTask?.cancel()
+                                nameSyncTask = Task {
+                                    try? await Task.sleep(for: .seconds(1))
+                                    guard !Task.isCancelled else { return }
+                                    NameSync.push(name)
+                                }
+                            }
                     }
                 } footer: {
                     Text("What Fern calls you. Syncs across your devices via iCloud.")

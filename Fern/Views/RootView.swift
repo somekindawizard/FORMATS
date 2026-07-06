@@ -88,9 +88,14 @@ struct RootView: View {
             }
         }
         .task {
-            await PromptNotifier.refresh()
+            // The notification permission dialog must not fire underneath the
+            // onboarding cover — it waits until onboarding completes.
+            if onboarded { await PromptNotifier.refresh() }
             SpotlightIndexer.reindexChanged(entries)   // incremental — not the whole corpus
             AssetSync.sync(context.container)   // photos/ink sync on a background context
+        }
+        .onChange(of: onboarded) { _, done in
+            if done { Task { await PromptNotifier.refresh() } }
         }
         .onReceive(NotificationCenter.default.publisher(for: .NSPersistentStoreRemoteChange)) { _ in
             AssetSync.sync(context.container)

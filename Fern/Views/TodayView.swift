@@ -40,13 +40,17 @@ struct TodayView: View {
     // keystroke-autosave while typing in a pushed editor.
     @State private var wordsThisWeek = 0
     @State private var streak = 0
+    @State private var streakAtRisk = false
     @State private var yearAgo: Entry?
 
     private func recomputeStats() {
         wordsThisWeek = WritingStats.wordsThisWeek(entries)
         streak = WritingStats.currentStreak(entries)
+        streakAtRisk = WritingStats.streakAtRisk(entries)
         yearAgo = OnThisDay.entries(from: entries).first
-        checkMilestone()
+        // Milestones celebrate the day you WRITE the milestone entry — not a
+        // morning where yesterday's chain merely survives on grace.
+        if !streakAtRisk { checkMilestone() }
     }
 
     var body: some View {
@@ -98,7 +102,8 @@ struct TodayView: View {
                         HStack(spacing: 0) {
                             statCell("\(wordsThisWeek)", "words this week")
                             Rectangle().fill(Paper.line).frame(width: 1, height: 36)
-                            statCell(streak == 1 ? "1 day" : "\(streak) days", "writing streak")
+                            statCell(streak == 1 ? "1 day" : "\(streak) days",
+                                     streakAtRisk ? "write today to keep it" : "writing streak")
                         }
                         .card(padding: 14)
                     }
