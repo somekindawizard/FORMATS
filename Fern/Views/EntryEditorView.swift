@@ -19,6 +19,10 @@ struct EntryEditorView: View {
     @State private var showInlinePhotoPicker = false
     @State private var inlinePhotoPicks: [PhotosPickerItem] = []
     @State private var showLineSpacing = false
+    /// True while the reader is pushed over this editor — the editor's
+    /// onDisappear must NOT treat that as leaving the note (it used to delete
+    /// a still-blank entry out from under the live ReadingView).
+    @State private var showReader = false
 
     private var notebooks: [String] {
         Array(Set(allEntries.compactMap(\.notebook))).sorted()
@@ -102,11 +106,10 @@ struct EntryEditorView: View {
                 }
                 .accessibilityLabel(controller.isDrawing ? "Stop drawing" : "Draw")
                 #endif
-                NavigationLink {
-                    ReadingView(entry: entry)
-                } label: {
+                Button { showReader = true } label: {
                     Image(systemName: "book").foregroundStyle(Paper.accent)
                 }
+                .accessibilityLabel("Read")
                 Menu {
                     Button {
                         entry.isPinned.toggle()
@@ -209,7 +212,13 @@ struct EntryEditorView: View {
         }
         .onChange(of: entry.title) { _, _ in entry.updatedAt = .now }
         .onChange(of: entry.body)  { _, _ in entry.updatedAt = .now }
+        .navigationDestination(isPresented: $showReader) {
+            ReadingView(entry: entry)
+        }
         .onDisappear {
+            // The reader riding above us is not "leaving the note" — reaping a
+            // blank entry here would delete the model under the live reader.
+            guard !showReader else { return }
             // Discard a note that was started but never written in.
             if entry.isBlank {
                 DrawingStore.delete(entry.id)
