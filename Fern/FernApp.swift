@@ -31,10 +31,11 @@ struct FernApp: App {
             .environment(lock)
             .environment(promptStore)
             .environment(theme)
-            // Re-render the whole tree when the paper tone / accent changes so
-            // the computed Paper.* colors are picked up everywhere.
-            .id(theme.paletteKey)
-            // Follows the system appearance — light paper, or its dark inverse.
+            // Theme changes propagate via Observation: Paper.* reads the
+            // @Observable ThemeStore during body evaluation, so every view
+            // using it re-renders on change. (No `.id` hammer here — keying
+            // the tree destroyed all state: it ejected you from an open note
+            // and re-locked the app on any theme tweak.)
         }
         .modelContainer(Persistence.shared)
         .commands { FormatCommands() }

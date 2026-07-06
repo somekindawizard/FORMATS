@@ -16,8 +16,9 @@ struct RedwoodApp: App {
             RedwoodRootView()
                 .tint(Paper.accent)
                 .environment(theme)
-                // Re-render when the accent (paletteKey) changes so Paper.* colors refresh.
-                .id(theme.paletteKey)
+                // Theme changes propagate via Observation (Paper.* reads the
+                // @Observable ThemeStore in body) — no `.id`, which would
+                // destroy navigation/editor state on every theme tweak.
         }
         .modelContainer(for: [RWProject.self, RWDocument.self, RWSnapshot.self])
         .commands { FormatCommands() }

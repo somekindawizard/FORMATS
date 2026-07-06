@@ -2,8 +2,9 @@ import SwiftUI
 
 /// The selected paper tone + accent, persisted in UserDefaults. A shared
 /// singleton so `Paper.*` can read it, and also injected via the environment
-/// so Settings can bind to it. Changing either bumps `paletteKey`, which the
-/// app root uses as an `.id` to re-render with the new colors.
+/// so Settings can bind to it. Because this is @Observable and `Paper.*`
+/// reads it during body evaluation, theme changes re-render dependents via
+/// Observation — no `.id` keying at the root (that destroyed all view state).
 @Observable
 final class ThemeStore {
     static let shared = ThemeStore()
@@ -54,6 +55,4 @@ final class ThemeStore {
         let savedSpacing = UserDefaults.standard.double(forKey: "fern.rule.spacing")
         ruleSpacing = savedSpacing > 0 ? savedSpacing : 30
     }
-
-    var paletteKey: String { "\(tone.rawValue)-\(accent.rawValue)-\(displayFont.rawValue)-\(paperRule.rawValue)-\(handedness.rawValue)" }
 }
