@@ -10,6 +10,12 @@ struct LockGate<Content: View>: View {
     @State private var veilOpacity: Double = 1
     @State private var pulse = false
     @State private var shakeX: CGFloat = 0
+    /// True while the Face ID sheet is up — it makes the scene .inactive, and
+    /// the privacy cover must not react to that.
+    @State private var authenticating = false
+    /// Covers content in the app switcher / on interruption (.inactive) so a
+    /// journal page is never captured in the system snapshot.
+    @State private var privacyCover = false
     let content: () -> Content
 
     /// Show the fern when the session hasn't been entered yet and either the
@@ -24,15 +30,41 @@ struct LockGate<Content: View>: View {
         ZStack {
             content()
                 .allowsHitTesting(!gateShown)
+                // Veiled content must be invisible to VoiceOver too.
+                .accessibilityHidden(gateShown || privacyCover)
             if gateShown {
                 veil
                     .opacity(veilOpacity)
                     .transition(.opacity)
+            } else if privacyCover {
+                // Quiet cover for the app-switcher snapshot — no auth needed;
+                // it lifts as soon as the app is active again.
+                ZStack {
+                    PaperBackground()
+                    Text("Fern")
+                        .font(.masthead)
+                        .foregroundStyle(Paper.ink)
+                }
+                .transition(.opacity)
             }
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .background { relock() }
+            switch phase {
+            case .background:
+                relock()
+                privacyCover = false   // gate (if any) takes over from here
+            case .inactive:
+                // Cover content on interruption — but not while the Face ID
+                // sheet (which makes us .inactive) is up, and not under the veil.
+                if !gateShown && !authenticating { privacyCover = true }
+            case .active:
+                privacyCover = false
+            @unknown default:
+                break
+            }
         }
+        .onAppear { lock.gateVisible = gateShown }
+        .onChange(of: gateShown) { _, shown in lock.gateVisible = shown }
     }
 
     private var veil: some View {
@@ -75,7 +107,9 @@ struct LockGate<Content: View>: View {
         withAnimation(.spring(response: 0.35, dampingFraction: 0.55)) { pulse = true }
 
         if lock.isEnabled {
+            authenticating = true
             let ok = await lock.authenticate()
+            authenticating = false
             if ok {
                 dissolve()
             } else {

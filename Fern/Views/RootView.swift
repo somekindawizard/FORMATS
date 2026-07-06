@@ -42,7 +42,12 @@ enum Destination: String, CaseIterable, Identifiable {
 struct RootView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.modelContext) private var context
+    @Environment(BiometricLock.self) private var lock
     @Query private var entries: [Entry]
+    /// A Spotlight-opened entry that arrived while the gate was up — presented
+    /// only once the gate is passed (sheets would otherwise float above it).
+    @State private var pendingSpotlightID: UUID?
+    @State private var pendingQuickCompose = false
     // Sidebar selection on iOS requires an optional binding; default to Today.
     @State private var sidebarSelection: Destination? = .today
     // Persisted so a theme change (which rebuilds the tree) keeps you on the tab.
@@ -108,6 +113,16 @@ struct RootView: View {
         .onOpenURL { url in
             if url.scheme == "fern" && url.host == "new" { startQuickCompose() }
         }
+        .onChange(of: lock.gateVisible) { _, visible in
+            if visible {
+                // Relocked — anything presented above the veil must come down.
+                spotlightEntry = nil
+            } else {
+                // Gate passed — deliver whatever arrived while it was up.
+                if let id = pendingSpotlightID { pendingSpotlightID = nil; openEntry(id) }
+                if pendingQuickCompose { pendingQuickCompose = false; startQuickCompose() }
+            }
+        }
         .fullScreenCover(isPresented: .constant(!onboarded || userName.isEmpty)) {
             OnboardingView { name in
                 userName = name
@@ -118,6 +133,9 @@ struct RootView: View {
     }
 
     private func openEntry(_ uuid: UUID) {
+        // Never present journal content above the lock veil — hold it until
+        // the gate is passed.
+        guard !lock.gateVisible else { pendingSpotlightID = uuid; return }
         let descriptor = FetchDescriptor<Entry>(predicate: #Predicate { $0.id == uuid })
         spotlightEntry = try? context.fetch(descriptor).first
     }
@@ -130,6 +148,7 @@ struct RootView: View {
     }
 
     private func startQuickCompose() {
+        guard !lock.gateVisible else { pendingQuickCompose = true; return }
         let entry = Entry(title: "", body: "", collection: .piece)
         context.insert(entry)
         spotlightEntry = entry

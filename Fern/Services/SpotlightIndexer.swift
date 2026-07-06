@@ -9,6 +9,12 @@ enum SpotlightIndexer {
 
     private static func attributeSet(for entry: Entry) -> CSSearchableItemAttributeSet {
         let attrs = CSSearchableItemAttributeSet(contentType: .text)
+        // A Face ID-locked note must not leak its contents into system search —
+        // it stays findable, but only as an anonymous locked note.
+        if entry.isLocked {
+            attrs.title = "Locked note"
+            return attrs
+        }
         attrs.title = entry.displayTitle
         attrs.contentDescription = String(entry.body.prefix(300))
         attrs.keywords = entry.tagNames

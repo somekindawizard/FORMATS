@@ -13,6 +13,11 @@ final class BiometricLock {
     /// Whether the user is currently authenticated within this app session.
     var isUnlocked: Bool
 
+    /// True while the lock-gate veil (welcome ritual or auth) covers the app.
+    /// Kept in sync by LockGate; lets other layers defer presenting content
+    /// (e.g. a Spotlight result sheet) until the gate has been passed.
+    var gateVisible = false
+
     init() {
         let enabled = UserDefaults.standard.bool(forKey: Self.userDefaultsKey)
         self.isEnabled = enabled

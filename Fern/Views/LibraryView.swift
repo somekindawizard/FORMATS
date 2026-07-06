@@ -174,6 +174,7 @@ struct LibraryView: View {
     private func toggleLock(_ entry: Entry) {
         Haptics.tap()
         entry.isLocked.toggle()
+        SpotlightIndexer.index(entry)   // hide/show content in search now
         try? context.save()
     }
 

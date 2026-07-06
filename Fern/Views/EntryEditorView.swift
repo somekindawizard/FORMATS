@@ -65,6 +65,8 @@ struct EntryEditorView: View {
                     .padding(.horizontal, -22)
             }
             .padding(.horizontal, 22)
+            // A locked note's content must be invisible to VoiceOver too.
+            .accessibilityHidden(entry.isLocked && !noteUnlocked)
 
             // The floating, movable ink pill (keyboard is down while drawing).
             if controller.isDrawing {
@@ -115,6 +117,7 @@ struct EntryEditorView: View {
                     Button {
                         entry.isLocked.toggle()
                         if entry.isLocked { noteUnlocked = true }
+                        SpotlightIndexer.index(entry)   // hide/show content in search now
                     } label: {
                         Label(entry.isLocked ? "Unlock note" : "Lock note",
                               systemImage: entry.isLocked ? "lock.open" : "lock")

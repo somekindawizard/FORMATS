@@ -33,13 +33,21 @@ struct InteractiveFernView: View {
                         model.began()
                         model.move(to: v.location)
                     }
-                    .onEnded { v in
-                        let moved = hypot(v.translation.width, v.translation.height)
-                        let quick = model.wasQuick
+                    .onEnded { _ in
+                        // A touch that never wandered is a tap (however long it
+                        // was held — a deliberate press should still unlock).
+                        let stayed = model.maxTravel < 12
                         model.end()
-                        if moved < 10 && quick { onTap() }
+                        if stayed { onTap() }
                     }
             )
+            // The gesture alone is invisible to assistive tech — expose the
+            // fern as a button so VoiceOver/Switch Control can get through.
+            .accessibilityElement()
+            .accessibilityLabel("Fern")
+            .accessibilityHint("Opens Fern")
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction { onTap() }
 
             #if DEBUG
             if showLab {
@@ -72,21 +80,26 @@ struct InteractiveFernView: View {
 /// Finger velocity is derived from successive positions (robust across SDKs).
 final class InteractiveFernModel: ObservableObject {
     let touch = FernTouchState()
-    private var startTime = CACurrentMediaTime()
     private var started = false
+    private var startPoint: CGPoint?
     private var lastPoint: CGPoint?
     private var lastMove = CACurrentMediaTime()
-    var wasQuick: Bool { CACurrentMediaTime() - startTime < 0.35 }
+    /// The farthest the touch strayed from where it began — a touch that never
+    /// wanders is a tap, however long it's held.
+    private(set) var maxTravel: CGFloat = 0
 
     func began() {
         if !started {
             started = true
-            startTime = CACurrentMediaTime()
+            startPoint = nil
             lastPoint = nil
+            maxTravel = 0
         }
     }
     func move(to p: CGPoint) {
         let now = CACurrentMediaTime()
+        if startPoint == nil { startPoint = p }
+        if let s = startPoint { maxTravel = max(maxTravel, hypot(p.x - s.x, p.y - s.y)) }
         if let last = lastPoint {
             let dt = max(1.0 / 240.0, now - lastMove)
             let vx = Float((p.x - last.x) / dt)
@@ -103,6 +116,7 @@ final class InteractiveFernModel: ObservableObject {
         touch.touching = false
         touch.fingerVel = .zero
         started = false
+        startPoint = nil
         lastPoint = nil
     }
 }
