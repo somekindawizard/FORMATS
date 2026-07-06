@@ -7,6 +7,7 @@ struct LibraryView: View {
     @State private var selectedTag: String?
     @State private var selectedNotebook: String?
     @State private var draftsOnly = false
+    @State private var draft: Entry?
 
     private var allTags: [String] {
         Array(Set(entries.flatMap(\.tagNames))).sorted()
@@ -89,6 +90,11 @@ struct LibraryView: View {
                 }
                 .accessibilityLabel("Calendar")
             }
+            ToolbarItem(placement: .topBarTrailing) {
+                ComposeButton(action: freeWrite,
+                              templates: Templates.all,
+                              onTemplate: startFromTemplate)
+            }
             if !notebooks.isEmpty || draftsOnly || selectedNotebook != nil {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
@@ -114,6 +120,25 @@ struct LibraryView: View {
         .navigationDestination(for: Entry.self) { entry in
             EntryEditorView(entry: entry)
         }
+        .navigationDestination(item: $draft) { entry in
+            EntryEditorView(entry: entry)
+        }
+    }
+
+    /// Start a fresh blank piece and open it.
+    private func freeWrite() {
+        Haptics.tap()
+        let entry = Entry(title: "", body: "", collection: .piece)
+        context.insert(entry)
+        draft = entry
+    }
+
+    /// Start a new entry pre-filled from a template.
+    private func startFromTemplate(_ template: WritingTemplate) {
+        Haptics.tap()
+        let entry = Entry(title: "", body: template.body, collection: template.collection)
+        context.insert(entry)
+        draft = entry
     }
 
     private func row(_ entry: Entry) -> some View {
@@ -206,7 +231,7 @@ private struct EmptyStateFern: View {
         VStack(spacing: 12) {
             FlameFernView(fern: fern)
                 .frame(width: 220, height: 300)
-            Text("Begin a new entry from Today.")
+            Text("Tap the pencil to begin your first entry.")
                 .font(.calloutSerif)
                 .foregroundStyle(Paper.inkSoft)
         }
