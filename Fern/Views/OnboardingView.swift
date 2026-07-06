@@ -7,7 +7,9 @@ struct OnboardingView: View {
     var onBegin: (String) -> Void
     @State private var name = ""
     @FocusState private var nameFocused: Bool
-    private let fern = BarnsleyFern.random(count: 800_000)
+    // @State so parent re-evaluations don't regrow (and visibly swap) the fern;
+    // count + renderHeight sized to the ~140pt display, not the full-screen fern.
+    @State private var fern = BarnsleyFern.random(count: 110_000)
 
     private var trimmedName: String {
         name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -18,7 +20,7 @@ struct OnboardingView: View {
             PaperBackground()
             VStack(spacing: 26) {
                 Spacer()
-                FlameFernView(fern: fern)
+                FlameFernView(fern: fern, renderHeight: 260)
                     .frame(width: 140, height: 196)
 
                 VStack(spacing: 12) {

@@ -232,10 +232,12 @@ struct LibraryView: View {
 }
 
 private struct EmptyStateFern: View {
-    private let fern = BarnsleyFern.random(count: 800_000)
+    // @State so parent re-evaluations don't regrow (and visibly swap) the fern;
+    // count + renderHeight sized to the ~220pt display, not the full-screen fern.
+    @State private var fern = BarnsleyFern.random(count: 270_000)
     var body: some View {
         VStack(spacing: 12) {
-            FlameFernView(fern: fern)
+            FlameFernView(fern: fern, renderHeight: 400)
                 .frame(width: 220, height: 300)
             Text("Tap the pencil to begin your first entry.")
                 .font(.calloutSerif)

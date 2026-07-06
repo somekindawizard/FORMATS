@@ -13,8 +13,16 @@ struct PaperCard: View {
     private let inkSoft = Color(red: 0.357, green: 0.341, blue: 0.314)
     private let accent  = Color(red: 0.604, green: 0.290, blue: 0.176)
     private let line    = Color(red: 0.922, green: 0.914, blue: 0.882)
-    // Each entry grows its own fern — the note's fingerprint, stable across shares.
-    private var fern: BarnsleyFern { BarnsleyFern.forID(entry.id, count: 800_000) }
+    // Each entry grows its own fern — the note's fingerprint, stable across
+    // shares. A stored `let`: as a computed property this re-ran the full
+    // 800k-point chaos game on every body access, and ImageRenderer evaluates
+    // body more than once. Count sized to the 360pt render.
+    private let fern: BarnsleyFern
+
+    init(entry: Entry) {
+        self.entry = entry
+        self.fern = BarnsleyFern.forID(entry.id, count: 220_000)
+    }
 
     /// Card typography — large, fixed-light, with the editorial figure/ligature
     /// features. Fed to the same `RenderedBody` renderer the reader uses.

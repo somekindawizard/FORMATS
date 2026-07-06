@@ -6,7 +6,9 @@ struct StreakFlourish: View {
     let days: Int
     let onDismiss: () -> Void
     @State private var appear = false
-    private let fern = BarnsleyFern.random(count: 800_000)
+    // @State so parent re-evaluations don't regrow (and visibly swap) the fern;
+    // count + renderHeight sized to the ~120pt display, not the full-screen fern.
+    @State private var fern = BarnsleyFern.random(count: 80_000)
 
     var body: some View {
         ZStack {
@@ -15,7 +17,7 @@ struct StreakFlourish: View {
                 .onTapGesture { dismiss() }
 
             VStack(spacing: 14) {
-                FlameFernView(fern: fern)
+                FlameFernView(fern: fern, renderHeight: 220)
                     .frame(width: 120, height: 168)
                     .scaleEffect(appear ? 1 : 0.5, anchor: .bottom)
                 VStack(spacing: 4) {

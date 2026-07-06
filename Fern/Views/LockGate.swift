@@ -23,8 +23,16 @@ struct LockGate<Content: View>: View {
     private var gateShown: Bool { locked && (welcomeGate || lock.isEnabled) }
 
     // A fresh, unique fern grows on every unlock — regenerated when the gate
-    // re-locks. High point count so the flame render reads as solid ink, not speckle.
-    @State private var fern = BarnsleyFern.random(count: 800_000)
+    // re-locks, always OFF the main thread (an 800k-point chaos game in a
+    // @State initializer re-ran on every LockGate init and churned ~13MB each
+    // time). Freed after unlock; regenerated on relock.
+    @State private var fern: BarnsleyFern?
+
+    private static func growFern() async -> BarnsleyFern {
+        await Task.detached(priority: .userInitiated) {
+            BarnsleyFern.random(count: 800_000)
+        }.value
+    }
 
     var body: some View {
         ZStack {
@@ -71,8 +79,17 @@ struct LockGate<Content: View>: View {
         ZStack {
             PaperBackground()
             VStack(spacing: 22) {
-                InteractiveFernView(fern: fern, tint: Paper.accent) {
-                    Task { await reactAndUnlock() }
+                Group {
+                    if let fern {
+                        InteractiveFernView(fern: fern, tint: Paper.accent) {
+                            Task { await reactAndUnlock() }
+                        }
+                    } else {
+                        // One or two frames while the fern grows off-main.
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .onTapGesture { Task { await reactAndUnlock() } }
+                    }
                 }
                     .frame(maxWidth: 360)
                     .frame(height: 460)
@@ -89,6 +106,7 @@ struct LockGate<Content: View>: View {
                 }
             }
         }
+        .task { if fern == nil { fern = await Self.growFern() } }
     }
 
     private func relock() {
@@ -96,7 +114,7 @@ struct LockGate<Content: View>: View {
         guard welcomeGate || lock.isEnabled else { return }
         locked = true
         lock.relock()
-        fern = BarnsleyFern.random(count: 800_000)   // a new fern each time
+        fern = nil   // a new fern each time — grown off-main by the veil's .task
         veilOpacity = 1
         pulse = false
         shakeX = 0
@@ -129,6 +147,7 @@ struct LockGate<Content: View>: View {
             try? await Task.sleep(for: .seconds(0.5))
             locked = false
             veilOpacity = 1
+            fern = nil   // release the 800k points while the app is open
         }
     }
 
