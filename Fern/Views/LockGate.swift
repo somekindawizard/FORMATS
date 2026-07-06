@@ -39,13 +39,13 @@ struct LockGate<Content: View>: View {
         ZStack {
             PaperBackground()
             VStack(spacing: 22) {
-                FlameFernView(fern: fern, sway: true)
+                InteractiveFernView(fern: fern, tint: Paper.accent) {
+                    Task { await reactAndUnlock() }
+                }
                     .frame(maxWidth: 360)
                     .frame(height: 460)
                     .scaleEffect(pulse ? 1.04 : 1.0)
                     .offset(x: shakeX)
-                    .contentShape(Rectangle())
-                    .onTapGesture { Task { await reactAndUnlock() } }
 
                 VStack(spacing: 4) {
                     Text("Fern")
