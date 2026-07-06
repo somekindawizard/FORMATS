@@ -9,6 +9,13 @@ final class FernTouchState {
     var touching = false
 }
 
+/// Live-tunable physics params. The renderer reads `.params` every frame, so the
+/// dev panel (FernLab) can dial the feel without a rebuild.
+final class FernTuning: ObservableObject {
+    @Published var params: FernPhysicsParams
+    init(_ params: FernPhysicsParams = .defaults) { self.params = params }
+}
+
 /// Packed constants handed to every shader. Field order + types must match the
 /// `FernUniforms` struct in FernParticles.metal exactly.
 private struct FernUniforms {
@@ -38,7 +45,7 @@ final class FernParticleRenderer: NSObject, MTKViewDelegate {
     private let tonemap: MTLRenderPipelineState
 
     private let fern: BarnsleyFern
-    private let params: FernPhysicsParams
+    private let tuning: FernTuning
     private let tint: SIMD4<Float>
     let touch: FernTouchState
 
@@ -49,12 +56,12 @@ final class FernParticleRenderer: NSObject, MTKViewDelegate {
     private var accum: MTLTexture?
     private var lastTime = CACurrentMediaTime()
 
-    init?(fern: BarnsleyFern, tint: UIColor, params: FernPhysicsParams, touch: FernTouchState) {
+    init?(fern: BarnsleyFern, tint: UIColor, tuning: FernTuning, touch: FernTouchState) {
         guard let device = MTLCreateSystemDefaultDevice(),
               let queue = device.makeCommandQueue(),
               let lib = device.makeDefaultLibrary() else { return nil }
         self.device = device; self.queue = queue
-        self.fern = fern; self.params = params; self.touch = touch
+        self.fern = fern; self.tuning = tuning; self.touch = touch
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
         tint.getRed(&r, green: &g, blue: &b, alpha: &a)
         self.tint = SIMD4<Float>(Float(r), Float(g), Float(b), 1)
@@ -130,6 +137,7 @@ final class FernParticleRenderer: NSObject, MTKViewDelegate {
     }
 
     private func uniforms(viewSize: CGSize, dt: Float) -> FernUniforms {
+        let params = tuning.params
         var u = FernUniforms()
         u.tint = tint
         u.viewSize = SIMD2<Float>(Float(viewSize.width), Float(viewSize.height))
@@ -202,11 +210,11 @@ final class FernParticleRenderer: NSObject, MTKViewDelegate {
 struct FernParticleField: UIViewRepresentable {
     let fern: BarnsleyFern
     let tint: UIColor
-    let params: FernPhysicsParams
+    let tuning: FernTuning
     let touch: FernTouchState
 
     func makeCoordinator() -> FernParticleRenderer? {
-        FernParticleRenderer(fern: fern, tint: tint, params: params, touch: touch)
+        FernParticleRenderer(fern: fern, tint: tint, tuning: tuning, touch: touch)
     }
 
     func makeUIView(context: Context) -> MTKView {

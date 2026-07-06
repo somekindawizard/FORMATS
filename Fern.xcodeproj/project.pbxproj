@@ -58,6 +58,7 @@
 		5FF5CDEE5C4F0D31194A4C7C /* Templates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F1E54D7BCC116EF041B9F49 /* Templates.swift */; };
 		62166C608582EFCE76A75612 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD6943B8927D7DB6D40C3730 /* Components.swift */; };
 		648295A308E820D07E568084 /* EditorialType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E181D97F5417E6B533BC15C6 /* EditorialType.swift */; };
+		649C63F3037B71D741F212D1 /* FernLabPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5FB8DB5EA93176FE5F9EC47 /* FernLabPanel.swift */; };
 		65A3BFB4A131C784AA20BB46 /* Prompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A87F893FEEDD086C788AEED /* Prompt.swift */; };
 		669E6EE6DF023A2CC97C609E /* BarnsleyFernTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22055322740852F3A76C7F93 /* BarnsleyFernTests.swift */; };
 		6779D6DD2E41184CA674A8A1 /* Prompts+Genshin.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DB7D4229AB470CADFC0E24 /* Prompts+Genshin.swift */; };
@@ -156,6 +157,7 @@
 		E5C0CCDE6CAC9613894A2100 /* AppIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8119C721CD1304B059C77 /* AppIntents.swift */; };
 		E9B55FD5E6752EBFE40ED327 /* FernParticles.metal in Sources */ = {isa = PBXBuildFile; fileRef = 447AB900F36576A7D652D944 /* FernParticles.metal */; };
 		EEC974BF4825752C14EF617E /* PhotoStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8179EB32444953EE697C2342 /* PhotoStore.swift */; };
+		EF45F3C5A4FEAF6785C21A2E /* FernLabPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5FB8DB5EA93176FE5F9EC47 /* FernLabPanel.swift */; };
 		EFB45A7993691F8811C3B8D5 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DC35D8BD947984A93C106B /* TodayView.swift */; };
 		F00296BCD3F84428E90C9F8D /* Prompts+Reflective.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498E7586F70ECCFA602F6B03 /* Prompts+Reflective.swift */; };
 		F1A24374EF71111E4081DA86 /* Fraunces-OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 41676068049DC79076637EB1 /* Fraunces-OFL.txt */; };
@@ -302,6 +304,7 @@
 		D3A20EA5F23C21B6ACF018CE /* Prompts+Extras.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prompts+Extras.swift"; sourceTree = "<group>"; };
 		D44942E279BD335540316414 /* DocumentEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentEditorView.swift; sourceTree = "<group>"; };
 		D5E1846726DBE1B8EB6ADCED /* BarnsleyFernView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFernView.swift; sourceTree = "<group>"; };
+		D5FB8DB5EA93176FE5F9EC47 /* FernLabPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FernLabPanel.swift; sourceTree = "<group>"; };
 		D7A67E4C33A31B4DDC79FE4E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DAF0A860ABA882ECEE54F2A7 /* Thesaurus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Thesaurus.swift; sourceTree = "<group>"; };
 		DDDBBE40B1B0CA3FFA37EB3D /* Fern.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Fern.entitlements; sourceTree = "<group>"; };
@@ -556,6 +559,7 @@
 			children = (
 				577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */,
 				D5E1846726DBE1B8EB6ADCED /* BarnsleyFernView.swift */,
+				D5FB8DB5EA93176FE5F9EC47 /* FernLabPanel.swift */,
 				2E9BAFB893D5E4F346FCB7B2 /* FernParticleField.swift */,
 				447AB900F36576A7D652D944 /* FernParticles.metal */,
 				F1EE3E5FF5DF02528E695A43 /* FernPhysics.swift */,
@@ -808,6 +812,7 @@
 				3E5FA23149B9339C1E0DCA1D /* EditorCommands.swift in Sources */,
 				D8603E52489C6BE6CBE9D6B7 /* EditorPhotos.swift in Sources */,
 				89A3803D9FCF064462EB77D4 /* EditorialType.swift in Sources */,
+				649C63F3037B71D741F212D1 /* FernLabPanel.swift in Sources */,
 				55AF1115C28B94566C3975E8 /* FernParticleField.swift in Sources */,
 				9ECA81FD5015F42107F1692F /* FernParticles.metal in Sources */,
 				98EFDF8758B8559DABA5C233 /* FernPhysics.swift in Sources */,
@@ -884,6 +889,7 @@
 				80AC7B1ED6DFFBCDA716827D /* EntryRow.swift in Sources */,
 				37DBA60E213431CDD95E2D8F /* Enums.swift in Sources */,
 				4B409622B1DBAB1DB8FA90C9 /* FernApp.swift in Sources */,
+				EF45F3C5A4FEAF6785C21A2E /* FernLabPanel.swift in Sources */,
 				838AFE515A20BB2E08D343AA /* FernParticleField.swift in Sources */,
 				E9B55FD5E6752EBFE40ED327 /* FernParticles.metal in Sources */,
 				01168C0137CEE5480EBD70C9 /* FernPhysics.swift in Sources */,

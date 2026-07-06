@@ -12,31 +12,59 @@ struct InteractiveFernView: View {
     let onTap: () -> Void
 
     @StateObject private var model = InteractiveFernModel()
+    @StateObject private var tuning = FernTuning()
+    @State private var showLab = false
     private var metalAvailable: Bool { MTLCreateSystemDefaultDevice() != nil }
 
     var body: some View {
-        Group {
-            if metalAvailable {
-                FernParticleField(fern: fern, tint: UIColor(tint),
-                                  params: params, touch: model.touch)
-            } else {
-                FlameFernView(fern: fern, tint: tint, sway: true)
+        ZStack(alignment: .bottom) {
+            Group {
+                if metalAvailable {
+                    FernParticleField(fern: fern, tint: UIColor(tint),
+                                      tuning: tuning, touch: model.touch)
+                } else {
+                    FlameFernView(fern: fern, tint: tint, sway: true)
+                }
             }
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { v in
+                        model.began()
+                        model.move(to: v.location)
+                    }
+                    .onEnded { v in
+                        let moved = hypot(v.translation.width, v.translation.height)
+                        let quick = model.wasQuick
+                        model.end()
+                        if moved < 10 && quick { onTap() }
+                    }
+            )
+
+            #if DEBUG
+            if showLab {
+                FernLabPanel(tuning: tuning) { showLab = false }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+            #endif
         }
-        .contentShape(Rectangle())
-        .gesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { v in
-                    model.began()
-                    model.move(to: v.location)
-                }
-                .onEnded { v in
-                    let moved = hypot(v.translation.width, v.translation.height)
-                    let quick = model.wasQuick
-                    model.end()
-                    if moved < 10 && quick { onTap() }
-                }
-        )
+        .overlay(alignment: .topTrailing) { labToggle }
+        .onAppear { tuning.params = params }
+    }
+
+    @ViewBuilder private var labToggle: some View {
+        #if DEBUG
+        Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { showLab.toggle() }
+        } label: {
+            Image(systemName: showLab ? "slider.horizontal.3" : "wrench.adjustable")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Paper.inkSoft.opacity(0.5))
+                .padding(8)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        #endif
     }
 }
 
