@@ -60,7 +60,8 @@ struct InteractiveFernView: View {
             #endif
         }
         .overlay(alignment: .topTrailing) { labToggle }
-        .onAppear { tuning.params = params }
+        // Note: no `tuning.params = params` here — FernTuning restores a
+        // persisted tuning session on init and must not be clobbered.
     }
 
     @ViewBuilder private var labToggle: some View {

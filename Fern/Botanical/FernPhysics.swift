@@ -2,8 +2,9 @@ import simd
 import CoreGraphics
 
 /// Tunable feel constants for the interactive fern. Shared by the CPU mirror
-/// (tests) and the GPU (packed into `FernUniforms`).
-struct FernPhysicsParams {
+/// (tests) and the GPU (packed into `FernUniforms`). Codable so the Fern Lab
+/// panel can persist a tuning session across launches.
+struct FernPhysicsParams: Codable, Equatable {
     var springK: Float        // pull back toward home
     var damping: Float        // velocity damping (per-force)
     var globalDamp: Float     // per-step velocity multiplier (stability)

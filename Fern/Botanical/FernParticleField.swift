@@ -14,10 +14,30 @@ final class FernTouchState {
 }
 
 /// Live-tunable physics params. The renderer reads `.params` every frame, so the
-/// dev panel (FernLab) can dial the feel without a rebuild.
+/// dev panel (FernLab) can dial the feel without a rebuild. A tuning session
+/// persists across launches (UserDefaults) so dialing-in survives a relock.
 final class FernTuning: ObservableObject {
-    @Published var params: FernPhysicsParams
-    init(_ params: FernPhysicsParams = .defaults) { self.params = params }
+    private static let storageKey = "fern.lab.params"
+
+    @Published var params: FernPhysicsParams {
+        didSet {
+            guard params != oldValue else { return }
+            if params == .defaults {
+                UserDefaults.standard.removeObject(forKey: Self.storageKey)
+            } else if let data = try? JSONEncoder().encode(params) {
+                UserDefaults.standard.set(data, forKey: Self.storageKey)
+            }
+        }
+    }
+
+    init(_ params: FernPhysicsParams = .defaults) {
+        if let data = UserDefaults.standard.data(forKey: Self.storageKey),
+           let saved = try? JSONDecoder().decode(FernPhysicsParams.self, from: data) {
+            self.params = saved
+        } else {
+            self.params = params
+        }
+    }
 }
 
 /// Packed constants handed to every shader. Field order + types must match the
