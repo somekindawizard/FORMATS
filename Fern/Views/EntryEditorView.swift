@@ -219,6 +219,9 @@ struct EntryEditorView: View {
             // The reader riding above us is not "leaving the note" — reaping a
             // blank entry here would delete the model under the live reader.
             guard !showReader else { return }
+            // Ink saves are debounced — write any pending strokes before the
+            // blank-check / sync recording below read the drawing file.
+            controller.flushDrawing()
             // Discard a note that was started but never written in.
             if entry.isBlank {
                 DrawingStore.delete(entry.id)
@@ -278,17 +281,20 @@ struct EntryEditorView: View {
         }
     }
 
-    /// Recognize the note's ink (if any) so handwriting is searchable.
+    /// Recognize the note's ink (if any) so handwriting is searchable. The
+    /// render is capped (~3MP) and runs off-main — see DrawingStore.ocrImage.
     private func ocrInkForSearch() {
         guard let d = DrawingStore.load(entry.id), !d.strokes.isEmpty,
               d.bounds.width > 1, d.bounds.height > 1 else {
             if !entry.inkText.isEmpty { entry.inkText = "" }
             return
         }
-        let image = d.image(from: d.bounds, scale: 2)
-        Task { @MainActor in
+        let current = entry.inkText
+        Task.detached(priority: .utility) {
+            let image = DrawingStore.ocrImage(d)
             let text = await HandwritingOCR.recognize(image)
-            if text != entry.inkText {
+            guard text != current else { return }
+            await MainActor.run {
                 entry.inkText = text
                 SpotlightIndexer.index(entry)
                 try? context.save()

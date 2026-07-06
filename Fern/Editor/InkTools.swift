@@ -80,7 +80,10 @@ final class InkCoordinator: NSObject, PKCanvasViewDelegate {
     weak var controller: MarkdownEditorController?
     init(_ controller: MarkdownEditorController) { self.controller = controller }
     func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
-        controller?.saveDrawing()
+        // Persistence is debounced — serializing the whole PKDrawing on every
+        // stroke end (and every eraser nibble) grew stroke-end latency with
+        // drawing size. Flushed on Done and when the editor closes.
+        controller?.scheduleSaveDrawing()
         // Grow the drawing room as ink extends downward, and keep the ink word
         // count fresh.
         controller?.resizeCanvas()
@@ -201,7 +204,6 @@ extension MarkdownEditorController {
         c.drawingPolicy = .pencilOnly       // finger stays for typing/scrolling
         c.isUserInteractionEnabled = false  // until draw mode
         let coord = InkCoordinator(self)
-        c.delegate = coord
         inkCoordinator = coord
         // Apple Pencil double-tap / squeeze.
         let pencilCoord = PencilInteractionCoordinator(self)
@@ -243,6 +245,10 @@ extension MarkdownEditorController {
         hover.allowedTouchTypes = [NSNumber(value: UITouch.TouchType.pencil.rawValue)]
         textView.addGestureRecognizer(hover)
         if let saved = DrawingStore.load(entryID) { c.drawing = saved }
+        // Delegate is set AFTER the initial drawing assignment — otherwise
+        // merely opening a note fired drawingDidChange and re-serialized its
+        // own drawing file (plus a pointless OCR pass).
+        c.delegate = coord
         c.backgroundColor = PaperTiles.pattern(for: ThemeStore.shared.paperRule,
                                                spacing: CGFloat(ThemeStore.shared.ruleSpacing)) ?? .clear
         textView.addSubview(c)
@@ -311,7 +317,7 @@ extension MarkdownEditorController {
             textView?.resignFirstResponder()
             scheduleInkWordCount()
         } else {
-            saveDrawing()
+            flushDrawing()
         }
         // resizeCanvas sets the scroll room + inset for the current mode.
         resizeCanvas()

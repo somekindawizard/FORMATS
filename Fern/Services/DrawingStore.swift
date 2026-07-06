@@ -34,4 +34,14 @@ enum DrawingStore {
     static func exists(_ id: UUID) -> Bool {
         FileManager.default.fileExists(atPath: url(id).path)
     }
+
+    /// A render of the drawing sized for OCR — capped to ~3 megapixels. The
+    /// old fixed 2x render of the full bounds could transiently allocate
+    /// hundreds of MB on a long handwritten note (jetsam risk).
+    static func ocrImage(_ drawing: PKDrawing) -> UIImage {
+        let b = drawing.bounds
+        let area = max(1, b.width * b.height)
+        let scale = min(2, sqrt(3_000_000 / area))
+        return drawing.image(from: b, scale: max(0.5, scale))
+    }
 }

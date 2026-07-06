@@ -44,6 +44,23 @@ final class MarkdownEditorController {
     /// typed count while drawing. Recomputed on a debounce as the ink changes.
     var inkWordCount: Int = 0
     @ObservationIgnored private var inkOCRWork: DispatchWorkItem?
+    @ObservationIgnored private var drawingSaveWork: DispatchWorkItem?
+
+    /// Debounced persistence of the ink (see canvasViewDrawingDidChange).
+    func scheduleSaveDrawing() {
+        drawingSaveWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in self?.saveDrawing() }
+        drawingSaveWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8, execute: work)
+    }
+
+    /// Write any pending debounced save NOW — call before anything reads the
+    /// drawing file (leaving the note, blank-check, sync recording).
+    func flushDrawing() {
+        drawingSaveWork?.cancel()
+        drawingSaveWork = nil
+        saveDrawing()
+    }
 
     /// The word the caret currently sits in (empty when between words). Observed
     /// by the synonym strip.
@@ -53,19 +70,23 @@ final class MarkdownEditorController {
     var wordCount: Int = 0
 
     /// Debounced OCR of the current drawing → a handwritten word count.
+    /// The render is capped (~3MP) and runs off the main thread — an
+    /// unbounded 2x main-thread render hitched after every drawing pause and
+    /// could spike hundreds of MB on long notes.
     func scheduleInkWordCount() {
         inkOCRWork?.cancel()
         guard let c = canvas else { return }
         let work = DispatchWorkItem { [weak self] in
-            let drawing = c.drawing
+            let drawing = c.drawing   // PKDrawing is a value type — safe to carry off-main
             guard !drawing.strokes.isEmpty,
                   drawing.bounds.width > 1, drawing.bounds.height > 1 else {
                 self?.inkWordCount = 0; return
             }
-            let image = drawing.image(from: drawing.bounds, scale: 2)
-            Task { @MainActor in
+            Task.detached(priority: .utility) {
+                let image = DrawingStore.ocrImage(drawing)
                 let text = await HandwritingOCR.recognize(image)
-                self?.inkWordCount = text.split(whereSeparator: \.isWhitespace).count
+                let count = text.split(whereSeparator: \.isWhitespace).count
+                await MainActor.run { [weak self] in self?.inkWordCount = count }
             }
         }
         inkOCRWork = work
