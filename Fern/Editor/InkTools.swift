@@ -124,8 +124,23 @@ final class CanvasScrollGesture: NSObject, UIGestureRecognizerDelegate {
     @objc func undoTap() { Haptics.tap(); controller?.undoInk() }
     @objc func redoTap() { Haptics.tap(); controller?.redoInk() }
 
-    /// A Pencil touched the page while not drawing — enter drawing mode.
+    /// A Pencil touched the page while not drawing — enter drawing mode. This
+    /// wake-up touch is consumed by the mode switch (UIKit won't re-route an
+    /// in-flight touch to the newly interactive canvas), so it can't mark;
+    /// the haptic makes the handshake feel intentional rather than broken.
+    /// On hover-capable hardware `pencilHover` pre-arms before contact and
+    /// the first stroke marks normally.
     @objc func pencilBegan() {
+        if controller?.isDrawing == false {
+            Haptics.tap()
+            controller?.setDrawing(true)
+        }
+    }
+
+    /// Pencil hovering over the page (Pencil 2 / Pro on hover-capable iPads) —
+    /// enter drawing mode BEFORE the tip lands so the first stroke draws.
+    @objc func pencilHover(_ g: UIHoverGestureRecognizer) {
+        guard g.state == .began || g.state == .changed else { return }
         if controller?.isDrawing == false { controller?.setDrawing(true) }
     }
 
@@ -162,6 +177,16 @@ final class PencilInteractionCoordinator: NSObject, UIPencilInteractionDelegate 
     }
 }
 
+/// A canvas with its OWN undo stack. `UIView.undoManager` resolves up the
+/// responder chain, and as a subview of the text view the canvas landed on the
+/// TEXT undo manager — ink and typing undos interleaved on one stack, so a
+/// two-finger undo tap while drawing could silently revert the last typed
+/// sentence (off-screen, no feedback). Ink undo is now isolated.
+final class InkCanvasView: PKCanvasView {
+    private let inkUndo = UndoManager()
+    override var undoManager: UndoManager? { inkUndo }
+}
+
 extension MarkdownEditorController {
 
     /// Attach a transparent PencilKit canvas over the text, sized to (and
@@ -169,7 +194,7 @@ extension MarkdownEditorController {
     /// touch auto-enters that mode (see PencilTouchGesture).
     func setupCanvas(on textView: UITextView, entryID: UUID) {
         guard canvas == nil else { return }
-        let c = PKCanvasView()
+        let c = InkCanvasView()
         c.backgroundColor = .clear
         c.isOpaque = false
         c.isScrollEnabled = false          // it rides along inside the text scroll view
@@ -210,6 +235,13 @@ extension MarkdownEditorController {
         pencilDetect.cancelsTouchesInView = true
         pencilDetect.delegate = g
         textView.addGestureRecognizer(pencilDetect)
+        // Hover pre-arm: a Pencil approaching the page enters drawing mode
+        // before contact, so the very first stroke marks (the touch-based
+        // fallback above consumes its wake-up stroke). Pencil hover only —
+        // trackpad/mouse pointers must not trigger it.
+        let hover = UIHoverGestureRecognizer(target: g, action: #selector(CanvasScrollGesture.pencilHover(_:)))
+        hover.allowedTouchTypes = [NSNumber(value: UITouch.TouchType.pencil.rawValue)]
+        textView.addGestureRecognizer(hover)
         if let saved = DrawingStore.load(entryID) { c.drawing = saved }
         c.backgroundColor = PaperTiles.pattern(for: ThemeStore.shared.paperRule,
                                                spacing: CGFloat(ThemeStore.shared.ruleSpacing)) ?? .clear
