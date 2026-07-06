@@ -7,6 +7,10 @@ final class FernTouchState {
     var finger = SIMD2<Float>(0, 0)
     var fingerVel = SIMD2<Float>(0, 0)
     var touching = false
+    /// When the finger last moved. The renderer uses this both to time out a
+    /// cancelled gesture (SwiftUI never calls onEnded on cancellation — the
+    /// fern would stay deformed forever) and to idle the render loop.
+    var lastTouch: CFTimeInterval = 0
 }
 
 /// Live-tunable physics params. The renderer reads `.params` every frame, so the
@@ -44,10 +48,13 @@ final class FernParticleRenderer: NSObject, MTKViewDelegate {
     private let splat: MTLRenderPipelineState
     private let tonemap: MTLRenderPipelineState
 
-    private let fern: BarnsleyFern
+    private var fern: BarnsleyFern
+    private var fernKey: String
     private let tuning: FernTuning
-    private let tint: SIMD4<Float>
+    private var tint: SIMD4<Float>
     let touch: FernTouchState
+    /// When the sim was last disturbed — drives the idle throttle.
+    private var lastActive = CACurrentMediaTime()
 
     private var homeBuf: MTLBuffer?
     private var posBuf: MTLBuffer?
@@ -56,15 +63,24 @@ final class FernParticleRenderer: NSObject, MTKViewDelegate {
     private var accum: MTLTexture?
     private var lastTime = CACurrentMediaTime()
 
+    private static func key(of fern: BarnsleyFern) -> String {
+        "\(fern.points.count)-\(fern.maxY)-\(fern.minX)-\(fern.maxX)"
+    }
+
+    private static func resolve(_ tint: UIColor) -> SIMD4<Float> {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        tint.getRed(&r, green: &g, blue: &b, alpha: &a)
+        return SIMD4<Float>(Float(r), Float(g), Float(b), 1)
+    }
+
     init?(fern: BarnsleyFern, tint: UIColor, tuning: FernTuning, touch: FernTouchState) {
         guard let device = MTLCreateSystemDefaultDevice(),
               let queue = device.makeCommandQueue(),
               let lib = device.makeDefaultLibrary() else { return nil }
         self.device = device; self.queue = queue
-        self.fern = fern; self.tuning = tuning; self.touch = touch
-        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        tint.getRed(&r, green: &g, blue: &b, alpha: &a)
-        self.tint = SIMD4<Float>(Float(r), Float(g), Float(b), 1)
+        self.fern = fern; self.fernKey = Self.key(of: fern)
+        self.tuning = tuning; self.touch = touch
+        self.tint = Self.resolve(tint)
 
         guard let kf = lib.makeFunction(name: "fern_physics"),
               let sv = lib.makeFunction(name: "fern_splat_v"),
@@ -124,6 +140,19 @@ final class FernParticleRenderer: NSObject, MTKViewDelegate {
         if let vb = velBuf { memset(vb.contents(), 0, len) }
     }
 
+    /// Adopt a new fern (relock regenerates one while the veil is still up) or
+    /// a re-resolved tint (dark-mode flip) without recreating the renderer.
+    func update(fern: BarnsleyFern, tint: UIColor, view: MTKView) {
+        self.tint = Self.resolve(tint)
+        let key = Self.key(of: fern)
+        if key != fernKey {
+            self.fern = fern
+            fernKey = key
+            build(for: view.bounds.size)
+            lastActive = CACurrentMediaTime()
+        }
+    }
+
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         guard size.width > 1, size.height > 1 else { return }
         let td = MTLTextureDescriptor.texture2DDescriptor(
@@ -155,15 +184,37 @@ final class FernParticleRenderer: NSObject, MTKViewDelegate {
     }
 
     func draw(in view: MTKView) {
+        let now = CACurrentMediaTime()
+
+        // A cancelled gesture (call, alert) never gets onEnded — without this
+        // timeout the finger force would pin the fern deformed forever.
+        if touch.touching && now - touch.lastTouch > 0.8 {
+            touch.touching = false
+            touch.fingerVel = .zero
+        }
+        if touch.touching { lastActive = now }
+
+        // Idle throttle: at rest the sim is pixel-identical frame to frame —
+        // rendering an 800k-point pipeline at 120fps while the gate sits idle
+        // was pure battery burn. Give the physics ~4s to settle after the last
+        // touch, then stop presenting (the last drawable stays on screen) and
+        // drop the callback rate to a heartbeat.
+        let active = now - lastActive < 4
+        view.preferredFramesPerSecond = active ? 120 : 10
+        guard active else { lastTime = now; return }
+
         guard let accum, let posBuf, let velBuf, let homeBuf, count > 0,
               let drawable = view.currentDrawable,
               let rpd = view.currentRenderPassDescriptor,
               let cmd = queue.makeCommandBuffer() else { return }
 
-        let now = CACurrentMediaTime()
         let dt = Float(min(1.0 / 30.0, max(1.0 / 240.0, now - lastTime)))
         lastTime = now
         var u = uniforms(viewSize: view.bounds.size, dt: dt)
+        // pointSize is a pixel quantity; keep the splat's physical size constant
+        // across 2x/3x screens (params are calibrated at 3x). This also keeps
+        // per-pixel density roughly scale-invariant, so the tone map matches.
+        u.pointSize *= Float(max(1, view.contentScaleFactor) / 3)
         var cnt = count
 
         // 1. physics
@@ -212,6 +263,8 @@ struct FernParticleField: UIViewRepresentable {
     let tint: UIColor
     let tuning: FernTuning
     let touch: FernTouchState
+    /// True when the scene isn't active — stops the render loop entirely.
+    var paused = false
 
     func makeCoordinator() -> FernParticleRenderer? {
         FernParticleRenderer(fern: fern, tint: tint, tuning: tuning, touch: touch)
@@ -221,17 +274,22 @@ struct FernParticleField: UIViewRepresentable {
         let v = MTKView()
         v.device = MTLCreateSystemDefaultDevice()
         v.colorPixelFormat = .bgra8Unorm
-        v.framebufferOnly = false
+        v.framebufferOnly = true             // drawable is never sampled
         v.isOpaque = false
         v.backgroundColor = .clear
         v.clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         v.enableSetNeedsDisplay = false
         v.isPaused = false
-        v.preferredFramesPerSecond = 120
+        v.preferredFramesPerSecond = 120     // renderer throttles itself when idle
         v.delegate = context.coordinator
         v.isUserInteractionEnabled = false   // SwiftUI handles the gesture
         return v
     }
 
-    func updateUIView(_ uiView: MTKView, context: Context) {}
+    func updateUIView(_ uiView: MTKView, context: Context) {
+        uiView.isPaused = paused
+        // Adopt a regenerated fern (relock while the veil is up) or a
+        // re-resolved tint without recreating the renderer.
+        context.coordinator?.update(fern: fern, tint: tint, view: uiView)
+    }
 }

@@ -14,14 +14,17 @@ struct InteractiveFernView: View {
     @StateObject private var model = InteractiveFernModel()
     @StateObject private var tuning = FernTuning()
     @State private var showLab = false
-    private var metalAvailable: Bool { MTLCreateSystemDefaultDevice() != nil }
+    @Environment(\.scenePhase) private var scenePhase
+    /// Cached — creating a throwaway MTLDevice per body eval was wasteful.
+    private static let metalAvailable = MTLCreateSystemDefaultDevice() != nil
 
     var body: some View {
         ZStack(alignment: .bottom) {
             Group {
-                if metalAvailable {
+                if Self.metalAvailable {
                     FernParticleField(fern: fern, tint: UIColor(tint),
-                                      tuning: tuning, touch: model.touch)
+                                      tuning: tuning, touch: model.touch,
+                                      paused: scenePhase != .active)
                 } else {
                     FlameFernView(fern: fern, tint: tint, sway: true)
                 }
@@ -111,6 +114,7 @@ final class InteractiveFernModel: ObservableObject {
         lastMove = now
         touch.finger = SIMD2<Float>(Float(p.x), Float(p.y))
         touch.touching = true
+        touch.lastTouch = now
     }
     func end() {
         touch.touching = false
