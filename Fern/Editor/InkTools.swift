@@ -229,15 +229,19 @@ extension MarkdownEditorController {
     func resizeCanvas() {
         guard let tv = textView, let c = canvas else { return }
         let w = tv.contentSize.width > 0 ? tv.contentSize.width : tv.bounds.width
-        let base = max(tv.contentSize.height, tv.bounds.height)
-        let inkBottom = c.drawing.strokes.isEmpty ? 0 : c.drawing.bounds.maxY
-        // Room below the text: while drawing keep ≥1200pt beyond the lowest
-        // content (grows with the ink); otherwise just enough to reach the ink.
-        let extra = isDrawing
-            ? max(1200, inkBottom + 500 - base)
-            : max(0, ceil(inkBottom) + 40 - base)
+        // The scroll view's reachable bottom is measured from contentSize.height
+        // (the *typed text* height) — NOT max(content, bounds). A handwritten note
+        // has little text, so measuring from `content` is what lets you actually
+        // scroll down to ink that sits far below the text.
+        let content = tv.contentSize.height
+        let inkBottom = c.drawing.strokes.isEmpty ? 0 : ceil(c.drawing.bounds.maxY)
+        // Bottom inset = how far past the text you can scroll. Must reach the ink
+        // (inkBottom − content, + pad); while drawing keep a growing blank slab.
+        let reachInk = max(0, inkBottom + 60 - content)
+        let extra = isDrawing ? max(1200, inkBottom + 500 - content) : reachInk
         if abs(tv.contentInset.bottom - extra) > 0.5 { tv.contentInset.bottom = extra }
-        let h = base + max(0, extra)
+        // The canvas must span the whole scrollable extent (text + the room).
+        let h = content + extra
         if abs(c.frame.height - h) > 0.5 || abs(c.frame.width - w) > 0.5 {
             c.frame = CGRect(x: 0, y: 0, width: w, height: h)
         }
