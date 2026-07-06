@@ -89,6 +89,7 @@
 		91D3B0870053AE6264E7441B /* PromptStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FDEB25A3B8570A4FFF61024 /* PromptStore.swift */; };
 		92D0C4DFE196536BC0FF6509 /* RedwoodSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C43EDE9E41EC16B56C3CA6E /* RedwoodSettings.swift */; };
 		92ED5F2A942664849205A3E5 /* ThemeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B28F822C8468BE267C3F3293 /* ThemeStore.swift */; };
+		94C249E0B56AAABE46D089FB /* UnfurlFern.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0877094005D812DE472A5E64 /* UnfurlFern.swift */; };
 		9754DE281C6AC39A1A30A206 /* DateGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28695B781553568A042DBF4C /* DateGrouping.swift */; };
 		9865957DD7F35828DE4FD1C3 /* SnapshotsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34493D1DC6741FEE0795EF1 /* SnapshotsView.swift */; };
 		98B6A141FF7B1252AA3901E6 /* RedwoodApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E7F1C4D49815A076F3A8A3C /* RedwoodApp.swift */; };
@@ -156,6 +157,7 @@
 		F644D9FD13C1AF7313F2738B /* LocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC7E99A123649E4FFAC4ECD /* LocationProvider.swift */; };
 		F68045FA8F51CCC21E75F553 /* Thesaurus.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF0A860ABA882ECEE54F2A7 /* Thesaurus.swift */; };
 		F81930CCA38BB2AB13EC20F9 /* Prompts+Nature.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9AD8AFAC01175AC14737031 /* Prompts+Nature.swift */; };
+		F909839CB8DBF731CBCF51C1 /* UnfurlFern.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0877094005D812DE472A5E64 /* UnfurlFern.swift */; };
 		F949628E768A92B2247D0559 /* SavedPromptsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74089F72177AC086B585AD67 /* SavedPromptsView.swift */; };
 		FAE502D993F02FEDCA8EA712 /* DateGroupingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400F7BE208A962AA4679EC06 /* DateGroupingTests.swift */; };
 /* End PBXBuildFile section */
@@ -194,6 +196,7 @@
 /* Begin PBXFileReference section */
 		032FBB6A0B3EFEEDE519FABC /* DropCap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropCap.swift; sourceTree = "<group>"; };
 		05F27301B01F7D4292CF16FE /* PaperBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperBackground.swift; sourceTree = "<group>"; };
+		0877094005D812DE472A5E64 /* UnfurlFern.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnfurlFern.swift; sourceTree = "<group>"; };
 		08E10046E72A3938832A9FAD /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		0BA4819F5B46F531E5941CEA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		12337FE2289C85966902B783 /* MarkdownExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownExporter.swift; sourceTree = "<group>"; };
@@ -543,6 +546,7 @@
 				D5E1846726DBE1B8EB6ADCED /* BarnsleyFernView.swift */,
 				970190D4D04CBD9FA602D885 /* FiddleheadShape.swift */,
 				163D4CB7983CFCF54E288E2D /* FlameFern.swift */,
+				0877094005D812DE472A5E64 /* UnfurlFern.swift */,
 			);
 			path = Botanical;
 			sourceTree = "<group>";
@@ -815,6 +819,7 @@
 				4241502C06180F2738B93F1F /* ThemeStore.swift in Sources */,
 				9E2545EC6950D4D99AD0BF94 /* Thesaurus.swift in Sources */,
 				25F1719DB79389C04B45E15C /* Typography.swift in Sources */,
+				94C249E0B56AAABE46D089FB /* UnfurlFern.swift in Sources */,
 				71FE0DFC47C1F0E54D1926AC /* ZipWriter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -917,6 +922,7 @@
 				F68045FA8F51CCC21E75F553 /* Thesaurus.swift in Sources */,
 				EFB45A7993691F8811C3B8D5 /* TodayView.swift in Sources */,
 				51010732818FD074595FF242 /* Typography.swift in Sources */,
+				F909839CB8DBF731CBCF51C1 /* UnfurlFern.swift in Sources */,
 				2A1C73B6F0D7923CED6F8DC4 /* WashLabView.swift in Sources */,
 				C4066C9745B5F006C924AE4C /* WeatherProvider.swift in Sources */,
 				78EF513543605A8FB978D60C /* WritingStats.swift in Sources */,

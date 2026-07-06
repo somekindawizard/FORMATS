@@ -7,7 +7,7 @@ import UIKit
 /// Returns a transparent, accent-tinted image that composites over the paper.
 enum FlameFern {
     static func image(_ fern: BarnsleyFern, height: CGFloat, tint: UIColor,
-                      gamma: Double = 1.6, supersample: CGFloat = 2) -> UIImage? {
+                      gamma: Double = 2.3, floor: Double = 0.55, supersample: CGFloat = 2) -> UIImage? {
         guard !fern.points.isEmpty else { return nil }
         let xs = max(0.001, fern.maxX - fern.minX)
         let ys = max(0.001, fern.maxY)
@@ -37,7 +37,8 @@ enum FlameFern {
         for i in 0..<W * H {
             let h = hist[i]
             if h <= 0 { continue }
-            let t = pow(log(1 + Double(h)) / denom, 1 / gamma)          // 0…1
+            var t = pow(log(1 + Double(h)) / denom, 1 / gamma)          // 0…1
+            if floor > 0 { t = floor + (1 - floor) * t }                // lift sparse areas so it's not washed out
             buf[i * 4 + 0] = UInt8(max(0, min(255, Double(tr) * t * 255)))
             buf[i * 4 + 1] = UInt8(max(0, min(255, Double(tg) * t * 255)))
             buf[i * 4 + 2] = UInt8(max(0, min(255, Double(tb) * t * 255)))
