@@ -45,6 +45,10 @@ struct BarnsleyFernView: View {
         let t = time ?? 0
         let gust = 0.6 * sin(t * 0.5) + 0.28 * sin(t * 1.15 + 1.0)
 
+        // Accumulate every dot into a single path and fill once — far faster
+        // than a fill per dot, so tens of thousands of points stay smooth even
+        // while swaying (redrawing each frame).
+        var path = Path()
         for p in fern.points {
             var px = p.x
             if time != nil {
@@ -53,11 +57,11 @@ struct BarnsleyFernView: View {
                 let flutter = 0.018 * h * sin(t * 2.6 + p.y * 1.9 + p.x * 1.4)
                 px = p.x + bend + flutter
             }
-            let r = CGRect(x: ox + px * scale,
-                           y: oy - p.y * scale,
-                           width: dotSize, height: dotSize)
-            ctx.fill(Path(ellipseIn: r), with: .color(tint))
+            path.addEllipse(in: CGRect(x: ox + px * scale,
+                                       y: oy - p.y * scale,
+                                       width: dotSize, height: dotSize))
         }
+        ctx.fill(path, with: .color(tint))
     }
 }
 
