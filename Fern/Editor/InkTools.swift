@@ -510,27 +510,55 @@ struct InkToolbar: View {
             .accessibilityLabel("Move tools")
     }
 
+    /// Left-handers rest their hand on the left, so the Done/undo/redo cluster
+    /// moves to the RIGHT of the drawing tools; right-handers get the mirror.
+    private var trailing: Bool { ThemeStore.shared.handedness.controlsTrailing }
+
     private var fullBar: some View {
         VStack(spacing: 10) {
             HStack(spacing: 14) {
-                grip
-                doneButton
-                barDivider
-                toolButton("arrow.uturn.backward") { controller.undoInk() }
-                toolButton("arrow.uturn.forward")  { controller.redoInk() }
-                barDivider
-                brushes
-                barDivider
-                toolButton("eraser", on: controller.ink.isEraser) {
-                    controller.ink.isEraser = true; showWeights = false; controller.applyInk()
+                if trailing {
+                    hideButton
+                    utilityTools
+                    barDivider
+                    brushes
+                    barDivider
+                    undoRedo
+                    barDivider
+                    doneButton
+                    grip
+                } else {
+                    grip
+                    doneButton
+                    barDivider
+                    undoRedo
+                    barDivider
+                    brushes
+                    barDivider
+                    utilityTools
+                    hideButton
                 }
-                toolButton("lasso", on: controller.isSelecting) { controller.selectStrokes() }
-                toolButton("ruler", on: controller.showRuler) { controller.toggleRuler() }
-                toolButton("trash") { confirmClear = true }
-                hideButton
             }
             if showWeights { weightRow }
             colorRow
+        }
+    }
+
+    private var undoRedo: some View {
+        HStack(spacing: 14) {
+            toolButton("arrow.uturn.backward") { controller.undoInk() }
+            toolButton("arrow.uturn.forward")  { controller.redoInk() }
+        }
+    }
+
+    private var utilityTools: some View {
+        HStack(spacing: 14) {
+            toolButton("eraser", on: controller.ink.isEraser) {
+                controller.ink.isEraser = true; showWeights = false; controller.applyInk()
+            }
+            toolButton("lasso", on: controller.isSelecting) { controller.selectStrokes() }
+            toolButton("ruler", on: controller.showRuler) { controller.toggleRuler() }
+            toolButton("trash") { confirmClear = true }
         }
     }
 
@@ -571,12 +599,19 @@ struct InkToolbar: View {
     }
 
     /// When hidden, a small Notes-style circle floats (showing the current ink
-    /// color); tap it to bring the tools back. Done sits beside it.
+    /// color); tap it to bring the tools back. Done sits beside it. Mirrored
+    /// for handedness like the full pill.
     private var collapsedBar: some View {
         HStack(spacing: 12) {
-            grip
-            expandCircle
-            doneButton
+            if trailing {
+                doneButton
+                expandCircle
+                grip
+            } else {
+                grip
+                expandCircle
+                doneButton
+            }
         }
     }
 
