@@ -125,6 +125,13 @@ private struct SharedNoteEditor: View {
             ZStack {
                 PaperBackground()
                 VStack(alignment: .leading, spacing: 8) {
+                    if store.lastSaveFailed {
+                        Label("Couldn't sync this note — retrying as you edit. Check iCloud if it persists.",
+                              systemImage: "exclamationmark.icloud")
+                            .font(.calloutSerif)
+                            .foregroundStyle(Paper.accent)
+                            .padding(.top, 8)
+                    }
                     TextField("Untitled", text: $title, axis: .vertical)
                         .font(.titleSerif).foregroundStyle(Paper.ink).padding(.top, 8)
                     MarkdownTextView(text: $bodyText, controller: controller)

@@ -58,6 +58,14 @@ final class SharedNotebookStore {
     var notes: [SharedNote] = []
     var hasNotebook = false
     var isBusy = false
+    /// Set when a save could not be persisted even after conflict-merging —
+    /// surfaced by the editor so edits never vanish silently.
+    var lastSaveFailed = false
+
+    /// The freshest CKRecord per note. CloudKit's change tags advance on every
+    /// save, so re-saving a stale instance fails `.ifServerRecordUnchanged` —
+    /// without this cache, every save after the first was silently dropped.
+    private var liveRecords: [CKRecord.ID: CKRecord] = [:]
 
     // MARK: owner — create + invite
 
@@ -123,22 +131,64 @@ final class SharedNotebookStore {
         guard let result = try? await db.modifyRecords(saving: [record], deleting: []),
               case .success(let saved)? = result.saveResults[record.recordID],
               let note = SharedNote(record: saved) else { return nil }
+        liveRecords[note.id] = saved
         notes.insert(note, at: 0)
         return note
     }
 
     func save(_ note: SharedNote, title: String, body: String) async {
-        note.record["title"] = title as CKRecordValue
-        note.record["body"] = body as CKRecordValue
-        note.record["modified"] = Date.now as CKRecordValue
-        note.record["author"] = myName as CKRecordValue
         let db = database(for: note.id.zoneID)
-        _ = try? await db.modifyRecords(saving: [note.record], deleting: [])
+        let record = liveRecords[note.id] ?? note.record
+        apply(title: title, body: body, to: record)
+        do {
+            let result = try await db.modifyRecords(saving: [record], deleting: [])
+            switch result.saveResults[note.id] {
+            case .success(let saved):
+                liveRecords[note.id] = saved
+                lastSaveFailed = false
+            case .failure(let error):
+                await resolveConflict(error, noteID: note.id, title: title, body: body, db: db)
+            case nil:
+                lastSaveFailed = true
+            }
+        } catch {
+            await resolveConflict(error, noteID: note.id, title: title, body: body, db: db)
+        }
+    }
+
+    private func apply(title: String, body: String, to record: CKRecord) {
+        record["title"] = title as CKRecordValue
+        record["body"] = body as CKRecordValue
+        record["modified"] = Date.now as CKRecordValue
+        record["author"] = myName as CKRecordValue
+    }
+
+    /// The partner saved since we last fetched (`serverRecordChanged`) — the
+    /// whole point of a shared notebook. Re-apply our text onto the *server's*
+    /// record (fresh change tag) and retry, so the save lands instead of being
+    /// silently discarded. Field-level: our title/body win for this save;
+    /// nothing local is dropped.
+    private func resolveConflict(_ error: Error, noteID: CKRecord.ID,
+                                 title: String, body: String, db: CKDatabase) async {
+        guard let ck = error as? CKError, ck.code == .serverRecordChanged,
+              let server = ck.serverRecord else {
+            lastSaveFailed = true
+            return
+        }
+        apply(title: title, body: body, to: server)
+        if let result = try? await db.modifyRecords(saving: [server], deleting: []),
+           case .success(let saved)? = result.saveResults[noteID] {
+            liveRecords[noteID] = saved
+            lastSaveFailed = false
+        } else {
+            lastSaveFailed = true
+        }
     }
 
     func delete(_ note: SharedNote) async {
         let db = database(for: note.id.zoneID)
         _ = try? await db.modifyRecords(saving: [], deleting: [note.id])
+        liveRecords[note.id] = nil
         notes.removeAll { $0.id == note.id }
     }
 
@@ -156,6 +206,9 @@ final class SharedNotebookStore {
         }
         var seen = Set<CKRecord.ID>()
         notes = collected.filter { seen.insert($0.id).inserted }.sorted { $0.modified > $1.modified }
+        // Freshly fetched records carry current change tags — cache them so the
+        // next save doesn't fail `.ifServerRecordUnchanged`.
+        for note in notes { liveRecords[note.id] = note.record }
         hasNotebook = await rootAndDatabase() != nil
     }
 
