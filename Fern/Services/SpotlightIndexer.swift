@@ -35,8 +35,21 @@ enum SpotlightIndexer {
         CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [id.uuidString])
     }
 
-    /// Rebuild the whole index (call on launch). Reads models — main actor.
+    /// Rebuild the whole index. Reads models — main actor.
     static func reindexAll(_ entries: [Entry]) {
         CSSearchableIndex.default().indexSearchableItems(entries.map(item(for:)))
+    }
+
+    /// Index only entries changed since the last pass (call on launch). The
+    /// full reindex ran over every body at every launch — O(corpus) for work
+    /// that per-save indexing already keeps current.
+    static func reindexChanged(_ entries: [Entry]) {
+        let key = "fern.spotlight.lastIndex"
+        let last = UserDefaults.standard.object(forKey: key) as? Date ?? .distantPast
+        let changed = entries.filter { $0.updatedAt > last }
+        if !changed.isEmpty {
+            CSSearchableIndex.default().indexSearchableItems(changed.map(item(for:)))
+        }
+        UserDefaults.standard.set(Date.now, forKey: key)
     }
 }

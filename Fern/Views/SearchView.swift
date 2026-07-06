@@ -2,17 +2,39 @@ import SwiftUI
 import SwiftData
 
 struct SearchView: View {
-    @Query(sort: \Entry.createdAt, order: .reverse) private var entries: [Entry]
+    @Environment(\.modelContext) private var context
     @State private var query = ""
+    @State private var results: [Entry] = []
+    @State private var searchTask: Task<Void, Never>?
 
-    private var results: [Entry] {
-        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !q.isEmpty else { return [] }
-        return entries.filter { e in
-            e.title.lowercased().contains(q)
-            || e.body.lowercased().contains(q)
-            || e.inkText.lowercased().contains(q)
-            || e.tagNames.contains { $0.lowercased().contains(q) }
+    /// Debounced, store-scoped search. The old version held every entry live
+    /// and lowercased every title+body+inkText per typed character — seconds
+    /// of main-thread work per keystroke on a large journal. A `#Predicate`
+    /// fetch pushes the matching into SQLite. Queries starting with `#`
+    /// search tags (a value array SwiftData can't predicate over).
+    private func runSearch(_ raw: String) {
+        searchTask?.cancel()
+        let q = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !q.isEmpty else { results = []; return }
+        searchTask = Task {
+            try? await Task.sleep(for: .milliseconds(250))
+            guard !Task.isCancelled else { return }
+            if q.hasPrefix("#") {
+                let tag = String(q.dropFirst()).lowercased()
+                let all = (try? context.fetch(FetchDescriptor<Entry>(
+                    sortBy: [SortDescriptor(\Entry.createdAt, order: .reverse)]))) ?? []
+                results = all.filter { $0.tagNames.contains { $0.contains(tag) } }
+            } else {
+                let predicate = #Predicate<Entry> { e in
+                    e.title.localizedStandardContains(q)
+                    || e.body.localizedStandardContains(q)
+                    || e.inkText.localizedStandardContains(q)
+                }
+                var d = FetchDescriptor<Entry>(predicate: predicate,
+                                               sortBy: [SortDescriptor(\Entry.createdAt, order: .reverse)])
+                d.fetchLimit = 200
+                results = (try? context.fetch(d)) ?? []
+            }
         }
     }
 
@@ -41,6 +63,7 @@ struct SearchView: View {
         }
         .navigationTitle("Search")
         .searchable(text: $query, prompt: "Title, text, or #tag")
+        .onChange(of: query) { _, q in runSearch(q) }
         .navigationDestination(for: Entry.self) { entry in
             EntryEditorView(entry: entry)
         }

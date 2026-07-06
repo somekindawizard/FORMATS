@@ -89,7 +89,7 @@ struct RootView: View {
         }
         .task {
             await PromptNotifier.refresh()
-            SpotlightIndexer.reindexAll(entries)
+            SpotlightIndexer.reindexChanged(entries)   // incremental — not the whole corpus
             AssetSync.sync(context.container)   // photos/ink sync on a background context
         }
         .onReceive(NotificationCenter.default.publisher(for: .NSPersistentStoreRemoteChange)) { _ in

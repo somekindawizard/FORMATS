@@ -9,7 +9,6 @@ struct ReadingView: View {
     let entry: Entry
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.modelContext) private var context
-    @Query private var allEntries: [Entry]
     @State private var linkedEntry: Entry?
     @State private var speech = ReadAloud.shared
     @State private var scrollY: CGFloat = 0
@@ -20,12 +19,19 @@ struct ReadingView: View {
         min(1, max(0, Double((scrollY - 44) / 44)))
     }
 
-    /// Notes that link to this one via [[title]].
-    private var backlinks: [Entry] {
+    /// Notes that link to this one via [[title]]. Fetched once via predicate —
+    /// the old live @Query lowercased every body in the library per body eval.
+    @State private var backlinks: [Entry] = []
+
+    private func loadBacklinks() {
         let title = entry.displayTitle
-        guard !title.isEmpty else { return [] }
-        let needle = "[[\(title)]]".lowercased()
-        return allEntries.filter { $0.id != entry.id && $0.body.lowercased().contains(needle) }
+        guard !title.isEmpty else { backlinks = []; return }
+        let needle = "[[\(title)]]"
+        let myID = entry.id
+        let predicate = #Predicate<Entry> { e in
+            e.id != myID && e.body.localizedStandardContains(needle)
+        }
+        backlinks = (try? context.fetch(FetchDescriptor<Entry>(predicate: predicate))) ?? []
     }
 
     private var wordCount: Int {
@@ -137,6 +143,7 @@ struct ReadingView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .task { loadBacklinks() }
         .tint(Paper.accent)
         .toolbar {
             if outline.count >= 2 {
@@ -180,7 +187,10 @@ struct ReadingView: View {
         .environment(\.openURL, OpenURLAction { url in
             if url.scheme == "fern", url.host == "note" {
                 let title = url.lastPathComponent.removingPercentEncoding ?? url.lastPathComponent
-                if let match = allEntries.first(where: {
+                // Runs on tap only — a fetch here beats holding a live
+                // all-entries query for the whole reading session.
+                let all = (try? context.fetch(FetchDescriptor<Entry>())) ?? []
+                if let match = all.first(where: {
                     $0.displayTitle.caseInsensitiveCompare(title) == .orderedSame
                         || $0.title.caseInsensitiveCompare(title) == .orderedSame
                 }) {

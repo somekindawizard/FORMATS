@@ -34,9 +34,20 @@ struct TodayView: View {
         userName.isEmpty ? "\(greeting)." : "\(greeting), \(userName)."
     }
 
-    private var onThisDay: [Entry] { OnThisDay.entries(from: entries) }
-    private var wordsThisWeek: Int { WritingStats.wordsThisWeek(entries) }
-    private var streak: Int { WritingStats.currentStreak(entries) }
+    // Cached and recomputed on appear (initial + pop-back) rather than as
+    // computed properties: those re-scanned the whole corpus — splitting every
+    // body written this week — on EVERY body evaluation, including once per
+    // keystroke-autosave while typing in a pushed editor.
+    @State private var wordsThisWeek = 0
+    @State private var streak = 0
+    @State private var yearAgo: Entry?
+
+    private func recomputeStats() {
+        wordsThisWeek = WritingStats.wordsThisWeek(entries)
+        streak = WritingStats.currentStreak(entries)
+        yearAgo = OnThisDay.entries(from: entries).first
+        checkMilestone()
+    }
 
     var body: some View {
         ZStack {
@@ -92,7 +103,7 @@ struct TodayView: View {
                         .card(padding: 14)
                     }
 
-                    if let past = onThisDay.first {
+                    if let past = yearAgo {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("One year ago today").sectionLabel()
                             NavigationLink(value: past) {
@@ -130,8 +141,7 @@ struct TodayView: View {
         .navigationDestination(item: $draft) { entry in
             EntryEditorView(entry: entry)
         }
-        .onAppear { loadInitialPrompts(); checkMilestone() }
-        .onChange(of: streak) { _, _ in checkMilestone() }
+        .onAppear { loadInitialPrompts(); recomputeStats() }
         .onChange(of: journalTheme) { _, _ in refresh(.journal) }
         .onChange(of: creativeTheme) { _, _ in refresh(.creative) }
     }

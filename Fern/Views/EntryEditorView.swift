@@ -8,7 +8,6 @@ struct EntryEditorView: View {
     @Bindable var entry: Entry
     @Environment(\.modelContext) private var context
     @Environment(\.horizontalSizeClass) private var sizeClass
-    @Query private var allEntries: [Entry]
     @FocusState private var bodyFocused: Bool
     @State private var locator = LocationProvider()
     @State private var noteUnlocked = false
@@ -24,8 +23,14 @@ struct EntryEditorView: View {
     /// a still-blank entry out from under the live ReadingView).
     @State private var showReader = false
 
-    private var notebooks: [String] {
-        Array(Set(allEntries.compactMap(\.notebook))).sorted()
+    /// Notebook names, fetched once on open. This was a live all-entries
+    /// @Query held by the editor — it refetched and re-rendered the editor on
+    /// every autosave of every keystroke, store-wide, to populate one menu.
+    @State private var notebooks: [String] = []
+
+    private func loadNotebooks() {
+        let all = (try? context.fetch(FetchDescriptor<Entry>())) ?? []
+        notebooks = Array(Set(all.compactMap(\.notebook))).sorted()
     }
 
     var body: some View {
@@ -243,6 +248,7 @@ struct EntryEditorView: View {
             try? context.save()
         }
         .onAppear {
+            loadNotebooks()
             controller.requestPhoto = { showInlinePhotoPicker = true }
             // On iPad/Mac, collapse the sidebar to give the note the full width.
             if sizeClass == .regular { FernNav.shared.columnVisibility = .detailOnly }
