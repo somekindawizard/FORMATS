@@ -78,17 +78,14 @@ struct EntryEditorView: View {
             .accessibilityHidden(entry.isLocked && !noteUnlocked)
 
             // The floating, movable ink pill (keyboard is down while drawing).
+            // The word count lives inside the pill — a screen-anchored badge
+            // overlapped the title/prompt text.
             if controller.isDrawing {
                 GeometryReader { geo in
                     InkToolbar(controller: controller, bounds: geo.size)
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                 }
                 .ignoresSafeArea(.keyboard)
-                // Live word count — typed, plus an OCR estimate of handwriting.
-                InkWordCountBadge(typed: controller.wordCount, ink: controller.inkWordCount)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                    .padding(.leading, 22)
-                    .allowsHitTesting(false)
             }
 
             if entry.isLocked && !noteUnlocked {
@@ -335,32 +332,6 @@ struct EntryEditorView: View {
         if let image = renderer.uiImage {
             shareItems = ShareItems(items: [image])
         }
-    }
-}
-
-// MARK: - Ink word count
-
-/// A small floating readout shown while drawing: typed words, plus an OCR
-/// estimate of handwritten words when there's ink to count.
-private struct InkWordCountBadge: View {
-    let typed: Int
-    let ink: Int
-
-    private var label: String {
-        ink > 0 ? "\(typed) typed · ~\(ink) ink" : "\(typed) words"
-    }
-
-    var body: some View {
-        HStack(spacing: 5) {
-            Image(systemName: "pencil.and.scribble").font(.system(size: 10))
-            Text(label)
-        }
-        .font(.system(size: 11, weight: .medium, design: .monospaced))
-        .foregroundStyle(Paper.inkSoft)
-        .padding(.vertical, 5).padding(.horizontal, 10)
-        .background(Capsule().fill(Paper.raised.opacity(0.96))
-            .overlay(Capsule().strokeBorder(Paper.line, lineWidth: 1)))
-        .padding(.top, 6)
     }
 }
 

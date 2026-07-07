@@ -588,10 +588,25 @@ struct InkToolbar: View {
 
     private var colorRow: some View {
         HStack(spacing: 12) {
+            if trailing { wordCountLabel; Spacer(minLength: 8) }
             swatch(ink)
             ForEach(Array(themeInks.enumerated()), id: \.offset) { _, c in swatch(c) }
             paletteButton
+            if !trailing { Spacer(minLength: 8); wordCountLabel }
         }
+    }
+
+    /// Typed words plus an OCR estimate of the handwriting — lives inside the
+    /// pill so it never overlaps the page (a screen-anchored badge sat on the
+    /// title).
+    private var wordCountLabel: some View {
+        Text(controller.inkWordCount > 0
+             ? "\(controller.wordCount) · ~\(controller.inkWordCount) ink"
+             : "\(controller.wordCount) words")
+            .font(.system(size: 10, weight: .medium, design: .monospaced))
+            .foregroundStyle(Paper.inkFaint)
+            .lineLimit(1)
+            .fixedSize()
     }
 
     private var barDivider: some View {
