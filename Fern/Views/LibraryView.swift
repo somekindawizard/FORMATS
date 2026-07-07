@@ -209,6 +209,11 @@ struct LibraryView: View {
                           systemImage: entry.isLocked ? "lock.open.fill" : "lock.fill")
                 }
                 .tint(Paper.inkSoft)
+                Button { togglePin(entry) } label: {
+                    Label(entry.isPinned ? "Unpin" : "Pin",
+                          systemImage: entry.isPinned ? "star.slash.fill" : "star.fill")
+                }
+                .tint(Paper.accent)
             }
     }
 
