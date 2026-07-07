@@ -38,6 +38,20 @@ struct RedwoodSettings: View {
                         }
                         .pickerStyle(.segmented)
 
+                        Divider().overlay(Paper.line).padding(.vertical, 6)
+
+                        Text("Writing").sectionLabel()
+                        Toggle("Focus mode", isOn: Binding(
+                            get: { theme.focusMode }, set: { theme.focusMode = $0 }))
+                            .font(.calloutSerif).tint(Paper.accent)
+                        Text("Dims every line but the one you're writing.")
+                            .font(.label).foregroundStyle(Paper.inkFaint)
+                        Toggle("Typewriter scrolling", isOn: Binding(
+                            get: { theme.typewriter }, set: { theme.typewriter = $0 }))
+                            .font(.calloutSerif).tint(Paper.accent)
+                        Text("Keeps the line you're on vertically centered.")
+                            .font(.label).foregroundStyle(Paper.inkFaint)
+
                         // A live preview of the tinted tree.
                         Image("RedwoodTree")
                             .renderingMode(.template)

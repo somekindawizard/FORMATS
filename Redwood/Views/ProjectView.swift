@@ -28,6 +28,7 @@ struct ProjectView: View {
     @State private var showingTrash = false
     @State private var targetNode: RWDocument?      // per-doc word target editor
     @State private var nodeTargetText = ""
+    @State private var searchQuery = ""
 
     init(project: RWProject, parent: RWDocument? = nil) {
         self.project = project
@@ -57,12 +58,17 @@ struct ProjectView: View {
     var body: some View {
         ZStack {
             PaperBackground()
-            switch mode {
-            case .binder:    binderList
-            case .corkboard: corkboard
-            case .outline:   outline
+            if parent == nil, !searchQuery.trimmingCharacters(in: .whitespaces).isEmpty {
+                searchResults
+            } else {
+                switch mode {
+                case .binder:    binderList
+                case .corkboard: corkboard
+                case .outline:   outline
+                }
             }
         }
+        .modifier(RootSearchable(enabled: parent == nil, text: $searchQuery))
         .navigationTitle(parent?.displayTitle ?? project.title)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
@@ -286,6 +292,52 @@ struct ProjectView: View {
         sessionGoal = Int(goalText.filter(\.isNumber)) ?? 0
         try? context.save()
         Haptics.tap()
+    }
+
+    // MARK: — Search (whole manuscript, root only)
+
+    private var searchMatches: [RWDocument] {
+        let q = searchQuery.trimmingCharacters(in: .whitespaces).lowercased()
+        guard !q.isEmpty else { return [] }
+        return allDocs.filter { d in
+            d.title.lowercased().contains(q)
+            || d.synopsis.lowercased().contains(q)
+            || d.body.lowercased().contains(q)
+        }
+    }
+
+    private var searchResults: some View {
+        let matches = searchMatches
+        return Group {
+            if matches.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass").font(.title2).foregroundStyle(Paper.inkFaint)
+                    Text("Nothing matches “\(searchQuery)”")
+                        .font(.bodySerif).foregroundStyle(Paper.inkSoft)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                List {
+                    ForEach(matches) { node in
+                        Group {
+                            if node.isFolder {
+                                NavigationLink { ProjectView(project: project, parent: node) } label: {
+                                    OutlineRow(node: node, depth: 0, childCount: childCount(of: node))
+                                }
+                            } else {
+                                NavigationLink(value: node) {
+                                    OutlineRow(node: node, depth: 0, childCount: 0)
+                                }
+                            }
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                    }
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+            }
+        }
     }
 
     // MARK: — Binder (list) mode
@@ -599,6 +651,21 @@ private struct SynopsisEditor: View {
             }
         }
         .presentationDetents([.medium])
+    }
+}
+
+/// Adds `.searchable` only for the root project view (nested folders don't get
+/// their own search bar).
+private struct RootSearchable: ViewModifier {
+    let enabled: Bool
+    @Binding var text: String
+    func body(content: Content) -> some View {
+        if enabled {
+            content.searchable(text: $text, placement: .navigationBarDrawer(displayMode: .automatic),
+                               prompt: "Search this manuscript")
+        } else {
+            content
+        }
     }
 }
 

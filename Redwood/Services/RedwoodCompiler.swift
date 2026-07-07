@@ -104,22 +104,26 @@ enum RedwoodCompiler {
         var cursor = 0
 
         while cursor < text.length {
-            UIGraphicsBeginPDFPage()
-            guard let ctx = UIGraphicsGetCurrentContext() else { break }
-            ctx.textMatrix = .identity
-            ctx.translateBy(x: 0, y: page.height)
-            ctx.scaleBy(x: 1, y: -1)
+            // One page per pool — CoreText's per-page typesetting objects are
+            // released promptly instead of piling up for the whole manuscript.
+            let advanced: Int = autoreleasepool {
+                UIGraphicsBeginPDFPage()
+                guard let ctx = UIGraphicsGetCurrentContext() else { return 0 }
+                ctx.textMatrix = .identity
+                ctx.translateBy(x: 0, y: page.height)
+                ctx.scaleBy(x: 1, y: -1)
 
-            let flippedRect = CGRect(x: printable.minX,
-                                     y: page.height - printable.maxY,
-                                     width: printable.width,
-                                     height: printable.height)
-            let path = CGPath(rect: flippedRect, transform: nil)
-            let frame = CTFramesetterCreateFrame(framesetter, CFRange(location: cursor, length: 0), path, nil)
-            CTFrameDraw(frame, ctx)
-            let visible = CTFrameGetVisibleStringRange(frame)
-            if visible.length == 0 { break }        // avoid an infinite loop
-            cursor += visible.length
+                let flippedRect = CGRect(x: printable.minX,
+                                         y: page.height - printable.maxY,
+                                         width: printable.width,
+                                         height: printable.height)
+                let path = CGPath(rect: flippedRect, transform: nil)
+                let frame = CTFramesetterCreateFrame(framesetter, CFRange(location: cursor, length: 0), path, nil)
+                CTFrameDraw(frame, ctx)
+                return CTFrameGetVisibleStringRange(frame).length
+            }
+            if advanced == 0 { break }        // avoid an infinite loop
+            cursor += advanced
         }
         UIGraphicsEndPDFContext()
         return data as Data
@@ -221,6 +225,11 @@ enum RedwoodCompiler {
         s.replacingOccurrences(of: "&", with: "&amp;")
          .replacingOccurrences(of: "<", with: "&lt;")
          .replacingOccurrences(of: ">", with: "&gt;")
+         // Escape quotes too — link URLs go into an href="…" attribute, and a
+         // quote (or already-escaped &amp; from a query string) in the URL made
+         // the XHTML malformed, so strict EPUB readers rejected the chapter.
+         .replacingOccurrences(of: "\"", with: "&quot;")
+         .replacingOccurrences(of: "'", with: "&#39;")
     }
 
     /// Markdown → a run of XHTML block elements (headings, paragraphs, lists,
