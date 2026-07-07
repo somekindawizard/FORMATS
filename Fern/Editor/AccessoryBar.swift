@@ -5,49 +5,94 @@ import SwiftUI
 /// word count below.
 struct AccessoryBar: View {
     @Bindable var controller: MarkdownEditorController
+    /// Tucks the synonym strip + formatting row away, leaving a slim handle —
+    /// persisted, so the bar stays how you left it across notes and launches.
+    @AppStorage("fern.accessory.collapsed") private var collapsed = false
 
     var body: some View {
         VStack(spacing: 0) {
-            SynonymStrip(controller: controller)
+            if collapsed {
+                collapsedRow
+            } else {
+                SynonymStrip(controller: controller)
 
-            HStack(spacing: 0) {
-                // Word count + keyboard-dismiss go on the dominant side so
-                // they're a thumb's reach away.
-                if trailing { dismissGroup; Divider().frame(height: 22) }
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 20) {
-                        icon("textformat.size")       { controller.cycleHeading() }
-                        icon("bold")                  { controller.wrap("**") }
-                        icon("italic")                { controller.wrap("*") }
-                        icon("strikethrough")         { controller.wrap("~~") }
-                        icon("highlighter")           { controller.wrap("==") }
-                        icon("chevron.left.forwardslash.chevron.right") { controller.wrap("`") }
-                        divider
-                        icon("list.bullet")           { controller.setLinePrefix("- ") }
-                        icon("list.number")           { controller.setLinePrefix("1. ") }
-                        icon("checklist")             { controller.toggleTask() }
-                        icon("text.quote")            { controller.setLinePrefix("> ") }
-                        divider
-                        icon("link")                  { controller.insertLink() }
-                        icon("minus")                 { controller.insertRule() }
-                        if controller.requestPhoto != nil {
-                            icon("photo") { controller.requestPhoto?() }
+                HStack(spacing: 0) {
+                    // Word count + keyboard-dismiss go on the dominant side so
+                    // they're a thumb's reach away.
+                    if trailing { dismissGroup; Divider().frame(height: 22) }
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 20) {
+                            icon("textformat.size")       { controller.cycleHeading() }
+                            icon("bold")                  { controller.wrap("**") }
+                            icon("italic")                { controller.wrap("*") }
+                            icon("strikethrough")         { controller.wrap("~~") }
+                            icon("highlighter")           { controller.wrap("==") }
+                            icon("chevron.left.forwardslash.chevron.right") { controller.wrap("`") }
+                            divider
+                            icon("list.bullet")           { controller.setLinePrefix("- ") }
+                            icon("list.number")           { controller.setLinePrefix("1. ") }
+                            icon("checklist")             { controller.toggleTask() }
+                            icon("text.quote")            { controller.setLinePrefix("> ") }
+                            divider
+                            icon("link")                  { controller.insertLink() }
+                            icon("minus")                 { controller.insertRule() }
+                            if controller.requestPhoto != nil {
+                                icon("photo") { controller.requestPhoto?() }
+                            }
                         }
+                        .padding(.horizontal, 20)
                     }
-                    .padding(.horizontal, 20)
-                }
 
-                if !trailing { Divider().frame(height: 22); dismissGroup }
+                    if !trailing { Divider().frame(height: 22); dismissGroup }
+                }
+                .frame(height: 44)
             }
-            .frame(height: 44)
         }
         .background(
             Rectangle().fill(Paper.raised.opacity(0.96))
                 .overlay(Rectangle().frame(height: 1).foregroundStyle(Paper.line), alignment: .top)
         )
+        .animation(.easeOut(duration: 0.18), value: collapsed)
     }
 
     private var trailing: Bool { ThemeStore.shared.handedness.controlsTrailing }
+
+    /// The bar, tucked: just the word count, an expand chevron, and the
+    /// keyboard-dismiss — clustered on the dominant side like the full bar.
+    private var collapsedRow: some View {
+        HStack(spacing: 0) {
+            if trailing { collapsedCluster; Spacer() }
+            else { Spacer(); collapsedCluster }
+        }
+        .frame(height: 30)
+    }
+
+    private var collapsedCluster: some View {
+        HStack(spacing: 0) {
+            Text("\(controller.wordCount)")
+                .font(.system(size: 12, design: .monospaced))
+                .foregroundStyle(Paper.inkFaint)
+                .padding(.horizontal, 12)
+            Button { collapsed = false } label: {
+                Image(systemName: "chevron.up")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(Paper.inkSoft)
+                    .frame(minWidth: 30, minHeight: 30)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Show formatting tools")
+            Button { controller.dismissKeyboard() } label: {
+                Image(systemName: "keyboard.chevron.compact.down")
+                    .font(.system(size: 15))
+                    .foregroundStyle(Paper.inkSoft)
+                    .frame(minWidth: 30, minHeight: 30)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .padding(.trailing, 8)
+        }
+    }
 
     private var dismissGroup: some View {
         HStack(spacing: 0) {
@@ -55,6 +100,15 @@ struct AccessoryBar: View {
                 .font(.system(size: 12, design: .monospaced))
                 .foregroundStyle(Paper.inkFaint)
                 .padding(.horizontal, 12)
+            Button { collapsed = true } label: {
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(Paper.inkSoft)
+                    .frame(minWidth: 26, minHeight: 30)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Hide formatting tools")
             Button { controller.dismissKeyboard() } label: {
                 Image(systemName: "keyboard.chevron.compact.down")
                     .font(.system(size: 16))
