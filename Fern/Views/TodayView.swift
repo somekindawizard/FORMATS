@@ -72,7 +72,7 @@ struct TodayView: View {
                                 } label: {
                                     Image(systemName: "sidebar.leading")
                                         .font(.system(size: 18, weight: .medium))
-                                        .foregroundStyle(Paper.inkSoft)
+                                        .foregroundStyle(Paper.accent)
                                 }
                                 .accessibilityLabel("Toggle sidebar")
                             }

@@ -85,6 +85,11 @@ struct RootView: View {
                     )
                 } detail: {
                     NavigationStack { (sidebarSelection ?? .today).view }
+                        // Tint the detail bar too, so the system-provided
+                        // sidebar-toggle button picks up the accent instead of
+                        // defaulting to white (the custom toolbar buttons set
+                        // their color explicitly; the system toggle follows tint).
+                        .tint(Paper.accent)
                 }
                 .tint(Paper.accent)
             } else {
