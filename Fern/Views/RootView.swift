@@ -69,6 +69,20 @@ struct RootView: View {
                         }
                     }
                     .navigationTitle("Fern")
+                    // Swipe left anywhere on the sidebar to tuck it away —
+                    // simultaneous so the list still scrolls vertically; only a
+                    // clearly horizontal leftward drag closes it.
+                    .simultaneousGesture(
+                        DragGesture(minimumDistance: 30)
+                            .onEnded { v in
+                                if v.translation.width < -50,
+                                   abs(v.translation.width) > abs(v.translation.height) {
+                                    withAnimation(.easeInOut(duration: 0.25)) {
+                                        nav.columnVisibility = .detailOnly
+                                    }
+                                }
+                            }
+                    )
                 } detail: {
                     NavigationStack { (sidebarSelection ?? .today).view }
                 }
