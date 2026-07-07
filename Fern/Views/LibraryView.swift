@@ -37,7 +37,7 @@ struct LibraryView: View {
     @State private var draft: Entry?
     @AppStorage("fern.library.sort") private var sortRaw = LibrarySort.created.rawValue
     private var sort: LibrarySort { LibrarySort(rawValue: sortRaw) ?? .created }
-    /// Long-press "New folder…" flow: the entry awaiting a folder + name field.
+    /// Long-press "New notebook…" flow: the entry awaiting a notebook + name field.
     @State private var folderEntry: Entry?
     @State private var newFolderName = ""
     @State private var showingNewFolder = false
@@ -149,11 +149,11 @@ struct LibraryView: View {
             if !notebooks.isEmpty || draftsOnly || selectedNotebook != nil {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
-                        Button("All folders") { selectedNotebook = nil }
+                        Button("All notebooks") { selectedNotebook = nil }
                         ForEach(notebooks, id: \.self) { nb in
                             Button { selectedNotebook = nb } label: {
                                 if selectedNotebook == nb { Label(nb, systemImage: "checkmark") }
-                                else { Label(nb, systemImage: "folder") }
+                                else { Label(nb, systemImage: "books.vertical") }
                             }
                         }
                         Divider()
@@ -174,7 +174,7 @@ struct LibraryView: View {
         .navigationDestination(item: $draft) { entry in
             EntryEditorView(entry: entry)
         }
-        .alert("New folder", isPresented: $showingNewFolder) {
+        .alert("New notebook", isPresented: $showingNewFolder) {
             TextField("Name", text: $newFolderName)
             Button("Create") {
                 let name = newFolderName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -232,8 +232,8 @@ struct LibraryView: View {
             }
     }
 
-    /// The long-press menu: pin, lock, move into a folder (create one inline),
-    /// delete. Folders are backed by the same field the filter menu uses.
+    /// The long-press menu: pin, lock, move into a notebook (create one inline),
+    /// delete. Backed by the same field the filter menu uses.
     @ViewBuilder
     private func rowMenu(_ entry: Entry) -> some View {
         Button { togglePin(entry) } label: {
@@ -247,14 +247,14 @@ struct LibraryView: View {
         Menu {
             if entry.notebook != nil {
                 Button { assign(entry, to: nil) } label: {
-                    Label("Remove from folder", systemImage: "folder.badge.minus")
+                    Label("Remove from notebook", systemImage: "minus.circle")
                 }
                 Divider()
             }
-            ForEach(notebooks, id: \.self) { folder in
-                Button { assign(entry, to: folder) } label: {
-                    if entry.notebook == folder { Label(folder, systemImage: "checkmark") }
-                    else { Label(folder, systemImage: "folder") }
+            ForEach(notebooks, id: \.self) { notebook in
+                Button { assign(entry, to: notebook) } label: {
+                    if entry.notebook == notebook { Label(notebook, systemImage: "checkmark") }
+                    else { Label(notebook, systemImage: "books.vertical") }
                 }
             }
             if !notebooks.isEmpty { Divider() }
@@ -263,10 +263,10 @@ struct LibraryView: View {
                 newFolderName = ""
                 showingNewFolder = true
             } label: {
-                Label("New folder…", systemImage: "folder.badge.plus")
+                Label("New notebook…", systemImage: "plus")
             }
         } label: {
-            Label("Move to folder", systemImage: "folder")
+            Label("Move to notebook", systemImage: "books.vertical")
         }
         Divider()
         Button(role: .destructive) { delete(entry) } label: {
@@ -274,9 +274,9 @@ struct LibraryView: View {
         }
     }
 
-    private func assign(_ entry: Entry, to folder: String?) {
+    private func assign(_ entry: Entry, to notebook: String?) {
         Haptics.tap()
-        entry.notebook = folder
+        entry.notebook = notebook
         try? context.save()
     }
 

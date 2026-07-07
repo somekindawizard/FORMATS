@@ -133,16 +133,16 @@ struct EntryEditorView: View {
                         Label(entry.isFinished ? "Mark as draft" : "Mark as finished",
                               systemImage: entry.isFinished ? "circle" : "checkmark.seal")
                     }
-                    Menu("Folder") {
+                    Menu("Notebook") {
                         Button("None") { entry.notebook = nil }
                         ForEach(notebooks, id: \.self) { nb in
                             Button { entry.notebook = nb } label: {
                                 if entry.notebook == nb { Label(nb, systemImage: "checkmark") }
-                                else { Label(nb, systemImage: "folder") }
+                                else { Label(nb, systemImage: "books.vertical") }
                             }
                         }
                         Divider()
-                        Button("New folder…") { showingNewNotebook = true }
+                        Button("New notebook…") { showingNewNotebook = true }
                     }
                     Button { entry.photoWash.toggle() } label: {
                         Label(entry.photoWash ? "Photo wash: on" : "Photo wash",
@@ -203,7 +203,7 @@ struct EntryEditorView: View {
         .onChange(of: inlinePhotoPicks) { _, items in
             Task { await insertInlinePhotos(items) }
         }
-        .alert("New folder", isPresented: $showingNewNotebook) {
+        .alert("New notebook", isPresented: $showingNewNotebook) {
             TextField("Name", text: $newNotebookName)
             Button("Create") {
                 let name = newNotebookName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -407,7 +407,7 @@ private struct MetadataRow: View {
                             .background(Capsule().fill(Paper.raised)))
                 }
                 if let nb = entry.notebook {
-                    Label(nb, systemImage: "folder")
+                    Label(nb, systemImage: "books.vertical")
                         .font(.calloutSerif)
                         .foregroundStyle(Paper.inkSoft)
                         .padding(.vertical, 5).padding(.horizontal, 10)
