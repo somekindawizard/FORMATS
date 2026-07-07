@@ -24,6 +24,10 @@ final class Entry {
     var collectionRaw: String = Collection.journal.rawValue
     var createdAt: Date = Date.now
     var updatedAt: Date = Date.now
+    /// When the entry was last opened in the editor — drives the library's
+    /// "Recently opened" sort. Epoch default so never-opened entries (and
+    /// existing stores migrating this field in) sort to the bottom.
+    var lastOpenedAt: Date = Date(timeIntervalSince1970: 0)
     var moodRaw: String?
     var placeName: String?
     var latitude: Double?

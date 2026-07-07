@@ -245,6 +245,7 @@ struct EntryEditorView: View {
             try? context.save()
         }
         .onAppear {
+            entry.lastOpenedAt = .now   // drives the library's "Recently opened" sort
             loadNotebooks()
             controller.requestPhoto = { showInlinePhotoPicker = true }
             // On iPad/Mac, collapse the sidebar to give the note the full width.

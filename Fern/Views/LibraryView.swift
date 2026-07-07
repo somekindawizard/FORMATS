@@ -1,6 +1,33 @@
 import SwiftUI
 import SwiftData
 
+/// How the library orders (and day-sections) its entries.
+enum LibrarySort: String, CaseIterable, Identifiable {
+    case created, written, opened
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .created: return "Date created"
+        case .written: return "Recently written"
+        case .opened:  return "Recently opened"
+        }
+    }
+    var icon: String {
+        switch self {
+        case .created: return "calendar"
+        case .written: return "pencil.line"
+        case .opened:  return "book"
+        }
+    }
+    var keyPath: KeyPath<Entry, Date> {
+        switch self {
+        case .created: return \.createdAt
+        case .written: return \.updatedAt
+        case .opened:  return \.lastOpenedAt
+        }
+    }
+}
+
 struct LibraryView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \Entry.createdAt, order: .reverse) private var entries: [Entry]
@@ -8,6 +35,8 @@ struct LibraryView: View {
     @State private var selectedNotebook: String?
     @State private var draftsOnly = false
     @State private var draft: Entry?
+    @AppStorage("fern.library.sort") private var sortRaw = LibrarySort.created.rawValue
+    private var sort: LibrarySort { LibrarySort(rawValue: sortRaw) ?? .created }
 
     private var allTags: [String] {
         Array(Set(entries.flatMap(\.tagNames))).sorted()
@@ -44,7 +73,9 @@ struct LibraryView: View {
 
     private var pinned: [Entry] { filtered.filter(\.isPinned) }
     private var sections: [DaySection] {
-        DayGrouping.sections(from: filtered.filter { !$0.isPinned })
+        // Sections group by the day of the active sort's date, so headers read
+        // as "the day you created / wrote / opened these".
+        DayGrouping.sections(from: filtered.filter { !$0.isPinned }, by: sort.keyPath)
     }
 
     var body: some View {
@@ -89,6 +120,22 @@ struct LibraryView: View {
                     Image(systemName: "calendar").foregroundStyle(Paper.accent)
                 }
                 .accessibilityLabel("Calendar")
+            }
+            ToolbarItem(placement: .topBarLeading) {
+                Menu {
+                    ForEach(LibrarySort.allCases) { option in
+                        Button {
+                            sortRaw = option.rawValue
+                        } label: {
+                            if sort == option { Label(option.title, systemImage: "checkmark") }
+                            else { Label(option.title, systemImage: option.icon) }
+                        }
+                    }
+                } label: {
+                    Image(systemName: "arrow.up.arrow.down")
+                        .foregroundStyle(Paper.accent)
+                }
+                .accessibilityLabel("Sort entries")
             }
             ToolbarItem(placement: .topBarTrailing) {
                 ComposeButton(action: freeWrite,
