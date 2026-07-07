@@ -32,8 +32,7 @@ struct EntryRow: View {
             HStack(spacing: 6) {
                 Text(dateLabel).sectionLabel()
                 if entry.isPinned {
-                    Image(systemName: "star.fill")
-                        .font(.system(size: 9)).foregroundStyle(Paper.accent)
+                    PinIcon.indicator(size: 10, color: Paper.accent)
                 }
                 if entry.isLocked {
                     Image(systemName: "lock.fill")

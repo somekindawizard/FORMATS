@@ -195,8 +195,8 @@ struct LibraryView: View {
             .listRowInsets(EdgeInsets(top: 2, leading: 22, bottom: 2, trailing: 22))
             .swipeActions(edge: .leading, allowsFullSwipe: true) {
                 Button { togglePin(entry) } label: {
-                    Label(entry.isPinned ? "Unpin" : "Pin",
-                          systemImage: entry.isPinned ? "star.slash.fill" : "star.fill")
+                    Label { Text(entry.isPinned ? "Unpin" : "Pin") }
+                        icon: { Image(uiImage: entry.isPinned ? PinIcon.unpin : PinIcon.pin) }
                 }
                 .tint(Paper.accent)
             }
@@ -210,8 +210,8 @@ struct LibraryView: View {
                 }
                 .tint(Paper.inkSoft)
                 Button { togglePin(entry) } label: {
-                    Label(entry.isPinned ? "Unpin" : "Pin",
-                          systemImage: entry.isPinned ? "star.slash.fill" : "star.fill")
+                    Label { Text(entry.isPinned ? "Unpin" : "Pin") }
+                        icon: { Image(uiImage: entry.isPinned ? PinIcon.unpin : PinIcon.pin) }
                 }
                 .tint(Paper.accent)
             }
