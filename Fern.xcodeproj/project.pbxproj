@@ -106,6 +106,7 @@
 		9ECA81FD5015F42107F1692F /* FernParticles.metal in Sources */ = {isa = PBXBuildFile; fileRef = 447AB900F36576A7D652D944 /* FernParticles.metal */; };
 		9ECDE84E71366D036DB3355A /* PaperBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F27301B01F7D4292CF16FE /* PaperBackground.swift */; };
 		A1608D2E62B4B1917A46A610 /* Prompts+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A20EA5F23C21B6ACF018CE /* Prompts+Extras.swift */; };
+		A319EDB7D857B0DDCEFEB025 /* RWCleanup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C851947D8814D742075BD60 /* RWCleanup.swift */; };
 		A3371C8D281AECF7E2AD4D6E /* AssetSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C7BF305C70EF6B5198FA801 /* AssetSync.swift */; };
 		A5337A96A39EF50CFE51E4C5 /* SharedNotebookStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 186A14AE8DEDDA5B874B66BD /* SharedNotebookStore.swift */; };
 		AAC0A0E5917AA096F46B77A2 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 229223438BC567429C3E5B74 /* Markdown */; };
@@ -249,6 +250,7 @@
 		528AD9D277391F37626DB21D /* FernPhysicsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FernPhysicsTests.swift; sourceTree = "<group>"; };
 		55662AF595DC7900135BE0CA /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		577966E8E6C9CBBB42BDF362 /* BarnsleyFern.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarnsleyFern.swift; sourceTree = "<group>"; };
+		5C851947D8814D742075BD60 /* RWCleanup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RWCleanup.swift; sourceTree = "<group>"; };
 		5D169EBE697B65EFB3254C49 /* CalendarBrowse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarBrowse.swift; sourceTree = "<group>"; };
 		5E7F1C4D49815A076F3A8A3C /* RedwoodApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedwoodApp.swift; sourceTree = "<group>"; };
 		61EF746BB6AAD23AA2AEFD56 /* WashLabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WashLabView.swift; sourceTree = "<group>"; };
@@ -386,6 +388,7 @@
 			isa = PBXGroup;
 			children = (
 				C0EAB514165A196C57AFEBE1 /* RedwoodCompiler.swift */,
+				5C851947D8814D742075BD60 /* RWCleanup.swift */,
 				8C16252685A829E96A585FE8 /* ZipWriter.swift */,
 			);
 			path = Services;
@@ -833,6 +836,7 @@
 				9ECDE84E71366D036DB3355A /* PaperBackground.swift in Sources */,
 				EEC974BF4825752C14EF617E /* PhotoStore.swift in Sources */,
 				DD8DF15F45F5C83BCDE68809 /* ProjectView.swift in Sources */,
+				A319EDB7D857B0DDCEFEB025 /* RWCleanup.swift in Sources */,
 				08DEA1E14E3440DC001945AA /* RWModels.swift in Sources */,
 				8BC189ECBBE3E285243537A2 /* RWTemplates.swift in Sources */,
 				98B6A141FF7B1252AA3901E6 /* RedwoodApp.swift in Sources */,

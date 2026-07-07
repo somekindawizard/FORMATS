@@ -41,6 +41,12 @@ final class RWDocument {
     var order: Int = 0
     /// A workflow label — "", "todo", "draft", "revised", "final".
     var statusRaw: String = ""
+    /// Optional per-document word goal ("this scene ≈ 2000 words"); 0 = none.
+    var wordTarget: Int = 0
+    /// Soft delete — non-nil means the node (and its subtree) is in the Trash,
+    /// hidden from the binder but restorable. Inline default so existing stores
+    /// migrate cleanly.
+    var deletedAt: Date?
     var createdAt: Date = Date.now
     var updatedAt: Date = Date.now
 
@@ -65,9 +71,16 @@ extension RWDocument {
         return isFolder ? "Untitled folder" : "Untitled"
     }
 
+    /// Word count over the *rendered* text, so Markdown syntax (`#`, `**`,
+    /// list markers, template scaffolding) isn't counted as words — matching
+    /// how `displayTitle` reads the body.
     var wordCount: Int {
-        body.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count
+        MarkdownRender.plainText(body)
+            .split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count
     }
+
+    /// ≈ reading time in minutes (≥1), at ~220 wpm.
+    var readMinutes: Int { max(1, Int((Double(wordCount) / 220).rounded(.up))) }
 
     var status: RWStatus {
         get { RWStatus(rawValue: statusRaw) ?? .none }
@@ -100,7 +113,9 @@ final class RWSnapshot {
 }
 
 enum RWStatus: String, CaseIterable, Identifiable {
-    case none, todo, draft, revised, final
+    // `none` stores as "" so the empty default and an explicit "no status" are
+    // the same on-disk encoding (they previously diverged: "" vs "none").
+    case none = "", todo, draft, revised, final
     var id: String { rawValue }
     var label: String {
         switch self {

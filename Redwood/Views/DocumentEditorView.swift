@@ -14,6 +14,8 @@ struct DocumentEditorView: View {
     @State private var showingSnapshots = false
     @State private var snapshotTaken = false
     @State private var showLineSpacing = false
+    @State private var editingTarget = false
+    @State private var targetText = ""
 
     var body: some View {
         @Bindable var controller = controller
@@ -29,7 +31,8 @@ struct DocumentEditorView: View {
                     .font(.calloutSerif).italic()
                     .foregroundStyle(Paper.inkFaint)
 
-                WordCountBar(words: doc.wordCount, status: doc.status)
+                WordCountBar(words: doc.wordCount, minutes: doc.readMinutes,
+                             status: doc.status, target: doc.wordTarget)
 
                 MarkdownTextView(text: $doc.body, controller: controller,
                                  wash: false, entryID: doc.id)
@@ -66,6 +69,10 @@ struct DocumentEditorView: View {
                                 else { Text(s.label) }
                             }
                         }
+                    }
+                    Button { beginEditTarget() } label: {
+                        Label(doc.wordTarget > 0 ? "Word target: \(doc.wordTarget)" : "Word target…",
+                              systemImage: "target")
                     }
                     Button { controller.presentFind() } label: {
                         Label("Find & Replace", systemImage: "magnifyingglass")
@@ -110,6 +117,16 @@ struct DocumentEditorView: View {
             SnapshotsView(doc: doc)
         }
         .sheet(isPresented: $showLineSpacing) { LineSpacingSheet(controller: controller) }
+        .alert("Word target", isPresented: $editingTarget) {
+            TextField("Words (0 = none)", text: $targetText).keyboardType(.numberPad)
+            Button("Save") {
+                doc.wordTarget = Int(targetText.filter(\.isNumber)) ?? 0
+                doc.updatedAt = .now; try? context.save()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("A goal for just this document — shown on its card and in the editor.")
+        }
         .overlay(alignment: .top) {
             if snapshotTaken {
                 Text("Snapshot saved")
@@ -133,10 +150,21 @@ struct DocumentEditorView: View {
         .photosPicker(isPresented: $showPhotoPicker, selection: $picks,
                       maxSelectionCount: 1, matching: .images)
         .onChange(of: picks) { _, items in Task { await insertPhotos(items) } }
-        .onChange(of: doc.title) { _, _ in doc.updatedAt = .now }
-        .onChange(of: doc.body)  { _, _ in doc.updatedAt = .now }
+        .onChange(of: doc.title)    { _, _ in doc.updatedAt = .now }
+        .onChange(of: doc.body)     { _, _ in doc.updatedAt = .now }
+        .onChange(of: doc.synopsis) { _, _ in doc.updatedAt = .now }
         .onAppear { controller.requestPhoto = { showPhotoPicker = true } }
-        .onDisappear { try? context.save() }
+        .onDisappear {
+            // Ink saves are debounced — flush pending strokes before leaving,
+            // or a quick back after drawing loses them.
+            controller.flushDrawing()
+            try? context.save()
+        }
+    }
+
+    private func beginEditTarget() {
+        targetText = doc.wordTarget > 0 ? "\(doc.wordTarget)" : ""
+        editingTarget = true
     }
 
     private func takeSnapshot() {
@@ -164,14 +192,19 @@ struct DocumentEditorView: View {
     }
 }
 
-/// A thin ribbon under the synopsis: live word count and the status chip.
+/// A thin ribbon under the synopsis: live word count, reading time, an optional
+/// per-document target, and the status chip.
 private struct WordCountBar: View {
     let words: Int
+    let minutes: Int
     let status: RWStatus
+    let target: Int
 
     var body: some View {
         HStack(spacing: 10) {
-            Text("\(words) words")
+            Text(target > 0 ? "\(words) / \(target) words" : "\(words) words")
+                .font(.label).foregroundStyle(target > 0 && words >= target ? Paper.accent : Paper.inkFaint)
+            Text("· \(minutes) min")
                 .font(.label).foregroundStyle(Paper.inkFaint)
             if status != .none {
                 Text("· \(status.label)")

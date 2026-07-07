@@ -13,6 +13,9 @@ struct RedwoodRootView: View {
     @State private var showingNew = false
     @State private var newProjectTitle = ""
     @State private var showingSettings = false
+    @State private var renamingProject: RWProject?
+    @State private var renameTitle = ""
+    @State private var renameSubtitle = ""
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -26,6 +29,21 @@ struct RedwoodRootView: View {
             TextField("Title", text: $newProjectTitle)
             Button("Create", action: createProject)
             Button("Cancel", role: .cancel) { newProjectTitle = "" }
+        }
+        .alert("Rename project", isPresented: Binding(get: { renamingProject != nil },
+                                                      set: { if !$0 { renamingProject = nil } })) {
+            TextField("Title", text: $renameTitle)
+            TextField("Subtitle (optional)", text: $renameSubtitle)
+            Button("Save") {
+                if let p = renamingProject {
+                    let t = renameTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !t.isEmpty { p.title = t }
+                    p.subtitle = renameSubtitle.trimmingCharacters(in: .whitespacesAndNewlines)
+                    p.updatedAt = .now; try? context.save()
+                }
+                renamingProject = nil
+            }
+            Button("Cancel", role: .cancel) { renamingProject = nil }
         }
         .onAppear { if selectedProject == nil { selectedProject = projects.first } }
         .onChange(of: projects.count) { _, _ in
@@ -45,6 +63,14 @@ struct RedwoodRootView: View {
                         ProjectShelfRow(project: project, count: documentCount(project))
                             .tag(project)
                             .listRowBackground(Color.clear)
+                            .contextMenu {
+                                Button { beginRename(project) } label: {
+                                    Label("Rename…", systemImage: "pencil")
+                                }
+                                Button(role: .destructive) { deleteProject(project) } label: {
+                                    Label("Delete project", systemImage: "trash")
+                                }
+                            }
                     }
                     .onDelete(perform: deleteProjects)
                 }
@@ -140,18 +166,29 @@ struct RedwoodRootView: View {
         selectedProject = project
     }
 
+    private func beginRename(_ project: RWProject) {
+        renameTitle = project.title
+        renameSubtitle = project.subtitle
+        renamingProject = project
+    }
+
     private func deleteProjects(_ offsets: IndexSet) {
+        for i in offsets { deleteProject(projects[i]) }
+    }
+
+    /// Permanently delete a project and every node it owns — including each
+    /// node's snapshots, drawing, ink prefs, and embedded photos (previously
+    /// only the drawing was removed, leaking the rest forever).
+    private func deleteProject(_ project: RWProject) {
         Haptics.tap(.medium)
-        for i in offsets {
-            let project = projects[i]
-            if selectedProject == project { selectedProject = nil }
-            let pid = project.id
-            if let docs = try? context.fetch(FetchDescriptor<RWDocument>(
-                predicate: #Predicate<RWDocument> { $0.projectID == pid })) {
-                for d in docs { DrawingStore.delete(d.id); context.delete(d) }
-            }
-            context.delete(project)
+        if selectedProject == project { selectedProject = nil }
+        let pid = project.id
+        if let docs = try? context.fetch(FetchDescriptor<RWDocument>(
+            predicate: #Predicate<RWDocument> { $0.projectID == pid })) {
+            for d in docs { RWCleanup.purge(context, d) }
         }
+        RWSession.baseline[project.id] = nil
+        context.delete(project)
         try? context.save()
     }
 }
@@ -168,6 +205,10 @@ struct ProjectShelfRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(project.title).font(.headlineSerif).foregroundStyle(Paper.ink)
                     .lineLimit(1)
+                if !project.subtitle.isEmpty {
+                    Text(project.subtitle).font(.label).italic()
+                        .foregroundStyle(Paper.inkSoft).lineLimit(1)
+                }
                 Text("\(count) document\(count == 1 ? "" : "s")")
                     .font(.label).foregroundStyle(Paper.inkFaint)
             }

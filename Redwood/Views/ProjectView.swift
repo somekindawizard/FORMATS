@@ -24,12 +24,17 @@ struct ProjectView: View {
     /// edit mode, which silently swallowed row taps — nothing in Binder view
     /// could be opened.
     @State private var arranging = false
+    @State private var pendingDelete: RWDocument?   // folder delete confirmation
+    @State private var showingTrash = false
+    @State private var targetNode: RWDocument?      // per-doc word target editor
+    @State private var nodeTargetText = ""
 
     init(project: RWProject, parent: RWDocument? = nil) {
         self.project = project
         self.parent = parent
         let pid = project.id
-        _allDocs = Query(filter: #Predicate<RWDocument> { $0.projectID == pid },
+        // Trashed nodes (deletedAt != nil) are excluded from the binder.
+        _allDocs = Query(filter: #Predicate<RWDocument> { $0.projectID == pid && $0.deletedAt == nil },
                          sort: [SortDescriptor(\RWDocument.order)])
     }
 
@@ -42,9 +47,11 @@ struct ProjectView: View {
         allDocs.filter { !$0.isFolder }.reduce(0) { $0 + $1.wordCount }
     }
 
-    /// Words added since this app session began (baseline captured on first open).
+    /// Words added since this app session began — baseline is PER PROJECT
+    /// (a single global baseline made the session count wrong for every
+    /// project opened after the first).
     private var sessionWords: Int {
-        max(0, totalWords - (RWSession.baselineWords ?? totalWords))
+        max(0, totalWords - (RWSession.baseline[project.id] ?? totalWords))
     }
 
     var body: some View {
@@ -59,7 +66,7 @@ struct ProjectView: View {
         .navigationTitle(parent?.displayTitle ?? project.title)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            if RWSession.baselineWords == nil { RWSession.baselineWords = totalWords }
+            if RWSession.baseline[project.id] == nil { RWSession.baseline[project.id] = totalWords }
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -110,6 +117,9 @@ struct ProjectView: View {
                         Button { showingCompile = true } label: {
                             Label("Compile…", systemImage: "square.stack.3d.up")
                         }
+                        Button { showingTrash = true } label: {
+                            Label("Trash…", systemImage: "trash")
+                        }
                     }
                 } label: {
                     Image(systemName: "plus.circle").foregroundStyle(Paper.accent)
@@ -132,6 +142,34 @@ struct ProjectView: View {
         .sheet(item: $editingSynopsis) { doc in
             SynopsisEditor(doc: doc)
         }
+        .sheet(isPresented: $showingTrash) {
+            TrashView(project: project)
+        }
+        .confirmationDialog(
+            pendingDelete.map { "Delete “\($0.displayTitle)” and everything inside it?" } ?? "",
+            isPresented: Binding(get: { pendingDelete != nil },
+                                 set: { if !$0 { pendingDelete = nil } }),
+            titleVisibility: .visible) {
+            Button("Move to Trash", role: .destructive) {
+                if let node = pendingDelete { softDelete(node) }
+                pendingDelete = nil
+            }
+            Button("Cancel", role: .cancel) { pendingDelete = nil }
+        } message: {
+            Text("It goes to the Trash — you can restore it until you empty it.")
+        }
+        .alert("Word target", isPresented: Binding(get: { targetNode != nil },
+                                                   set: { if !$0 { targetNode = nil } })) {
+            TextField("Words (0 = none)", text: $nodeTargetText).keyboardType(.numberPad)
+            Button("Save") {
+                if let node = targetNode {
+                    node.wordTarget = Int(nodeTargetText.filter(\.isNumber)) ?? 0
+                    node.updatedAt = .now; try? context.save()
+                }
+                targetNode = nil
+            }
+            Button("Cancel", role: .cancel) { targetNode = nil }
+        }
         .alert("Rename", isPresented: $showingRename) {
             TextField("Name", text: $renameText)
             Button("Rename") {
@@ -147,10 +185,16 @@ struct ProjectView: View {
         }
     }
 
+    private func beginNodeTarget(_ node: RWDocument) {
+        nodeTargetText = node.wordTarget > 0 ? "\(node.wordTarget)" : ""
+        targetNode = node
+    }
+
     private func beginRename(_ node: RWDocument) {
         renamingNode = node
-        renameText = node.title.isEmpty ? node.displayTitle : node.title
-        if renameText == "Untitled" { renameText = "" }
+        // Seed from the actual title only (blank if untitled) — don't string-
+        // match the derived "Untitled" fallback, which could blank a real title.
+        renameText = node.title
         showingRename = true
     }
 
@@ -164,6 +208,12 @@ struct ProjectView: View {
             Button { editingSynopsis = node } label: {
                 Label("Edit synopsis…", systemImage: "text.alignleft")
             }
+            Button { beginNodeTarget(node) } label: {
+                Label("Word target…", systemImage: "target")
+            }
+        }
+        Button { duplicate(node) } label: {
+            Label("Duplicate", systemImage: "plus.square.on.square")
         }
         let targets = moveTargets(for: node)
         if !targets.isEmpty || node.parentID != nil {
@@ -182,10 +232,19 @@ struct ProjectView: View {
         }
         Divider()
         Button(role: .destructive) {
-            Haptics.tap(.medium); deleteRecursively(node)
-            project.updatedAt = .now; try? context.save()
+            requestDelete(node)
         } label: {
             Label("Delete", systemImage: "trash")
+        }
+    }
+
+    /// Folders can bury a lot of writing — confirm before trashing one. Single
+    /// documents trash straight away (recoverable from Trash).
+    private func requestDelete(_ node: RWDocument) {
+        if node.isFolder, !allDocs.filter({ $0.parentID == node.id }).isEmpty {
+            pendingDelete = node
+        } else {
+            softDelete(node)
         }
     }
 
@@ -372,24 +431,130 @@ struct ProjectView: View {
     }
 
     private func delete(_ offsets: IndexSet) {
+        for i in offsets { softDelete(nodes[i]) }
+    }
+
+    /// Move a node (and, if a folder, its whole subtree) to the Trash. Nothing
+    /// is destroyed until the Trash is emptied, so a mis-swipe is recoverable.
+    private func softDelete(_ node: RWDocument) {
         Haptics.tap(.medium)
-        for i in offsets {
-            let node = nodes[i]
-            deleteRecursively(node)
+        let now = Date.now
+        func mark(_ n: RWDocument) {
+            n.deletedAt = now
+            for child in allDocs.filter({ $0.parentID == n.id }) { mark(child) }
         }
+        mark(node)
         project.updatedAt = .now
         try? context.save()
     }
 
-    /// Delete a node and, if it's a folder, everything beneath it.
-    private func deleteRecursively(_ node: RWDocument) {
+    /// Duplicate a document (or a whole folder subtree) as a sibling.
+    private func duplicate(_ node: RWDocument) {
+        Haptics.tap()
+        let baseOrder = (nodes.map(\.order).max() ?? node.order) + 1
+        copyNode(node, into: node.parentID, order: baseOrder, appendCopy: true)
+        project.updatedAt = .now
+        try? context.save()
+    }
+
+    @discardableResult
+    private func copyNode(_ node: RWDocument, into newParent: UUID?, order: Int,
+                          appendCopy: Bool) -> RWDocument {
+        let copy = RWDocument(projectID: project.id, title: node.title.isEmpty ? "" : node.title + (appendCopy ? " copy" : ""),
+                              isFolder: node.isFolder, order: order, parentID: newParent)
+        copy.synopsis = node.synopsis
+        copy.body = node.body
+        copy.statusRaw = node.statusRaw
+        copy.wordTarget = node.wordTarget
+        context.insert(copy)
         if node.isFolder {
-            for child in allDocs.filter({ $0.parentID == node.id }) {
-                deleteRecursively(child)
+            let children = allDocs.filter { $0.parentID == node.id }.sorted { $0.order < $1.order }
+            for (i, child) in children.enumerated() {
+                copyNode(child, into: copy.id, order: i, appendCopy: false)
             }
         }
-        DrawingStore.delete(node.id)
-        context.delete(node)
+        return copy
+    }
+}
+
+/// The Trash — soft-deleted nodes for a project, restorable until emptied.
+/// Emptying permanently purges each node's snapshots, drawing, ink prefs, and
+/// embedded photos (see RWCleanup).
+private struct TrashView: View {
+    let project: RWProject
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var context
+    @Query private var trashed: [RWDocument]
+
+    init(project: RWProject) {
+        self.project = project
+        let pid = project.id
+        _trashed = Query(filter: #Predicate<RWDocument> { $0.projectID == pid && $0.deletedAt != nil },
+                         sort: [SortDescriptor(\RWDocument.deletedAt, order: .reverse)])
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                PaperBackground()
+                if trashed.isEmpty {
+                    VStack(spacing: 10) {
+                        Image(systemName: "trash").font(.system(size: 34)).foregroundStyle(Paper.inkFaint)
+                        Text("Trash is empty").font(.headlineSerif).foregroundStyle(Paper.inkSoft)
+                    }
+                } else {
+                    List {
+                        ForEach(trashed) { node in
+                            HStack(spacing: 12) {
+                                Image(systemName: node.isFolder ? "folder" : "doc.text")
+                                    .foregroundStyle(Paper.inkSoft)
+                                Text(node.displayTitle).font(.bodySerif).foregroundStyle(Paper.ink)
+                                    .lineLimit(1)
+                                Spacer()
+                                Button("Restore") { restore(node) }
+                                    .font(.label).foregroundStyle(Paper.accent).buttonStyle(.plain)
+                            }
+                            .listRowBackground(Color.clear)
+                        }
+                    }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                }
+            }
+            .navigationTitle("Trash")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Done") { dismiss() }.tint(Paper.accent)
+                }
+                if !trashed.isEmpty {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Empty", role: .destructive) { empty() }.tint(.red)
+                    }
+                }
+            }
+        }
+    }
+
+    /// Un-trash a node and its trashed descendants.
+    private func restore(_ node: RWDocument) {
+        Haptics.tap()
+        let pid = project.id
+        let all = (try? context.fetch(FetchDescriptor<RWDocument>(
+            predicate: #Predicate<RWDocument> { $0.projectID == pid }))) ?? []
+        func unmark(_ n: RWDocument) {
+            n.deletedAt = nil
+            for child in all where child.parentID == n.id && child.deletedAt != nil { unmark(child) }
+        }
+        unmark(node)
+        try? context.save()
+    }
+
+    /// Permanently purge everything in the Trash (rows + off-model assets).
+    private func empty() {
+        Haptics.tap(.medium)
+        for node in trashed { RWCleanup.purge(context, node) }
+        try? context.save()
     }
 }
 
@@ -457,10 +622,10 @@ enum BinderMode: String, CaseIterable, Identifiable {
     }
 }
 
-/// Tracks the word baseline for the current app session (in-memory, resets on
-/// relaunch) so "words this session" can be shown.
+/// Tracks each project's word baseline for the current app session (in-memory,
+/// resets on relaunch) so "words this session" is correct per project.
 enum RWSession {
-    static var baselineWords: Int?
+    static var baseline: [UUID: Int] = [:]
 }
 
 /// A corkboard index card: title, a ruled line, the synopsis, and a footer.
