@@ -10,7 +10,6 @@
 		01168C0137CEE5480EBD70C9 /* FernPhysics.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1EE3E5FF5DF02528E695A43 /* FernPhysics.swift */; };
 		01D567AA68237053C6AC3535 /* Prompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A87F893FEEDD086C788AEED /* Prompt.swift */; };
 		0517271B1D128E80B8942A3F /* OnThisDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35FC6DC207A6791C7446EE4 /* OnThisDay.swift */; };
-		07929DA5B3F2C941CDC3FDF3 /* PinGlyph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6994EFE5C5CD710551B5B539 /* PinGlyph.swift */; };
 		08DEA1E14E3440DC001945AA /* RWModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F327C3B26DB2481E8B9B1E8D /* RWModels.swift */; };
 		0D0DE355B9F5C242382E500E /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E955C6672E8D66A488569630 /* SmokeTests.swift */; };
 		0D963D7D2C4667E6B6D95444 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AB26D146B901CF925B729558 /* Assets.xcassets */; };
@@ -256,7 +255,6 @@
 		655279ADA8C6783C3A2943A0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6874D40188440206C80B5EE5 /* Fern.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Fern.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		68B6BA6BD6603F605BF65B63 /* ReadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingView.swift; sourceTree = "<group>"; };
-		6994EFE5C5CD710551B5B539 /* PinGlyph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinGlyph.swift; sourceTree = "<group>"; };
 		69C9FD6E8B7EA7C53554913F /* LockGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockGate.swift; sourceTree = "<group>"; };
 		6A87F893FEEDD086C788AEED /* Prompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prompt.swift; sourceTree = "<group>"; };
 		6E26486E72AA73E121EBA526 /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
@@ -518,7 +516,6 @@
 				69C9FD6E8B7EA7C53554913F /* LockGate.swift */,
 				5176A8356310FFA7D76E741E /* OnboardingView.swift */,
 				280EC49A5562C111FA2CD94C /* PaperCard.swift */,
-				6994EFE5C5CD710551B5B539 /* PinGlyph.swift */,
 				3EB2BB1BE40E5C8BA4A77780 /* PromptCard.swift */,
 				68B6BA6BD6603F605BF65B63 /* ReadingView.swift */,
 				1EEABECED98FEE4A7B0EF304 /* RootView.swift */,
@@ -925,7 +922,6 @@
 				1109D39F0468942D5FEE7DA6 /* PaperCard.swift in Sources */,
 				D5B3AC7B5AB7666C2BAEC1DE /* Persistence.swift in Sources */,
 				CA4B3D83E81920AEAC18A28C /* PhotoStore.swift in Sources */,
-				07929DA5B3F2C941CDC3FDF3 /* PinGlyph.swift in Sources */,
 				65A3BFB4A131C784AA20BB46 /* Prompt.swift in Sources */,
 				3291FF5A77AE8F8B2D893CCE /* PromptCard.swift in Sources */,
 				121EC7706CC6B8DD6B0B1CDE /* PromptLibrary.swift in Sources */,

@@ -116,8 +116,8 @@ struct EntryEditorView: View {
                     Button {
                         entry.isPinned.toggle()
                     } label: {
-                        Label { Text(entry.isPinned ? "Unpin" : "Pin") }
-                            icon: { Image(uiImage: entry.isPinned ? PinIcon.unpin : PinIcon.pin) }
+                        Label(entry.isPinned ? "Unpin" : "Pin",
+                              systemImage: entry.isPinned ? "pin.slash" : "pin")
                     }
                     Button {
                         entry.isLocked.toggle()
