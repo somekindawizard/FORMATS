@@ -44,8 +44,13 @@ struct ProjectView: View {
         allDocs.filter { $0.parentID == parent?.id }.sorted { $0.order < $1.order }
     }
 
-    private var totalWords: Int {
-        allDocs.filter { !$0.isFolder }.reduce(0) { $0 + $1.wordCount }
+    // Cached: summing wordCount (which renders plainText) over every document
+    // on each render — while the root view sits alive under a pushed editor —
+    // was O(manuscript) per keystroke. Recomputed on appear / structural change.
+    @State private var totalWords = 0
+
+    private func recomputeTotal() {
+        totalWords = allDocs.filter { !$0.isFolder }.reduce(0) { $0 + $1.wordCount }
     }
 
     /// Words added since this app session began — baseline is PER PROJECT
@@ -72,8 +77,10 @@ struct ProjectView: View {
         .navigationTitle(parent?.displayTitle ?? project.title)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
+            recomputeTotal()
             if RWSession.baseline[project.id] == nil { RWSession.baseline[project.id] = totalWords }
         }
+        .onChange(of: allDocs) { _, _ in recomputeTotal() }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Menu {
