@@ -37,6 +37,10 @@ struct LibraryView: View {
     @State private var draft: Entry?
     @AppStorage("fern.library.sort") private var sortRaw = LibrarySort.created.rawValue
     private var sort: LibrarySort { LibrarySort(rawValue: sortRaw) ?? .created }
+    /// Long-press "New folder…" flow: the entry awaiting a folder + name field.
+    @State private var folderEntry: Entry?
+    @State private var newFolderName = ""
+    @State private var showingNewFolder = false
 
     private var allTags: [String] {
         Array(Set(entries.flatMap(\.tagNames))).sorted()
@@ -145,11 +149,11 @@ struct LibraryView: View {
             if !notebooks.isEmpty || draftsOnly || selectedNotebook != nil {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
-                        Button("All notebooks") { selectedNotebook = nil }
+                        Button("All folders") { selectedNotebook = nil }
                         ForEach(notebooks, id: \.self) { nb in
                             Button { selectedNotebook = nb } label: {
                                 if selectedNotebook == nb { Label(nb, systemImage: "checkmark") }
-                                else { Text(nb) }
+                                else { Label(nb, systemImage: "folder") }
                             }
                         }
                         Divider()
@@ -169,6 +173,16 @@ struct LibraryView: View {
         }
         .navigationDestination(item: $draft) { entry in
             EntryEditorView(entry: entry)
+        }
+        .alert("New folder", isPresented: $showingNewFolder) {
+            TextField("Name", text: $newFolderName)
+            Button("Create") {
+                let name = newFolderName.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !name.isEmpty, let entry = folderEntry { assign(entry, to: name) }
+                folderEntry = nil
+                newFolderName = ""
+            }
+            Button("Cancel", role: .cancel) { folderEntry = nil; newFolderName = "" }
         }
     }
 
@@ -190,6 +204,7 @@ struct LibraryView: View {
 
     private func row(_ entry: Entry) -> some View {
         NavigationLink(value: entry) { EntryRow(entry: entry) }
+            .contextMenu { rowMenu(entry) }
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
             .listRowInsets(EdgeInsets(top: 2, leading: 22, bottom: 2, trailing: 22))
@@ -215,6 +230,54 @@ struct LibraryView: View {
                 }
                 .tint(Paper.accent)
             }
+    }
+
+    /// The long-press menu: pin, lock, move into a folder (create one inline),
+    /// delete. Folders are backed by the same field the filter menu uses.
+    @ViewBuilder
+    private func rowMenu(_ entry: Entry) -> some View {
+        Button { togglePin(entry) } label: {
+            Label(entry.isPinned ? "Unpin" : "Pin",
+                  systemImage: entry.isPinned ? "pin.slash" : "pin")
+        }
+        Button { toggleLock(entry) } label: {
+            Label(entry.isLocked ? "Unlock" : "Lock",
+                  systemImage: entry.isLocked ? "lock.open" : "lock")
+        }
+        Menu {
+            if entry.notebook != nil {
+                Button { assign(entry, to: nil) } label: {
+                    Label("Remove from folder", systemImage: "folder.badge.minus")
+                }
+                Divider()
+            }
+            ForEach(notebooks, id: \.self) { folder in
+                Button { assign(entry, to: folder) } label: {
+                    if entry.notebook == folder { Label(folder, systemImage: "checkmark") }
+                    else { Label(folder, systemImage: "folder") }
+                }
+            }
+            if !notebooks.isEmpty { Divider() }
+            Button {
+                folderEntry = entry
+                newFolderName = ""
+                showingNewFolder = true
+            } label: {
+                Label("New folder…", systemImage: "folder.badge.plus")
+            }
+        } label: {
+            Label("Move to folder", systemImage: "folder")
+        }
+        Divider()
+        Button(role: .destructive) { delete(entry) } label: {
+            Label("Delete", systemImage: "trash")
+        }
+    }
+
+    private func assign(_ entry: Entry, to folder: String?) {
+        Haptics.tap()
+        entry.notebook = folder
+        try? context.save()
     }
 
     private func togglePin(_ entry: Entry) {
