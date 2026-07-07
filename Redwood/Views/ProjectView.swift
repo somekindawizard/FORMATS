@@ -16,6 +16,14 @@ struct ProjectView: View {
     @State private var goalText = ""
     @State private var showingCompile = false
     @State private var editingSynopsis: RWDocument?
+    /// Rename flow (documents, folders, and the current folder via the menu).
+    @State private var renamingNode: RWDocument?
+    @State private var renameText = ""
+    @State private var showingRename = false
+    /// Edit mode for drag-reordering. The list previously sat PERMANENTLY in
+    /// edit mode, which silently swallowed row taps — nothing in Binder view
+    /// could be opened.
+    @State private var arranging = false
 
     init(project: RWProject, parent: RWDocument? = nil) {
         self.project = project
@@ -82,6 +90,18 @@ struct ProjectView: View {
                     } label: {
                         Label("New from template", systemImage: "doc.badge.plus")
                     }
+                    Divider()
+                    if mode == .binder {
+                        Button { withAnimation { arranging.toggle() } } label: {
+                            Label(arranging ? "Done arranging" : "Arrange",
+                                  systemImage: arranging ? "checkmark" : "arrow.up.arrow.down")
+                        }
+                    }
+                    if let parent {
+                        Button { beginRename(parent) } label: {
+                            Label("Rename folder…", systemImage: "pencil")
+                        }
+                    }
                     if parent == nil {
                         Divider()
                         Button { beginEditTargets() } label: {
@@ -112,11 +132,34 @@ struct ProjectView: View {
         .sheet(item: $editingSynopsis) { doc in
             SynopsisEditor(doc: doc)
         }
+        .alert("Rename", isPresented: $showingRename) {
+            TextField("Name", text: $renameText)
+            Button("Rename") {
+                if let node = renamingNode {
+                    node.title = renameText.trimmingCharacters(in: .whitespacesAndNewlines)
+                    node.updatedAt = .now
+                    project.updatedAt = .now
+                    try? context.save()
+                }
+                renamingNode = nil
+            }
+            Button("Cancel", role: .cancel) { renamingNode = nil }
+        }
+    }
+
+    private func beginRename(_ node: RWDocument) {
+        renamingNode = node
+        renameText = node.title.isEmpty ? node.displayTitle : node.title
+        if renameText == "Untitled" { renameText = "" }
+        showingRename = true
     }
 
     /// Long-press menu shared by every binder row / card / outline row.
     @ViewBuilder
     private func nodeMenu(_ node: RWDocument) -> some View {
+        Button { beginRename(node) } label: {
+            Label("Rename…", systemImage: "pencil")
+        }
         if !node.isFolder {
             Button { editingSynopsis = node } label: {
                 Label("Edit synopsis…", systemImage: "text.alignleft")
@@ -209,7 +252,9 @@ struct ProjectView: View {
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
-        .environment(\.editMode, .constant(.active))
+        // Edit mode only while arranging — leaving it always-on made every
+        // row un-tappable (NavigationLinks don't fire in edit mode).
+        .environment(\.editMode, .constant(arranging ? .active : .inactive))
     }
 
     // MARK: — Corkboard mode
