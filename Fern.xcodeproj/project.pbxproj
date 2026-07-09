@@ -27,6 +27,7 @@
 		2E423D4EA3FD10D32F3F3260 /* MarkdownRender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372C0EB975F143697FA69E96 /* MarkdownRender.swift */; };
 		30B54EE715B224CE938A6A97 /* JournalingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA4F12FB548A792178852EC /* JournalingTests.swift */; };
 		3291FF5A77AE8F8B2D893CCE /* PromptCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB2BB1BE40E5C8BA4A77780 /* PromptCard.swift */; };
+		32DB75FA914E043AF25BC507 /* RWImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF5DE7DCC1ED8D92A215AEA /* RWImport.swift */; };
 		37DBA60E213431CDD95E2D8F /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ABB577E515BBF1EC0238B8 /* Enums.swift */; };
 		392EB22690A3C371227C9160 /* FlameFern.swift in Sources */ = {isa = PBXBuildFile; fileRef = 163D4CB7983CFCF54E288E2D /* FlameFern.swift */; };
 		39F5FEA6808CFCC33C58C418 /* ThemeOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FED160A738BC3DE663C28045 /* ThemeOptions.swift */; };
@@ -236,6 +237,7 @@
 		3BE4457DFF57CF5D04E853B5 /* AccessoryBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessoryBar.swift; sourceTree = "<group>"; };
 		3D4D39EC866C9EFD80CD9546 /* MarkdownTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownTextView.swift; sourceTree = "<group>"; };
 		3EB2BB1BE40E5C8BA4A77780 /* PromptCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptCard.swift; sourceTree = "<group>"; };
+		3EF5DE7DCC1ED8D92A215AEA /* RWImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RWImport.swift; sourceTree = "<group>"; };
 		3FDEB25A3B8570A4FFF61024 /* PromptStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptStore.swift; sourceTree = "<group>"; };
 		400F7BE208A962AA4679EC06 /* DateGroupingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateGroupingTests.swift; sourceTree = "<group>"; };
 		41676068049DC79076637EB1 /* Fraunces-OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Fraunces-OFL.txt"; sourceTree = "<group>"; };
@@ -389,6 +391,7 @@
 			children = (
 				C0EAB514165A196C57AFEBE1 /* RedwoodCompiler.swift */,
 				5C851947D8814D742075BD60 /* RWCleanup.swift */,
+				3EF5DE7DCC1ED8D92A215AEA /* RWImport.swift */,
 				8C16252685A829E96A585FE8 /* ZipWriter.swift */,
 			);
 			path = Services;
@@ -837,6 +840,7 @@
 				EEC974BF4825752C14EF617E /* PhotoStore.swift in Sources */,
 				DD8DF15F45F5C83BCDE68809 /* ProjectView.swift in Sources */,
 				A319EDB7D857B0DDCEFEB025 /* RWCleanup.swift in Sources */,
+				32DB75FA914E043AF25BC507 /* RWImport.swift in Sources */,
 				08DEA1E14E3440DC001945AA /* RWModels.swift in Sources */,
 				8BC189ECBBE3E285243537A2 /* RWTemplates.swift in Sources */,
 				98B6A141FF7B1252AA3901E6 /* RedwoodApp.swift in Sources */,

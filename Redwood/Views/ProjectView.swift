@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 /// A project's binder — the tree of folders and documents. Recurses into
 /// folders. New nodes, reorder, and delete all live here.
@@ -29,6 +30,7 @@ struct ProjectView: View {
     @State private var targetNode: RWDocument?      // per-doc word target editor
     @State private var nodeTargetText = ""
     @State private var searchQuery = ""
+    @State private var showingImporter = false
 
     init(project: RWProject, parent: RWDocument? = nil) {
         self.project = project
@@ -110,6 +112,9 @@ struct ProjectView: View {
                     } label: {
                         Label("New from template", systemImage: "doc.badge.plus")
                     }
+                    Button { showingImporter = true } label: {
+                        Label("Import Markdown…", systemImage: "square.and.arrow.down")
+                    }
                     Divider()
                     if mode == .binder {
                         Button { withAnimation { arranging.toggle() } } label: {
@@ -157,6 +162,13 @@ struct ProjectView: View {
         }
         .sheet(isPresented: $showingTrash) {
             TrashView(project: project)
+        }
+        .fileImporter(isPresented: $showingImporter,
+                      allowedContentTypes: [.plainText, .text,
+                                            UTType(filenameExtension: "md") ?? .plainText,
+                                            UTType(filenameExtension: "markdown") ?? .plainText],
+                      allowsMultipleSelection: true) { result in
+            if case .success(let urls) = result { importFiles(urls) }
         }
         .confirmationDialog(
             pendingDelete.map { "Delete “\($0.displayTitle)” and everything inside it?" } ?? "",
@@ -466,6 +478,26 @@ struct ProjectView: View {
         let node = RWDocument(projectID: project.id, isFolder: isFolder,
                               order: order, parentID: parent?.id)
         context.insert(node)
+        project.updatedAt = .now
+        try? context.save()
+    }
+
+    /// Import one or more Markdown/text files as documents at this level —
+    /// e.g. a Fern entry saved via "Share as Markdown."
+    private func importFiles(_ urls: [URL]) {
+        Haptics.tap()
+        var order = (nodes.map(\.order).max() ?? -1) + 1
+        for url in urls {
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+            guard let text = try? String(contentsOf: url, encoding: .utf8) else { continue }
+            let (title, body) = RWImport.parse(text: text, filename: url.lastPathComponent)
+            let node = RWDocument(projectID: project.id, title: title,
+                                  isFolder: false, order: order, parentID: parent?.id)
+            node.body = body
+            context.insert(node)
+            order += 1
+        }
         project.updatedAt = .now
         try? context.save()
     }
