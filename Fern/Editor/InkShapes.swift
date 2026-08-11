@@ -18,21 +18,71 @@ enum InkShapes {
         let closed = gap < max(24, 0.22 * length)
         if !closed {
             if let line = fitLine(pts, length: length) { return line }
-            return matchTemplate(pts, in: ShapeTemplates.open)
+            guard let (outline, cloud) = matchTemplate(pts, in: ShapeTemplates.open),
+                  cloud < 0.045 else { return nil }
+            return outline
         }
 
-        // Closed stroke → ellipse, then polygon/star by corner count, then
-        // drawn-shape templates (heart).
-        if let ellipse = fitEllipse(pts) { return ellipse }
-        let corners = strawCorners(pts, epsilon: max(8, 0.045 * length))
-        switch corners.count {
-        case 3:      return polygon(corners)
-        case 4:      return fitQuad(corners)
-        case 5, 6:   return polygon(corners)
-        case 8...12: if let star = fitStar(corners) { return star }
-        default:     break
+        // Closed stroke → score EVERY interpretation (ellipse, polygon/star,
+        // templates) against the drawn points and take the lowest error, the
+        // way PaleoSketch-style recognizers do — first-match-wins let a
+        // mediocre polygon beat a good circle whose fit barely errored out.
+        let sample = resample(pts, to: 64)
+        var minX = CGFloat.greatestFiniteMagnitude, maxX = -CGFloat.greatestFiniteMagnitude
+        var minY = CGFloat.greatestFiniteMagnitude, maxY = -CGFloat.greatestFiniteMagnitude
+        for p in pts {
+            minX = min(minX, p.x); maxX = max(maxX, p.x)
+            minY = min(minY, p.y); maxY = max(maxY, p.y)
         }
-        return matchTemplate(pts, in: ShapeTemplates.closed)
+        let diag = hypot(maxX - minX, maxY - minY)
+        guard diag > 1 else { return nil }
+
+        /// Mean distance from the drawn points to the candidate outline,
+        /// normalized by the bounding-box diagonal (dimensionless, so all
+        /// shape classes compete on equal terms).
+        func fitError(_ outline: [CGPoint]) -> CGFloat {
+            var sum: CGFloat = 0
+            for p in sample {
+                var best = CGFloat.greatestFiniteMagnitude
+                for q in outline {
+                    let d = hypot(p.x - q.x, p.y - q.y)
+                    if d < best { best = d }
+                }
+                sum += best
+            }
+            return sum / CGFloat(sample.count) / diag
+        }
+
+        var candidates: [(points: [CGPoint], score: CGFloat)] = []
+        if let ellipse = fitEllipse(pts) {
+            candidates.append((ellipse, fitError(ellipse)))
+        }
+        if let corners = polygonCorners(pts) {
+            var shape: [CGPoint]?
+            switch corners.count {
+            case 3:      shape = polygon(corners)
+            case 4:      shape = fitQuad(corners)
+            case 5...7:  shape = polygon(corners)
+            case 8...12: shape = fitStar(corners) ?? polygon(corners)
+            default:     break
+            }
+            if let s = shape {
+                // Small per-corner penalty so a many-gon can't edge out a
+                // simpler interpretation on raw error alone.
+                candidates.append((s, fitError(s) + 0.002 * CGFloat(corners.count)))
+            }
+        }
+        if let (outline, cloud) = matchTemplate(pts, in: ShapeTemplates.closed), cloud < 0.045 {
+            // Templates compete on their calibrated cloud distance — a drawn
+            // heart legitimately differs in proportion from the parametric
+            // ideal, so nearest-point error would unfairly punish it. The
+            // 0.045 gate is the calibrated accept threshold (hearts ~0.03,
+            // circle 0.06, lumpy blob 0.09).
+            candidates.append((outline, cloud))
+        }
+        guard let best = candidates.min(by: { $0.score < $1.score }),
+              best.score < 0.05 else { return nil }
+        return best.points
     }
 
     // MARK: line
@@ -61,15 +111,19 @@ enum InkShapes {
         let theta = 0.5 * atan2(2 * sxy, sxx - syy)
         let ct = cos(theta), st = sin(theta)
 
-        // Rotate into the principal frame; fit semi-axes from extents there.
-        var maxU: CGFloat = 0, maxV: CGFloat = 0
+        // Rotate into the principal frame; fit semi-axes by least squares
+        // (mean |coordinate| — for an ellipse E|u| = 2a/π), not max extents:
+        // one overshoot at the seam inflated an extent-based axis and pushed
+        // every other residual past the threshold, so wobbly circles fell
+        // through to the corner finder and came back as pentagons.
+        var sumU: CGFloat = 0, sumV: CGFloat = 0
         let local = pts.map { p -> CGPoint in
             let dx = p.x - cx, dy = p.y - cy
             let u = dx * ct + dy * st, v = -dx * st + dy * ct
-            maxU = max(maxU, abs(u)); maxV = max(maxV, abs(v))
+            sumU += abs(u); sumV += abs(v)
             return CGPoint(x: u, y: v)
         }
-        var a = maxU, b = maxV
+        var a = sumU / n * .pi / 2, b = sumV / n * .pi / 2
         guard a > 8, b > 8 else { return nil }
 
         var err: CGFloat = 0
@@ -78,7 +132,8 @@ enum InkShapes {
             err += abs(du * du + dv * dv - 1)
         }
         err /= n
-        guard err < 0.18 else { return nil }
+        // Loose sanity gate only — the candidate scorer makes the real call.
+        guard err < 0.35 else { return nil }
 
         // Nearly-equal axes snap to a true circle.
         if abs(a - b) < 0.18 * max(a, b) { let r = (a + b) / 2; a = r; b = r }
@@ -254,7 +309,9 @@ enum InkShapes {
         return best
     }
 
-    private static func matchTemplate(_ pts: [CGPoint], in templates: [ShapeTemplate]) -> [CGPoint]? {
+    /// Best template match with its cloud distance — closed shapes feed the
+    /// candidate scorer (which applies its own gate), open shapes gate here.
+    private static func matchTemplate(_ pts: [CGPoint], in templates: [ShapeTemplate]) -> (points: [CGPoint], cloud: CGFloat)? {
         let norm = normalize(pts)
         var bestScore = CGFloat.greatestFiniteMagnitude
         var bestTemplate: ShapeTemplate?
@@ -264,7 +321,7 @@ enum InkShapes {
         }
         // Calibrated for the cloud metric: noisy hearts score ~0.03, a 25°-
         // tilted heart ~0.04, a circle ~0.06, a lumpy blob ~0.09.
-        guard let match = bestTemplate, bestScore < 0.045 else { return nil }
+        guard let match = bestTemplate, bestScore < 0.06 else { return nil }
 
         // Emit the ideal outline scaled to the drawn bounding box.
         var minX = CGFloat.greatestFiniteMagnitude, maxX = -CGFloat.greatestFiniteMagnitude
@@ -275,7 +332,8 @@ enum InkShapes {
         }
         let w = maxX - minX, h = maxY - minY
         let cx = (minX + maxX) / 2, cy = (minY + maxY) / 2
-        return match.ideal.map { CGPoint(x: cx + $0.x * w, y: cy + $0.y * h) }
+        let outline = match.ideal.map { CGPoint(x: cx + $0.x * w, y: cy + $0.y * h) }
+        return (outline, bestScore)
     }
 
     // MARK: geometry helpers
@@ -304,90 +362,75 @@ enum InkShapes {
         }
     }
 
-    /// ShortStraw corner finding (Wolin et al.) over a closed stroke, with the
-    /// RDP simplifier as fallback: resample evenly, measure each point's
-    /// "straw" (chord across a window) — corners are local straw minima well
-    /// below the median. More reliable than RDP on slow, wobbly strokes.
-    private static func strawCorners(_ pts: [CGPoint], epsilon: CGFloat) -> [CGPoint] {
-        let resampled = resample(pts, to: 64)
-        let n = resampled.count
-        let w = 3
-        guard n > 2 * w + 2 else { return simplify(pts, epsilon: epsilon) }
+    /// Angle-based corner finding over a closed stroke (IStraw-style,
+    /// Xiong & LaViola): corners are local minima of the turn angle that
+    /// stay sharp as the measuring window shrinks — a real corner keeps its
+    /// angle at any scale, while a smooth curve flattens toward 180° up
+    /// close. This catches a star's obtuse inner corners (which ShortStraw's
+    /// chord test missed, collapsing stars to just their tips) and rejects
+    /// curve noise. Returns nil — "not a polygon at all" — unless every
+    /// inter-corner segment passes a straight-line test, so circles and
+    /// hearts can never come back polygonal.
+    private static func polygonCorners(_ pts: [CGPoint]) -> [CGPoint]? {
+        let r = resample(pts, to: 64)
+        let n = r.count
+        guard n >= 16 else { return nil }
 
-        // Straw length per point, with closed-loop wraparound.
-        var straws = [CGFloat](repeating: 0, count: n)
-        for i in 0..<n {
-            let a = resampled[(i - w + n) % n], b = resampled[(i + w) % n]
-            straws[i] = hypot(b.x - a.x, b.y - a.y)
+        func angle(_ i: Int, _ k: Int) -> CGFloat {
+            let a = r[(i - k + n) % n], b = r[(i + k) % n], p = r[i]
+            let v1x = a.x - p.x, v1y = a.y - p.y
+            let v2x = b.x - p.x, v2y = b.y - p.y
+            let m = hypot(v1x, v1y) * hypot(v2x, v2y)
+            guard m > 0.001 else { return .pi }
+            return acos(max(-1, min(1, (v1x * v2x + v1y * v2y) / m)))
         }
-        let sorted = straws.sorted()
-        let threshold = sorted[n / 2] * 0.95
 
-        // Local minima below the threshold → corner candidates.
-        var corners: [Int] = []
-        var i = 0
-        while i < n {
-            if straws[i] < threshold {
-                // Walk the whole below-threshold run; keep its minimum.
-                var minIdx = i
-                var j = i
-                while j < n, straws[j] < threshold {
-                    if straws[j] < straws[minIdx] { minIdx = j }
-                    j += 1
-                }
-                corners.append(minIdx)
-                i = j
+        let sharp = 152 * CGFloat.pi / 180
+        let sharpClose = 160 * CGFloat.pi / 180
+        var idxs: [Int] = []
+        for i in 0..<n {
+            let a3 = angle(i, 3)
+            guard a3 < sharp else { continue }
+            // Local minimum of the wide-window angle.
+            guard a3 <= angle((i - 1 + n) % n, 3), a3 < angle((i + 1) % n, 3) else { continue }
+            // Multi-scale test: still sharp at the smaller window, or a curve.
+            guard angle(i, 2) < sharpClose else { continue }
+            idxs.append(i)
+        }
+
+        // Merge candidates closer than 4 samples (keep the sharper one),
+        // including the wraparound pair.
+        var merged: [Int] = []
+        for i in idxs {
+            if let last = merged.last, i - last < 4 {
+                if angle(i, 3) < angle(last, 3) { merged[merged.count - 1] = i }
             } else {
-                i += 1
+                merged.append(i)
             }
         }
+        if merged.count >= 2, let f = merged.first, let l = merged.last,
+           (f + n - l) < 4 {
+            if angle(f, 3) < angle(l, 3) { merged.removeLast() }
+            else { merged.removeFirst() }
+        }
+        guard merged.count >= 3, merged.count <= 12 else { return nil }
 
-        // Merge corners that are near-collinear with their neighbors (curve
-        // noise, not a real corner).
-        var kept: [CGPoint] = []
-        for (k, idx) in corners.enumerated() {
-            let prev = resampled[corners[(k - 1 + corners.count) % corners.count]]
-            let next = resampled[corners[(k + 1) % corners.count]]
-            let p = resampled[idx]
-            if perpDistance(p, prev, next) > epsilon * 0.5 { kept.append(p) }
+        // Line test (the published ShortStraw post-process this file used to
+        // skip): every segment between consecutive corners must be straight
+        // (chord ≈ path). One curved side means the stroke isn't a polygon.
+        for k in 0..<merged.count {
+            let i = merged[k], j = merged[(k + 1) % merged.count]
+            var path: CGFloat = 0
+            var m = i
+            while m != j {
+                let next = (m + 1) % n
+                path += hypot(r[next].x - r[m].x, r[next].y - r[m].y)
+                m = next
+            }
+            let chord = hypot(r[j].x - r[i].x, r[j].y - r[i].y)
+            if path > 12, chord / path < 0.92 { return nil }
         }
-        return kept.count >= 3 ? kept : simplify(pts, epsilon: epsilon)
-    }
-
-    /// Ramer–Douglas–Peucker corner extraction over a closed stroke. The
-    /// farthest-from-start point splits the loop so corners on both halves
-    /// survive; endpoints are then merged if they collapsed together.
-    private static func simplify(_ pts: [CGPoint], epsilon: CGFloat) -> [CGPoint] {
-        guard pts.count > 4 else { return pts }
-        var farIdx = pts.count / 2
-        var farDist: CGFloat = 0
-        for (i, p) in pts.enumerated() {
-            let d = hypot(p.x - pts[0].x, p.y - pts[0].y)
-            if d > farDist { farDist = d; farIdx = i }
-        }
-        let half1 = rdp(Array(pts[0...farIdx]), epsilon: epsilon)
-        let half2 = rdp(Array(pts[farIdx...]), epsilon: epsilon)
-        var corners = half1.dropLast() + half2.dropLast()
-        // Merge a duplicated seam corner (start ≈ end).
-        if let f = corners.first, let l = corners.last,
-           hypot(f.x - l.x, f.y - l.y) < epsilon { corners = corners.dropLast() }
-        return Array(corners)
-    }
-
-    private static func rdp(_ pts: [CGPoint], epsilon: CGFloat) -> [CGPoint] {
-        guard pts.count > 2 else { return pts }
-        var maxDist: CGFloat = 0
-        var index = 0
-        for i in 1..<pts.count - 1 {
-            let d = perpDistance(pts[i], pts[0], pts[pts.count - 1])
-            if d > maxDist { maxDist = d; index = i }
-        }
-        if maxDist > epsilon {
-            let left = rdp(Array(pts[0...index]), epsilon: epsilon)
-            let right = rdp(Array(pts[index...]), epsilon: epsilon)
-            return left.dropLast() + right
-        }
-        return [pts[0], pts[pts.count - 1]]
+        return merged.map { r[$0] }
     }
 
     // MARK: templates
