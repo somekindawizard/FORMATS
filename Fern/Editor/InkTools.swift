@@ -37,6 +37,9 @@ struct InkSettings: Codable {
     var r: Double = AccentTone.sienna.light.0
     var g: Double = AccentTone.sienna.light.1
     var b: Double = AccentTone.sienna.light.2
+    /// The canvas width this note's ink was last laid out for. Optional so
+    /// previously-saved settings still decode; nil = never recorded.
+    var canvasWidth: Double?
 
     var uiColor: UIColor { UIColor(red: r, green: g, blue: b, alpha: 1) }
     var color: Color { Color(red: r, green: g, blue: b) }
@@ -233,13 +236,6 @@ extension MarkdownEditorController {
         redoTap.delegate = g
         c.addGestureRecognizer(redoTap)
         scrollPanHandler = g
-        // Perfect shapes: observe pencil touches for the finish-and-hold gesture.
-        let hold = PencilHoldObserver()
-        hold.cancelsTouchesInView = false
-        hold.delaysTouchesEnded = false
-        hold.delegate = g              // recognize simultaneously with everything
-        c.addGestureRecognizer(hold)
-        holdObserver = hold
         // Auto-detect: a Pencil touch on the text enters drawing mode. Fails when
         // already drawing, so it never interferes with the live canvas.
         let pencilDetect = PencilTouchGesture(target: g, action: #selector(CanvasScrollGesture.pencilBegan))
@@ -349,6 +345,33 @@ extension MarkdownEditorController {
                                                      spacing: CGFloat(ThemeStore.shared.ruleSpacing)) ?? .clear
     }
 
+    /// Notes-style handwriting reflow: when the editor's width changes
+    /// (rotation, Split View), scale the ink proportionally so the page of
+    /// handwriting fits the new width instead of running off-screen. The
+    /// reference width persists per note (InkSettings.canvasWidth), so a note
+    /// drawn in portrait opens correctly in landscape and vice versa.
+    func canvasWidthChanged(_ width: CGFloat) {
+        guard let c = canvas, width > 1 else { return }
+        if inkReferenceWidth <= 1 {
+            // First layout for this note: adopt the saved reference (scaling
+            // the loaded ink if this device/orientation differs) or record one.
+            inkReferenceWidth = CGFloat(ink.canvasWidth ?? Double(width))
+        }
+        let ratio = width / inkReferenceWidth
+        if abs(ratio - 1) > 0.02, !c.drawing.strokes.isEmpty {
+            snappingShape = true   // suppress the perfect-shape pass for this change
+            c.drawing = c.drawing.transformed(using: CGAffineTransform(scaleX: ratio, y: ratio))
+            snappingShape = false
+            scheduleSaveDrawing()
+        }
+        inkReferenceWidth = width
+        if ink.canvasWidth != Double(width) {
+            ink.canvasWidth = Double(width)
+            if let id = drawingEntryID { InkPrefsStore.save(id, ink) }
+        }
+        resizeCanvas()
+    }
+
     func undoInk() { canvas?.undoManager?.undo() }
     func redoInk() { canvas?.undoManager?.redo() }
 
@@ -358,9 +381,10 @@ extension MarkdownEditorController {
     /// brings the hand-drawn original back.
     func snapLastStrokeIfHeld() {
         guard let c = canvas,
-              holdObserver?.consumeHold() == true,
               c.tool is PKInkingTool,               // never on eraser/lasso
-              let last = c.drawing.strokes.last else { return }
+              let last = c.drawing.strokes.last,
+              !snappingShape,                       // re-entrancy (our own replace fires didChange)
+              PencilHold.heldAtEnd(of: last) else { return }
 
         // Sample the stroke's path in canvas space.
         let pts = last.path.map { $0.location.applying(last.transform) }
@@ -372,7 +396,9 @@ extension MarkdownEditorController {
         c.undoManager?.registerUndo(withTarget: c) { canvas in
             canvas.drawing = old
         }
+        snappingShape = true
         c.drawing = d
+        snappingShape = false
         Haptics.tap()
     }
 

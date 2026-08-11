@@ -17,9 +17,12 @@ final class MarkdownEditorController {
     @ObservationIgnored var inkCoordinator: InkCoordinator?
     @ObservationIgnored var scrollPanHandler: CanvasScrollGesture?
     @ObservationIgnored var pencilCoordinator: PencilInteractionCoordinator?
-    /// Watches for the finish-and-hold gesture that snaps a stroke to a
-    /// perfect shape (see InkShapes).
-    @ObservationIgnored var holdObserver: PencilHoldObserver?
+    /// Re-entrancy guard for the perfect-shape replace (setting the drawing
+    /// fires drawingDidChange again).
+    @ObservationIgnored var snappingShape = false
+    /// The canvas width the current note's ink was drawn at — handwriting is
+    /// scaled proportionally when the width changes (rotation), Notes-style.
+    @ObservationIgnored var inkReferenceWidth: CGFloat = 0
     /// The last pen used before switching to the eraser (for double-tap toggle).
     @ObservationIgnored var previousPen: InkSettings.Pen = .pen
     /// Set by a Pencil squeeze / palette action to present the color wheel.

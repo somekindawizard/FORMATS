@@ -7,6 +7,9 @@ import UIKit
 final class PhotoTextView: UITextView {
     private var lastWidth: CGFloat = 0
     private var didInitialLayout = false
+    /// Fired when the usable width actually changes (rotation, Split View) —
+    /// the ink layer scales the handwriting to fit, Notes-style.
+    var onWidthChange: ((CGFloat) -> Void)?
 
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -26,6 +29,7 @@ final class PhotoTextView: UITextView {
 
         guard usable > 1, abs(usable - lastWidth) > 2 else { return }
         lastWidth = usable
+        onWidthChange?(usable)
         let storage = textStorage
         let whole = NSRange(location: 0, length: storage.length)
         var changed = false
@@ -154,6 +158,9 @@ struct MarkdownTextView: UIViewRepresentable {
         }
 
         if let entryID { controller?.setupCanvas(on: tv, entryID: entryID) }
+        tv.onWidthChange = { [weak controller] width in
+            controller?.canvasWidthChanged(width)
+        }
         return tv
     }
 

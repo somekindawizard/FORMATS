@@ -3,56 +3,29 @@ import UIKit
 
 // MARK: - Hold detection
 
-/// Observes Apple Pencil touches on the canvas (never recognizing, never
-/// blocking) to detect the Notes gesture for perfect shapes: finishing a
-/// stroke and holding the Pencil still before lifting.
-final class PencilHoldObserver: UIGestureRecognizer {
-    private var lastMove = CACurrentMediaTime()
-    private var lastPoint = CGPoint.zero
-    private var tracking = false
-    /// Set on lift when the tip was stationary for the hold interval.
-    private(set) var heldAtEnd = false
-    private(set) var endedAt: CFTimeInterval = 0
-
-    private let holdInterval: CFTimeInterval = 0.5
-    private let jitter: CGFloat = 3
-
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
-        guard let t = touches.first(where: { $0.type == .pencil }) else { return }
-        tracking = true
-        heldAtEnd = false
-        lastPoint = t.location(in: view)
-        lastMove = CACurrentMediaTime()
-    }
-
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
-        guard tracking, let t = touches.first(where: { $0.type == .pencil }) else { return }
-        let p = t.location(in: view)
-        if hypot(p.x - lastPoint.x, p.y - lastPoint.y) > jitter {
-            lastPoint = p
-            lastMove = CACurrentMediaTime()
+/// Detects the Notes gesture for perfect shapes — finishing a stroke and
+/// holding the Pencil still before lifting — from the stroke's OWN recorded
+/// timing, at the moment `canvasViewDrawingDidChange` fires (≈ the lift).
+///
+/// While the tip is stationary PencilKit stops recording moving control
+/// points, so "now − time of the last point that actually moved" IS the hold
+/// duration. (A parallel UIGestureRecognizer can't do this job: PencilKit's
+/// internal drawing recognizer cancels competitors when it claims the touch,
+/// so an observer never survives to the lift.)
+enum PencilHold {
+    static func heldAtEnd(of stroke: PKStroke, holdInterval: TimeInterval = 0.45) -> Bool {
+        let path = stroke.path
+        guard let last = path.last else { return false }
+        // Walk back to the most recent point that is meaningfully away from
+        // the final resting position (pressure jitter can append stationary
+        // points), then measure how long ago the ink stopped moving.
+        var lastMoveOffset = last.timeOffset
+        for p in path.reversed() {
+            if hypot(p.location.x - last.location.x, p.location.y - last.location.y) > 3 { break }
+            lastMoveOffset = p.timeOffset
         }
-    }
-
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
-        guard tracking else { return }
-        tracking = false
-        let now = CACurrentMediaTime()
-        heldAtEnd = now - lastMove >= holdInterval
-        endedAt = now
-        state = .failed   // observer only — never claim the touch
-    }
-
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {
-        tracking = false
-        heldAtEnd = false
-        state = .failed
-    }
-
-    /// One-shot read: true when a hold just finished (consumed on read).
-    func consumeHold() -> Bool {
-        defer { heldAtEnd = false }
-        return heldAtEnd && CACurrentMediaTime() - endedAt < 0.4
+        let stoppedAt = path.creationDate.addingTimeInterval(lastMoveOffset)
+        return Date.now.timeIntervalSince(stoppedAt) >= holdInterval
     }
 }
 
