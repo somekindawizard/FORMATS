@@ -17,6 +17,9 @@ final class MarkdownEditorController {
     @ObservationIgnored var inkCoordinator: InkCoordinator?
     @ObservationIgnored var scrollPanHandler: CanvasScrollGesture?
     @ObservationIgnored var pencilCoordinator: PencilInteractionCoordinator?
+    /// Watches for the finish-and-hold gesture that snaps a stroke to a
+    /// perfect shape (see InkShapes).
+    @ObservationIgnored var holdObserver: PencilHoldObserver?
     /// The last pen used before switching to the eraser (for double-tap toggle).
     @ObservationIgnored var previousPen: InkSettings.Pen = .pen
     /// Set by a Pencil squeeze / palette action to present the color wheel.

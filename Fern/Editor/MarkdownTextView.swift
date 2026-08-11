@@ -32,10 +32,20 @@ final class PhotoTextView: UITextView {
         storage.enumerateAttribute(.attachment, in: whole) { value, _, _ in
             if let a = value as? PhotoAttachment { a.fit(toWidth: usable); changed = true }
         }
-        if changed {
-            // Re-lay-out with the new sizes on the next runloop (avoid re-entrancy).
-            DispatchQueue.main.async { [weak self] in
-                self?.layoutManager.invalidateLayout(forCharacterRange: whole, actualCharacterRange: nil)
+        // Rotation (or any width change): TextKit 1 lays out lazily, and a
+        // stale layout could leave lines wrapped for the OLD width. Re-lay the
+        // whole document for the new width on the next runloop (avoid
+        // re-entrancy inside layoutSubviews), then keep the offset in range —
+        // the shorter/taller reflowed content could strand the old offset.
+        _ = changed
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.layoutManager.invalidateLayout(forCharacterRange: whole, actualCharacterRange: nil)
+            self.layoutManager.ensureLayout(for: self.textContainer)
+            let maxY = max(-self.adjustedContentInset.top,
+                           self.contentSize.height + self.contentInset.bottom - self.bounds.height)
+            if self.contentOffset.y > maxY {
+                self.setContentOffset(CGPoint(x: 0, y: maxY), animated: false)
             }
         }
     }

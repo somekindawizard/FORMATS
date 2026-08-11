@@ -80,6 +80,9 @@ final class InkCoordinator: NSObject, PKCanvasViewDelegate {
     weak var controller: MarkdownEditorController?
     init(_ controller: MarkdownEditorController) { self.controller = controller }
     func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
+        // Perfect shapes: a stroke finished with the Pencil held still snaps
+        // to its idealized form (line/circle/ellipse/triangle/rectangle).
+        controller?.snapLastStrokeIfHeld()
         // Persistence is debounced — serializing the whole PKDrawing on every
         // stroke end (and every eraser nibble) grew stroke-end latency with
         // drawing size. Flushed on Done and when the editor closes.
@@ -230,6 +233,13 @@ extension MarkdownEditorController {
         redoTap.delegate = g
         c.addGestureRecognizer(redoTap)
         scrollPanHandler = g
+        // Perfect shapes: observe pencil touches for the finish-and-hold gesture.
+        let hold = PencilHoldObserver()
+        hold.cancelsTouchesInView = false
+        hold.delaysTouchesEnded = false
+        hold.delegate = g              // recognize simultaneously with everything
+        c.addGestureRecognizer(hold)
+        holdObserver = hold
         // Auto-detect: a Pencil touch on the text enters drawing mode. Fails when
         // already drawing, so it never interferes with the live canvas.
         let pencilDetect = PencilTouchGesture(target: g, action: #selector(CanvasScrollGesture.pencilBegan))
@@ -341,6 +351,30 @@ extension MarkdownEditorController {
 
     func undoInk() { canvas?.undoManager?.undo() }
     func redoInk() { canvas?.undoManager?.redo() }
+
+    /// Perfect shapes: when the just-finished stroke ended with the Pencil held
+    /// still (Notes-style), replace it with its recognized ideal form. The
+    /// replacement is registered with the ink undo manager, so two-finger tap
+    /// brings the hand-drawn original back.
+    func snapLastStrokeIfHeld() {
+        guard let c = canvas,
+              holdObserver?.consumeHold() == true,
+              c.tool is PKInkingTool,               // never on eraser/lasso
+              let last = c.drawing.strokes.last else { return }
+
+        // Sample the stroke's path in canvas space.
+        let pts = last.path.map { $0.location.applying(last.transform) }
+        guard let ideal = InkShapes.recognize(Array(pts)) else { return }
+
+        let old = c.drawing
+        var d = c.drawing
+        d.strokes[d.strokes.count - 1] = InkShapes.stroke(points: ideal, like: last)
+        c.undoManager?.registerUndo(withTarget: c) { canvas in
+            canvas.drawing = old
+        }
+        c.drawing = d
+        Haptics.tap()
+    }
 
     func toggleRuler() {
         showRuler.toggle()
