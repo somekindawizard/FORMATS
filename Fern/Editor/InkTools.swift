@@ -96,13 +96,11 @@ final class InkCoordinator: NSObject, PKCanvasViewDelegate {
         controller?.scheduleInkWordCount()
     }
     /// A tool started touching the page. Auto-enter drawing mode if a Pencil
-    /// woke us (the reliable "auto-detect Apple Pencil" hook), tuck the
-    /// toolbar away so it's never under your hand, and timestamp the touch —
-    /// the perfect-shape hold detector needs the stroke's real start time.
+    /// woke us (the reliable "auto-detect Apple Pencil" hook), and tuck the
+    /// toolbar away so it's never under your hand while you make marks.
     func canvasViewDidBeginUsingTool(_ canvasView: PKCanvasView) {
         if controller?.isDrawing == false { controller?.setDrawing(true) }
         controller?.inkToolsCollapsed = true
-        controller?.strokeBeganAt = CACurrentMediaTime()
     }
 }
 
@@ -134,6 +132,60 @@ final class CanvasScrollGesture: NSObject, UIGestureRecognizerDelegate {
     // Procreate gestures: two-finger tap = undo, three-finger tap = redo.
     @objc func undoTap() { Haptics.tap(); controller?.undoInk() }
     @objc func redoTap() { Haptics.tap(); controller?.redoInk() }
+
+    // MARK: perfect-shape hold (live, via the canvas's own drawing recognizer)
+
+    private var holdTimer: Timer?
+    private var lastPencilPoint = CGPoint.zero
+    private var lastPencilMove = CACurrentMediaTime()
+    private var armPoint = CGPoint.zero
+
+    /// Attached as an extra target on `PKCanvasView.drawingGestureRecognizer`,
+    /// so we see the pencil's live position without fighting PencilKit for
+    /// touches. Holding still for the interval ARMS the snap (with a haptic,
+    /// so you feel it lock while the tip is still down — the actual stroke
+    /// replacement can only land at lift; PencilKit doesn't allow editing an
+    /// in-progress stroke). Moving again disarms, so mid-stroke pauses don't
+    /// false-trigger.
+    @objc func drawingGesture(_ g: UIGestureRecognizer) {
+        guard let view = g.view else { return }
+        let p = g.location(in: view)
+        switch g.state {
+        case .began:
+            controller?.armedShapeSnap = false
+            lastPencilPoint = p
+            lastPencilMove = CACurrentMediaTime()
+            holdTimer?.invalidate()
+            holdTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+                self?.holdTick()
+            }
+        case .changed:
+            if hypot(p.x - lastPencilPoint.x, p.y - lastPencilPoint.y) > 3 {
+                lastPencilPoint = p
+                lastPencilMove = CACurrentMediaTime()
+                // Kept drawing after the arm — this wasn't a finishing hold.
+                if controller?.armedShapeSnap == true,
+                   hypot(p.x - armPoint.x, p.y - armPoint.y) > 6 {
+                    controller?.armedShapeSnap = false
+                }
+            }
+        case .ended, .cancelled, .failed:
+            holdTimer?.invalidate()
+            holdTimer = nil
+            if g.state != .ended { controller?.armedShapeSnap = false }
+        default:
+            break
+        }
+    }
+
+    private func holdTick() {
+        guard controller?.armedShapeSnap == false,
+              controller?.isDrawing == true,
+              CACurrentMediaTime() - lastPencilMove >= 0.5 else { return }
+        armPoint = lastPencilPoint
+        controller?.armedShapeSnap = true
+        Haptics.tap()   // the "locked in — lift to snap" signal
+    }
 
     /// A Pencil touched the page while not drawing — enter drawing mode. This
     /// wake-up touch is consumed by the mode switch (UIKit won't re-route an
@@ -238,6 +290,10 @@ extension MarkdownEditorController {
         redoTap.delegate = g
         c.addGestureRecognizer(redoTap)
         scrollPanHandler = g
+        // Perfect shapes: ride along on PencilKit's own drawing recognizer for
+        // live pencil position (an independent recognizer gets cancelled the
+        // moment PencilKit claims the touch).
+        c.drawingGestureRecognizer.addTarget(g, action: #selector(CanvasScrollGesture.drawingGesture(_:)))
         // Auto-detect: a Pencil touch on the text enters drawing mode. Fails when
         // already drawing, so it never interferes with the live canvas.
         let pencilDetect = PencilTouchGesture(target: g, action: #selector(CanvasScrollGesture.pencilBegan))
@@ -382,13 +438,12 @@ extension MarkdownEditorController {
     /// replacement is registered with the ink undo manager, so two-finger tap
     /// brings the hand-drawn original back.
     func snapLastStrokeIfHeld() {
-        let beganAt = strokeBeganAt
-        strokeBeganAt = 0                           // one-shot per stroke
+        guard armedShapeSnap else { return }
+        armedShapeSnap = false                      // one-shot per stroke
         guard let c = canvas,
               c.tool is PKInkingTool,               // never on eraser/lasso
               let last = c.drawing.strokes.last,
-              !snappingShape,                       // re-entrancy (our own replace fires didChange)
-              PencilHold.heldAtEnd(of: last, beganAt: beganAt) else { return }
+              !snappingShape else { return }        // re-entrancy (our replace fires didChange)
 
         // Sample the stroke's path in canvas space.
         let pts = last.path.map { $0.location.applying(last.transform) }
