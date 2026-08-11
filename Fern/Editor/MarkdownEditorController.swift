@@ -23,6 +23,9 @@ final class MarkdownEditorController {
     /// Armed by holding the Pencil still mid-touch (live tracking on the
     /// drawing gesture); consumed at lift to snap the stroke to a shape.
     @ObservationIgnored var armedShapeSnap = false
+    /// The recognized (and possibly hold-drag adjusted) ideal outline to swap
+    /// in at lift — kept current by the gesture handler while armed.
+    @ObservationIgnored var pendingShapePoints: [CGPoint]?
     /// The canvas width the current note's ink was drawn at — handwriting is
     /// scaled proportionally when the width changes (rotation), Notes-style.
     @ObservationIgnored var inkReferenceWidth: CGFloat = 0

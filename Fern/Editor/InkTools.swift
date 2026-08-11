@@ -138,21 +138,34 @@ final class CanvasScrollGesture: NSObject, UIGestureRecognizerDelegate {
     private var holdTimer: Timer?
     private var lastPencilPoint = CGPoint.zero
     private var lastPencilMove = CACurrentMediaTime()
-    private var armPoint = CGPoint.zero
+    private var livePoints: [CGPoint] = []
+    private var lastTriedCount = 0
+    // Armed state: the recognized ideal + the geometry for hold-drag adjust.
+    private var baseIdeal: [CGPoint] = []
+    private var shapeCentroid = CGPoint.zero
+    private var armVector = CGVector.zero
+    private var previewLayer: CAShapeLayer?
 
     /// Attached as an extra target on `PKCanvasView.drawingGestureRecognizer`,
     /// so we see the pencil's live position without fighting PencilKit for
-    /// touches. Holding still for the interval ARMS the snap (with a haptic,
-    /// so you feel it lock while the tip is still down — the actual stroke
-    /// replacement can only land at lift; PencilKit doesn't allow editing an
-    /// in-progress stroke). Moving again disarms, so mid-stroke pauses don't
-    /// false-trigger.
+    /// touches (an independent recognizer gets cancelled when PencilKit claims
+    /// the touch). GoodNotes-style flow, as close as public PencilKit allows:
+    ///
+    ///  • hold still ~0.5s → the stroke is recognized and a PREVIEW of the
+    ///    perfect shape appears under the tip (haptic), while still down;
+    ///  • keep holding and MOVE → the preview scales/rotates around its
+    ///    center, following the pencil;
+    ///  • lift → the hand-drawn stroke is swapped for the adjusted shape.
+    ///
+    /// (The committed stroke can only be replaced at lift — editing an
+    /// in-progress PKStroke isn't possible with public API.)
     @objc func drawingGesture(_ g: UIGestureRecognizer) {
         guard let view = g.view else { return }
         let p = g.location(in: view)
         switch g.state {
         case .began:
-            controller?.armedShapeSnap = false
+            resetShapeState()
+            livePoints = [p]
             lastPencilPoint = p
             lastPencilMove = CACurrentMediaTime()
             holdTimer?.invalidate()
@@ -160,31 +173,101 @@ final class CanvasScrollGesture: NSObject, UIGestureRecognizerDelegate {
                 self?.holdTick()
             }
         case .changed:
-            if hypot(p.x - lastPencilPoint.x, p.y - lastPencilPoint.y) > 3 {
+            livePoints.append(p)
+            if controller?.armedShapeSnap == true {
+                adjustPreview(to: p)
+            } else if hypot(p.x - lastPencilPoint.x, p.y - lastPencilPoint.y) > 3 {
                 lastPencilPoint = p
                 lastPencilMove = CACurrentMediaTime()
-                // Kept drawing after the arm — this wasn't a finishing hold.
-                if controller?.armedShapeSnap == true,
-                   hypot(p.x - armPoint.x, p.y - armPoint.y) > 6 {
-                    controller?.armedShapeSnap = false
-                }
             }
-        case .ended, .cancelled, .failed:
-            holdTimer?.invalidate()
-            holdTimer = nil
-            if g.state != .ended { controller?.armedShapeSnap = false }
+        case .ended:
+            holdTimer?.invalidate(); holdTimer = nil
+            // Remove the preview a beat later — by then drawingDidChange has
+            // swapped the committed stroke, so there's no flash of neither.
+            let layer = previewLayer
+            previewLayer = nil
+            DispatchQueue.main.async { layer?.removeFromSuperlayer() }
+        case .cancelled, .failed:
+            holdTimer?.invalidate(); holdTimer = nil
+            resetShapeState()
         default:
             break
         }
     }
 
+    private func resetShapeState() {
+        controller?.armedShapeSnap = false
+        controller?.pendingShapePoints = nil
+        previewLayer?.removeFromSuperlayer()
+        previewLayer = nil
+        baseIdeal = []
+        lastTriedCount = 0
+    }
+
+    /// Stationary for the hold interval → recognize the live stroke; on a
+    /// match, arm and show the preview. Retries on later ticks only if more
+    /// ink arrived since the last attempt.
     private func holdTick() {
-        guard controller?.armedShapeSnap == false,
-              controller?.isDrawing == true,
-              CACurrentMediaTime() - lastPencilMove >= 0.5 else { return }
-        armPoint = lastPencilPoint
-        controller?.armedShapeSnap = true
-        Haptics.tap()   // the "locked in — lift to snap" signal
+        guard let controller, !controller.armedShapeSnap,
+              controller.isDrawing,
+              controller.canvas?.tool is PKInkingTool,
+              CACurrentMediaTime() - lastPencilMove >= 0.5,
+              livePoints.count >= 8,
+              livePoints.count != lastTriedCount else { return }
+        lastTriedCount = livePoints.count
+        guard let ideal = InkShapes.recognize(livePoints) else { return }
+
+        baseIdeal = ideal
+        let n = CGFloat(ideal.count)
+        shapeCentroid = CGPoint(x: ideal.map(\.x).reduce(0, +) / n,
+                                y: ideal.map(\.y).reduce(0, +) / n)
+        armVector = CGVector(dx: lastPencilPoint.x - shapeCentroid.x,
+                             dy: lastPencilPoint.y - shapeCentroid.y)
+        controller.armedShapeSnap = true
+        controller.pendingShapePoints = ideal
+        showPreview(ideal)
+        Haptics.tap()   // "locked in — adjust or lift"
+    }
+
+    /// Scale/rotate the armed shape around its center as the held pencil moves.
+    private func adjustPreview(to p: CGPoint) {
+        guard !baseIdeal.isEmpty else { return }
+        let v0 = armVector
+        let len0 = hypot(v0.dx, v0.dy)
+        guard len0 > 25 else { return }   // too close to center to steer
+        let v1 = CGVector(dx: p.x - shapeCentroid.x, dy: p.y - shapeCentroid.y)
+        let scale = min(4, max(0.25, hypot(v1.dx, v1.dy) / len0))
+        let rot = atan2(v1.dy, v1.dx) - atan2(v0.dy, v0.dx)
+        let ct = cos(rot), st = sin(rot)
+        let adjusted = baseIdeal.map { q -> CGPoint in
+            let dx = (q.x - shapeCentroid.x) * scale, dy = (q.y - shapeCentroid.y) * scale
+            return CGPoint(x: shapeCentroid.x + dx * ct - dy * st,
+                           y: shapeCentroid.y + dx * st + dy * ct)
+        }
+        controller?.pendingShapePoints = adjusted
+        previewLayer?.path = Self.path(adjusted)
+    }
+
+    private func showPreview(_ pts: [CGPoint]) {
+        guard let canvas = controller?.canvas else { return }
+        let layer = CAShapeLayer()
+        layer.path = Self.path(pts)
+        layer.strokeColor = controller?.ink.uiColor.cgColor
+        layer.fillColor = nil
+        layer.lineWidth = controller?.ink.width ?? 4
+        layer.lineCap = .round
+        layer.lineJoin = .round
+        layer.opacity = 0.9
+        canvas.layer.addSublayer(layer)
+        previewLayer = layer
+    }
+
+    private static func path(_ pts: [CGPoint]) -> CGPath {
+        let path = CGMutablePath()
+        guard let first = pts.first else { return path }
+        path.move(to: first)
+        for p in pts.dropFirst() { path.addLine(to: p) }
+        return path
     }
 
     /// A Pencil touched the page while not drawing — enter drawing mode. This
@@ -440,14 +523,22 @@ extension MarkdownEditorController {
     func snapLastStrokeIfHeld() {
         guard armedShapeSnap else { return }
         armedShapeSnap = false                      // one-shot per stroke
+        let pending = pendingShapePoints
+        pendingShapePoints = nil
         guard let c = canvas,
               c.tool is PKInkingTool,               // never on eraser/lasso
               let last = c.drawing.strokes.last,
               !snappingShape else { return }        // re-entrancy (our replace fires didChange)
 
-        // Sample the stroke's path in canvas space.
-        let pts = last.path.map { $0.location.applying(last.transform) }
-        guard let ideal = InkShapes.recognize(Array(pts)) else { return }
+        // The armed preview (possibly hold-drag adjusted) is the shape to
+        // commit; recognizing from the committed path is the fallback.
+        let ideal: [CGPoint]
+        if let pending { ideal = pending }
+        else {
+            let pts = last.path.map { $0.location.applying(last.transform) }
+            guard let recognized = InkShapes.recognize(Array(pts)) else { return }
+            ideal = recognized
+        }
 
         let old = c.drawing
         var d = c.drawing
