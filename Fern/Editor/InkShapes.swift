@@ -54,7 +54,12 @@ enum InkShapes {
         }
 
         var candidates: [(points: [CGPoint], score: CGFloat)] = []
-        if let ellipse = fitEllipse(pts) {
+        // Fit on the arc-length-uniform resample, NOT the raw points: a real
+        // 120Hz Pencil stream piles hundreds of points wherever the hand
+        // slows, and that clustering biases the mean-based axis fit and the
+        // PCA frame (uniform synthetic tests passed while real circles
+        // failed for exactly this reason).
+        if let ellipse = fitEllipse(sample) {
             candidates.append((ellipse, fitError(ellipse)))
         }
         if let corners = polygonCorners(pts) {
