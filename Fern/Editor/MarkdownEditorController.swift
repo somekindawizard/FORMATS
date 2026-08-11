@@ -20,6 +20,9 @@ final class MarkdownEditorController {
     /// Re-entrancy guard for the perfect-shape replace (setting the drawing
     /// fires drawingDidChange again).
     @ObservationIgnored var snappingShape = false
+    /// Wall-clock time the current stroke's Pencil touch began — the hold
+    /// detector compares this to the path's recorded movement span.
+    @ObservationIgnored var strokeBeganAt: CFTimeInterval = 0
     /// The canvas width the current note's ink was drawn at — handwriting is
     /// scaled proportionally when the width changes (rotation), Notes-style.
     @ObservationIgnored var inkReferenceWidth: CGFloat = 0

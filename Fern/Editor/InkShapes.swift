@@ -13,19 +13,36 @@ import UIKit
 /// internal drawing recognizer cancels competitors when it claims the touch,
 /// so an observer never survives to the lift.)
 enum PencilHold {
-    static func heldAtEnd(of stroke: PKStroke, holdInterval: TimeInterval = 0.45) -> Bool {
+    /// `beganAt` is the wall-clock time the Pencil touched down for this
+    /// stroke (recorded in canvasViewDidBeginUsingTool). Two witnesses:
+    ///
+    /// 1. The touch outlasting the recorded movement: the path's timeOffsets
+    ///    only span actual ink motion (the spline's control points end when
+    ///    movement ends — comparing them to wall clock made EVERY stroke look
+    ///    held). `total touch time − recorded path span` is the stillness at
+    ///    the end.
+    /// 2. Trailing stationary control points, if PencilKit appended any
+    ///    (pressure changes while holding).
+    static func heldAtEnd(of stroke: PKStroke, beganAt: CFTimeInterval,
+                          holdInterval: TimeInterval = 0.45) -> Bool {
         let path = stroke.path
-        guard let last = path.last else { return false }
-        // Walk back to the most recent point that is meaningfully away from
-        // the final resting position (pressure jitter can append stationary
-        // points), then measure how long ago the ink stopped moving.
-        var lastMoveOffset = last.timeOffset
+        guard let last = path.last, beganAt > 0 else { return false }
+
+        // Witness 2: how long the recorded tail sat within 3pt of the end.
+        var earliestStationary = last.timeOffset
         for p in path.reversed() {
             if hypot(p.location.x - last.location.x, p.location.y - last.location.y) > 3 { break }
-            lastMoveOffset = p.timeOffset
+            earliestStationary = p.timeOffset
         }
-        let stoppedAt = path.creationDate.addingTimeInterval(lastMoveOffset)
-        return Date.now.timeIntervalSince(stoppedAt) >= holdInterval
+        let trailingStationary = last.timeOffset - earliestStationary
+
+        // Witness 1: touch duration minus recorded movement (≈ end-of-stroke
+        // stillness plus a little delegate latency — the 0.45s threshold
+        // absorbs that).
+        let touchDuration = CACurrentMediaTime() - beganAt
+        let tailStillness = touchDuration - last.timeOffset
+
+        return max(trailingStationary, tailStillness) >= holdInterval
     }
 }
 

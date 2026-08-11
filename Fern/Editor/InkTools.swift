@@ -96,11 +96,13 @@ final class InkCoordinator: NSObject, PKCanvasViewDelegate {
         controller?.scheduleInkWordCount()
     }
     /// A tool started touching the page. Auto-enter drawing mode if a Pencil
-    /// woke us (the reliable "auto-detect Apple Pencil" hook), and tuck the
-    /// toolbar away so it's never under your hand while you make marks.
+    /// woke us (the reliable "auto-detect Apple Pencil" hook), tuck the
+    /// toolbar away so it's never under your hand, and timestamp the touch —
+    /// the perfect-shape hold detector needs the stroke's real start time.
     func canvasViewDidBeginUsingTool(_ canvasView: PKCanvasView) {
         if controller?.isDrawing == false { controller?.setDrawing(true) }
         controller?.inkToolsCollapsed = true
+        controller?.strokeBeganAt = CACurrentMediaTime()
     }
 }
 
@@ -380,11 +382,13 @@ extension MarkdownEditorController {
     /// replacement is registered with the ink undo manager, so two-finger tap
     /// brings the hand-drawn original back.
     func snapLastStrokeIfHeld() {
+        let beganAt = strokeBeganAt
+        strokeBeganAt = 0                           // one-shot per stroke
         guard let c = canvas,
               c.tool is PKInkingTool,               // never on eraser/lasso
               let last = c.drawing.strokes.last,
               !snappingShape,                       // re-entrancy (our own replace fires didChange)
-              PencilHold.heldAtEnd(of: last) else { return }
+              PencilHold.heldAtEnd(of: last, beganAt: beganAt) else { return }
 
         // Sample the stroke's path in canvas space.
         let pts = last.path.map { $0.location.applying(last.transform) }
