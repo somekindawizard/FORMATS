@@ -29,6 +29,10 @@ final class MarkdownEditorController {
     /// The canvas width the current note's ink was drawn at — handwriting is
     /// scaled proportionally when the width changes (rotation), Notes-style.
     @ObservationIgnored var inkReferenceWidth: CGFloat = 0
+    /// Ruled-line zoom factor: current width ÷ the note's born width. Ink
+    /// scales uniformly on width change, so scaling the line spacing by the
+    /// same ratio keeps handwriting anchored to its lines.
+    @ObservationIgnored var patternScale: CGFloat = 1
     /// The last pen used before switching to the eraser (for double-tap toggle).
     @ObservationIgnored var previousPen: InkSettings.Pen = .pen
     /// Set by a Pencil squeeze / palette action to present the color wheel.

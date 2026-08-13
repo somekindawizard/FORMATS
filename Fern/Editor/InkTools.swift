@@ -40,6 +40,10 @@ struct InkSettings: Codable {
     /// The canvas width this note's ink was last laid out for. Optional so
     /// previously-saved settings still decode; nil = never recorded.
     var canvasWidth: Double?
+    /// The width this note's page was born at — the ruled-line spacing is
+    /// "natural" here and zooms with the width ratio elsewhere, so
+    /// handwriting keeps its anchor on the lines through rotation.
+    var pageWidth: Double?
 
     var uiColor: UIColor { UIColor(red: r, green: g, blue: b, alpha: 1) }
     var color: Color { Color(red: r, green: g, blue: b) }
@@ -482,8 +486,9 @@ extension MarkdownEditorController {
 
     /// Re-apply the ruled / dot paper pattern live (rule or spacing changed).
     func refreshPaperPattern() {
+        let spacing = CGFloat(ThemeStore.shared.ruleSpacing) * patternScale
         canvas?.backgroundColor = PaperTiles.pattern(for: ThemeStore.shared.paperRule,
-                                                     spacing: CGFloat(ThemeStore.shared.ruleSpacing)) ?? .clear
+                                                     spacing: spacing) ?? .clear
     }
 
     /// Notes-style handwriting reflow: when the editor's width changes
@@ -505,10 +510,19 @@ extension MarkdownEditorController {
             snappingShape = false
             scheduleSaveDrawing()
         }
+        // The page's born width anchors the ruled-line zoom: ink and line
+        // spacing scale by the same ratio, so words stay on their lines.
+        // Seed from the pre-change reference (the note's saved width) so a
+        // note opened mid-rotation doesn't adopt the transient width.
+        var dirty = false
+        if ink.pageWidth == nil { ink.pageWidth = Double(inkReferenceWidth); dirty = true }
         inkReferenceWidth = width
-        if ink.canvasWidth != Double(width) {
-            ink.canvasWidth = Double(width)
-            if let id = drawingEntryID { InkPrefsStore.save(id, ink) }
+        if ink.canvasWidth != Double(width) { ink.canvasWidth = Double(width); dirty = true }
+        if dirty, let id = drawingEntryID { InkPrefsStore.save(id, ink) }
+        let newScale = width / CGFloat(ink.pageWidth ?? Double(width))
+        if abs(newScale - patternScale) > 0.001 {
+            patternScale = newScale
+            refreshPaperPattern()
         }
         resizeCanvas()
     }
